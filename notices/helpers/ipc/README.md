@@ -1,0 +1,1 @@
+Native helper license candidate: newly authored code is proposed GPL-3.0-only pending author publishing approval. Rust 1.96.0 standard library/compiler notices are retained; the render helper additionally uses glam 0.32.1 under its included MIT/Apache notices. Cargo.lock pins dependencies. Exact source is in sources/adapter-source.zip.

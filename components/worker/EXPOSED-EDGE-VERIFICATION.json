@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "status": "Candidate21 source-level and bounded owned-fixture gates passed; full-map cold/warm/edit proof and live gameplay acceptance remain separate release gates",
+  "artifact_sha256": "6548829d22043109c4321c7aa3c1b9ec214f22499d335945ce781295cb499ab2",
+  "artifact_bytes": 8106496,
+  "compiled_source_sha256": "44bcbccbdfc2e01849b30272288f9c4a903cb1b58995b08b24271a27803fbd34",
+  "compiled_source_records": 1252,
+  "compiled_source_hash_algorithm": {
+    "selection": "Every SOURCE-PROVENANCE.json files entry whose relative POSIX path ends .rs or has basename Cargo.toml or Cargo.lock",
+    "records": "Objects containing only path and lowercase sha256, sorted lexicographically by path",
+    "encoding": "UTF-8 of Python json.dumps(records, sort_keys=True, separators=(',', ':'), ensure_ascii=True)",
+    "digest": "SHA256"
+  },
+  "baseline_source_archive_sha256": "55bdc9a38583dabc6854fcea8930f97f7916354bc74a2442a0a3e64b5ff5a2f6",
+  "changed_existing_rust_files": [
+    "dragonwilds-skate-worker/Cargo.toml",
+    "dragonwilds-skate-worker/src/main.rs",
+    "dragonwilds-skate-worker/src/world_runtime.rs",
+    "skate3-mashup/skate/crates/skate-host/src/grind_world/octree.rs",
+    "skate3-mashup/skate/crates/skate-host/src/grind_world/provider.rs",
+    "skate3-mashup/skate/crates/skate-host/src/physics/bridge.rs"
+  ],
+  "new_rust_files": [
+    "dragonwilds-skate-worker/src/exposed_edge_cache.rs",
+    "dragonwilds-skate-worker/src/exposed_edges.rs",
+    "dragonwilds-skate-worker/src/exposed_query.rs",
+    "dragonwilds-skate-worker/src/exposed_rail_cache.rs",
+    "dragonwilds-skate-worker/src/legacy_cache_read.rs",
+    "dragonwilds-skate-worker/tests/exposed_density.rs",
+    "dragonwilds-skate-worker/tests/exposed_edge_cache.rs",
+    "dragonwilds-skate-worker/tests/exposed_edges.rs",
+    "dragonwilds-skate-worker/tests/exposed_profile.rs",
+    "dragonwilds-skate-worker/tests/exposed_provider_query.rs",
+    "dragonwilds-skate-worker/tests/exposed_rail_cache.rs",
+    "dragonwilds-skate-worker/tests/seam_grind_contacts.rs"
+  ],
+  "unchanged_rust_and_cargo_files": 1234,
+  "patch": "patches/dragonwilds-exposed-world-edges.patch",
+  "patch_sha256": "10f548f7cca3656f4f8d6770cdcb9babd30ef194c77970de67ebf075e8892706",
+  "scope": "Exposed physical collision edges, including supported sloped and curved segments, with coplanar/internal/underside rejection and continuous unchanged native-probe clearance. Supported upper-envelope lift stays within the original four-centimetre support range. Final native-point endpoint connectivity retains whole networks of at least50cm total arclength; shorter isolated networks are excluded by user selection. Short constituent curves/branches remain.",
+  "source_mechanics": "Physical triangles, original narrow-phase collision/grind/acquisition math, controls and original stock provider behavior remain unchanged. Exposed imports explicitly change crowded host candidate admission: nearest40 primitive segments to query center, native primitive ID tie, then original traversal order. Queries with40or fewer retain exact original order. This is not claimed equivalent to the previous truncated candidate set.",
+  "cache_compatibility": "Eight original raw cache identity inputs remain byte-identical. Independently keyed DWE1/DWC1 derived cells and DWR1 ordered f32 polylines use algorithm/source pins and checksums. Missing/corrupt complete runtime ordered caches require offline repair. New scene deltas rebuild dependency-intersecting cells; global stitching/provider installation remains an explicit measured release gate.",
+  "cold_preparation": "At most4 immutable-world workers,4 queued results, one serial durable publisher. Canonical final ordering and payload hashes match serial; interruption resumes only verified cells. No Session/input during offline preparation.",
+  "unchanged_cache_identity_inputs": [
+    {
+      "path": "dragonwilds-skate-worker/src/compact_world.rs",
+      "sha256": "159d354ed49d5b2dc128bfe857d1a8f6aecd2ef9449d5de9f442cf370a44958b"
+    },
+    {
+      "path": "dragonwilds-skate-worker/src/compact_geometry.rs",
+      "sha256": "74b1821b5ce9eb79cc80bdee674fcca833181b218c0d193a245444695fe7cb7d"
+    },
+    {
+      "path": "dragonwilds-skate-worker/src/compact_rails.rs",
+      "sha256": "4d086947cc8e08234f2b71eea800ed531b5483b03e7fd835cf9f87c753e3ff7c"
+    },
+    {
+      "path": "dragonwilds-skate-worker/src/scene_rail_cache.rs",
+      "sha256": "c1df95c90bcf97e28e79bc214f4b6d715a34be8a3ce60f5c45bc95373e863fc8"
+    },
+    {
+      "path": "dragonwilds-skate-worker/src/accepted_scene_cache.rs",
+      "sha256": "e58c8d3ae39d4bfe120ff97dfdf10968985ed16ea0c5bcab86a55cba0eeff4df"
+    },
+    {
+      "path": "dragonwilds-skate-worker/src/merged_rail_cache.rs",
+      "sha256": "9d88ecf3852a5a1fd4eccc972a90540faf26d635157c54bbe687445961bc39ad"
+    },
+    {
+      "path": "dragonwilds-skate-worker/Cargo.lock",
+      "sha256": "320c408d09581755d041c9c7a598011e32780f4baa81d6c13581b71a7c0fa23d"
+    },
+    {
+      "path": "skate3-mashup/crates/render_anim/src/skate/rails.rs",
+      "sha256": "3dfc6d763eeaebd6dfb2bce9c846aa732da3144e81818b0f7aa00c161badc76a"
+    }
+  ],
+  "build": {
+    "toolchain": "rustc 1.96.0 (ac68faa20 2026-05-25)",
+    "target": "x86_64-pc-windows-msvc",
+    "offline": true,
+    "locked": true,
+    "jobs": 2,
+    "incremental": false,
+    "source_remap": "/source/dragonwilds-skate",
+    "cargo_registry_remap": "/cargo/registry",
+    "build_log_sha256": "543e6147e74456b92a1673e6a91c28ff727dba885fd1b90c16ecfb4ae4c4c215"
+  },
+  "checks": {
+    "worker_tests_passed": 139,
+    "worker_tests_failed": 0,
+    "ignored_owned_data_tests": 15,
+    "exact_source_simulation": {
+      "exact_before_after_simulation": true,
+      "baseline": {
+        "pose_digest": "35e852612d30c0a3d1ad1c7ba581e6347f6363aff46768ce3b4a038d171af220",
+        "frames": 451,
+        "states": {
+          "PhysicsGround": 64,
+          "PhysicsAir": 5,
+          "GroundAnimation": 5,
+          "BipedGround": 377
+        },
+        "mean_ms": 1.3486809305539003,
+        "max_ms": 4.838199994992465
+      },
+      "candidate": {
+        "pose_digest": "35e852612d30c0a3d1ad1c7ba581e6347f6363aff46768ce3b4a038d171af220",
+        "frames": 451,
+        "states": {
+          "PhysicsGround": 64,
+          "PhysicsAir": 5,
+          "GroundAnimation": 5,
+          "BipedGround": 377
+        },
+        "mean_ms": 1.2422290456660934,
+        "max_ms": 4.599100037012249
+      },
+      "diagnostic_enabled": {
+        "pose_digest": "35e852612d30c0a3d1ad1c7ba581e6347f6363aff46768ce3b4a038d171af220",
+        "frames": 451,
+        "states": {
+          "PhysicsGround": 64,
+          "PhysicsAir": 5,
+          "GroundAnimation": 5,
+          "BipedGround": 377
+        },
+        "mean_ms": 1.3455509956969474,
+        "max_ms": 4.978400014806539
+      }
+    },
+    "test_inputs": "Public tests use synthetic geometry. Optional private fixture/profiling targets require explicitly supplied external owned data; no extracted game geometry/assets are included."
+  },
+  "assets_included": false,
+  "published": false
+}

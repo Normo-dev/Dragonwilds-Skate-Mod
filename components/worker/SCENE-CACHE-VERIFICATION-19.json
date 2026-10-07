@@ -1,0 +1,19 @@
+{
+  "schema": 2,
+  "status": "Candidate19 verified empty-volume world-query correction; live playtest pending",
+  "artifact_sha256": "abf1e42606ecccaf9c658f079e3f7cda3f3c826a5f7949a6b74a69136a81cfa3",
+  "compiled_source_sha256": "761d6baeca70d3f4b0e3cbc69c82745ecd8c899b66a02fc3ce4a62772d1c4032",
+  "compiled_source_records": 1236,
+  "compiled_source_hash_algorithm": {
+    "selection": "Every SOURCE-PROVENANCE.json files entry whose relative POSIX path ends .rs or has basename Cargo.toml or Cargo.lock",
+    "records": "Objects containing only path and lowercase sha256, sorted lexicographically by path",
+    "encoding": "UTF-8 of Python json.dumps(records, sort_keys=True, separators=(',', ':'), ensure_ascii=True)",
+    "digest": "SHA256"
+  },
+  "verification": "EMPTY-WORLD-QUERY-VERIFICATION.json",
+  "verification_sha256": "bbc0a7422b783eda06ef286700fc21db748951e4400ed458ee46d04b0bc81f51",
+  "previous_verification": "SCENE-CACHE-VERIFICATION-18.json",
+  "previous_verification_sha256": "9a7cb957a56657f7442e7aeed068c1783057701c33507be618d0215aededfa8f",
+  "assets_included": false,
+  "published": false
+}

@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "licensed_revision": "4488651c35c44365faa1ba38eed5758b6ebde714",
+  "staged_core_data_net": {
+    "passed": 838,
+    "failed": 2,
+    "ignored": 2
+  },
+  "pristine_licensed_core": {
+    "passed": 616,
+    "failed": 2,
+    "ignored": 0
+  },
+  "identical_failure_names_and_assertion_payloads": true,
+  "assertion_payload_sha256": {
+    "physics::board_world::broadphase_tests::predictive_contacts_and_retention_match_full_scan_for_every_primitive": "70685e6fa078cdd00d0ad4385441975300586558259469940a691869f4fda1cd",
+    "physics::skeleton_body::collision_feedback_tests::a_moving_group_8_body_reaches_native_impact_feedback_for_a_stationary_actor": "62cc9d5694b08e0a9c880648c3d5bd20c81876f774df4f162d5f4222080733fb"
+  },
+  "staged_log_sha256": "35d58e665a8b903effc30b0a68a951f59a2dceca5972e6eda425e82b8c4d8969",
+  "pristine_log_sha256": "5f399d9275cc5347eeb13c591598038e3e71eb1ef698d6be68bdf22585b40348",
+  "host_unit_harness": {
+    "status": "cannot compile because referenced test source was omitted by original mashup",
+    "missing_files": [
+      {
+        "from": "src/animation_pose.rs",
+        "target": "src/tests/animation_pose.rs",
+        "licensed_source": "crates/skate-game/src/tests/animation_pose.rs"
+      },
+      {
+        "from": "src/graph_runtime.rs",
+        "target": "src/tests/graph_runtime.rs",
+        "licensed_source": "crates/skate-game/src/tests/graph_runtime.rs"
+      },
+      {
+        "from": "src/physics.rs",
+        "target": "src/tests/map_startup.rs",
+        "licensed_source": "crates/skate-game/src/tests/map_startup.rs"
+      },
+      {
+        "from": "src/physics.rs",
+        "target": "src/tests/physics_startup.rs",
+        "licensed_source": "crates/skate-game/src/tests/physics_startup.rs"
+      },
+      {
+        "from": "src/physics.rs",
+        "target": "src/tests/air_playback.rs",
+        "licensed_source": "crates/skate-game/src/tests/air_playback.rs"
+      },
+      {
+        "from": "src/physics.rs",
+        "target": "src/tests/wipeout_playback.rs",
+        "licensed_source": "crates/skate-game/src/tests/wipeout_playback.rs"
+      },
+      {
+        "from": "src/physics.rs",
+        "target": "src/tests/powerslide_playback.rs",
+        "licensed_source": "crates/skate-game/src/tests/powerslide_playback.rs"
+      },
+      {
+        "from": "src/physics.rs",
+        "target": "src/tests/manual_playback.rs",
+        "licensed_source": "crates/skate-game/src/tests/manual_playback.rs"
+      },
+      {
+        "from": "src/physics.rs",
+        "target": "src/tests/hippy_playback.rs",
+        "licensed_source": "crates/skate-game/src/tests/hippy_playback.rs"
+      },
+      {
+        "from": "src/physics.rs",
+        "target": "src/tests/recorded_playback.rs",
+        "licensed_source": "crates/skate-game/src/tests/recorded_playback.rs"
+      },
+      {
+        "from": "src/physics.rs",
+        "target": "src/tests/offboard_air_playback.rs",
+        "licensed_source": "crates/skate-game/src/tests/offboard_air_playback.rs"
+      },
+      {
+        "from": "src/physics.rs",
+        "target": "src/tests/offboard_midair_playback.rs",
+        "licensed_source": "crates/skate-game/src/tests/offboard_midair_playback.rs"
+      },
+      {
+        "from": "src/physics.rs",
+        "target": "src/tests/offboard_recall_playback.rs",
+        "licensed_source": "crates/skate-game/src/tests/offboard_recall_playback.rs"
+      },
+      {
+        "from": "src/physics.rs",
+        "target": "src/tests/offboard_jump_playback.rs",
+        "licensed_source": "crates/skate-game/src/tests/offboard_jump_playback.rs"
+      },
+      {
+        "from": "src/physics.rs",
+        "target": "src/tests/offboard_root_trace.rs",
+        "licensed_source": "crates/skate-game/src/tests/offboard_root_trace.rs"
+      },
+      {
+        "from": "src/skate_world.rs",
+        "target": "src/retail_shadow_geometry.rs",
+        "licensed_source": null
+      }
+    ]
+  },
+  "physics_or_assertions_modified_to_hide_failures": false
+}

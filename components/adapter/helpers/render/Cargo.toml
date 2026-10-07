@@ -1,0 +1,12 @@
+[package]
+name="skate-render"
+version="0.1.0"
+edition="2024"
+publish=false
+[lib]
+crate-type=["cdylib"]
+[dependencies]
+glam="=0.32.1"
+[profile.release]
+opt-level=3
+debug=0

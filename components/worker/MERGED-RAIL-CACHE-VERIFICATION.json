@@ -1,0 +1,273 @@
+{
+  "schema": 1,
+  "status": "Candidate16 verified in isolated native tests; no live deployment or end-to-end host acceptance",
+  "scope": "Persist exact ordered original merged rails; no source physics changes",
+  "assets_included": false,
+  "published": false,
+  "native_files": [
+    {
+      "path": "dragonwilds-skate-worker/src/main.rs",
+      "sha256": "aaf9b64b5c5a2e7b3db4fe8b772fb911b2a399e34f2874d1ab03dea0e4926f15",
+      "candidate15_sha256": "e32887af4a27ef75eb29f8c087ff15ac57d62a4dbe16a17e4ad8b2b07f6ec030"
+    },
+    {
+      "path": "dragonwilds-skate-worker/src/world_runtime.rs",
+      "sha256": "5ea7a861443a8bbfa6abead6fdfc3d5a141a0fda600bcd39a4f6482e5a63358d",
+      "candidate15_sha256": "9fc8b175adb7264c081419dc3463174d24ec425261e5323d84840bf164452321"
+    },
+    {
+      "path": "dragonwilds-skate-worker/src/merged_rail_cache.rs",
+      "sha256": "9d88ecf3852a5a1fd4eccc972a90540faf26d635157c54bbe687445961bc39ad",
+      "candidate15_sha256": null
+    },
+    {
+      "path": "dragonwilds-skate-worker/tests/merged_rail_cache.rs",
+      "sha256": "f939628094c7eb812dcedff6df5ee5da7267ba868c38cd547c02aa718df889ed",
+      "candidate15_sha256": null
+    }
+  ],
+  "patch": "patches/dragonwilds-merged-rail-cache.patch",
+  "patch_sha256": "ee66cd9a397db2f16f7e90f9157de63f8711d2f1a648601ea5d866c7da40dc77",
+  "baseline_source_archive_sha256": "46f46f625e2109b4a59339f24100bb6e98e5673ecdae87288e22f2c09e4e8fa6",
+  "artifact_sha256": "1641fb78dc96109bec380059efcba78eeb00b98600463674b8e9e821b8b729f0",
+  "artifact_bytes": 6753792,
+  "compiled_source_sha256": "4e6125e43f4a16111d3546a3a37f2e7adc3e29043a30e0df9762ba814765a04b",
+  "compiled_source_records": 1233,
+  "compiled_source_hash_algorithm": {
+    "selection": "Every SOURCE-PROVENANCE.json files entry whose relative POSIX path ends .rs or has basename Cargo.toml or Cargo.lock",
+    "records": "Objects containing only path and lowercase sha256, sorted lexicographically by path",
+    "encoding": "UTF-8 of Python json.dumps(records, sort_keys=True, separators=(',', ':'), ensure_ascii=True)",
+    "digest": "SHA256"
+  },
+  "build": {
+    "toolchain": "rustc1.96.0",
+    "target": "x86_64-pc-windows-msvc",
+    "command": "Build-Worker.ps1 -Mode Build -Offline -Jobs4 with explicit checked toolchain and paths",
+    "debug_symbols": false,
+    "incremental": false,
+    "source_verified_before_build": true,
+    "test_before_build": true,
+    "source_remap": "/source/dragonwilds-skate",
+    "cargo_registry_remap": "/cargo/registry",
+    "build_log_sha256": "be1be3e24a0fdb9f3e31f70f3e82467bc3da13b98003f6ffeda148a2bc80858c",
+    "ascii_and_utf16_private_path_audit_passed": true
+  },
+  "checks": {
+    "worker_tests": {
+      "passed": 56,
+      "failed": 0,
+      "ignored_owned_data_cases": 5
+    },
+    "offline_prepare_protocol": {
+      "passed": 7,
+      "cases": [
+        {
+          "check": "base_cold_no_session",
+          "seconds": 0.18574210000224411,
+          "lips": 645,
+          "merged_rails": 450
+        },
+        {
+          "check": "base_warm_reuse",
+          "seconds": 0.09563500003423542
+        },
+        {
+          "check": "damaged_merged_cache_repaired",
+          "seconds": 0.12792110000737011
+        },
+        {
+          "check": "damaged_census_rebuilt",
+          "seconds": 0.1372346999705769
+        },
+        {
+          "check": "scene_cold_persisted",
+          "seconds": 0.14363519998732954,
+          "lips": 8
+        },
+        {
+          "check": "scene_warm_reuse",
+          "seconds": 0.08896480000112206
+        },
+        {
+          "check": "invalid_manifest_no_ready",
+          "seconds": 0.0940596999716945
+        }
+      ],
+      "report_sha256": "40874333f61eb4e5fd3d94f158741e57baa85c20b04d5fbd8db4ab8e1a1674fb"
+    },
+    "source_profile": {
+      "startup_seconds": 44.580575299973134,
+      "merge_chaining_seconds": 24.001,
+      "spline_conversion_seconds": 3.031,
+      "octree_build_seconds": 9.721,
+      "octree_entries": 2400744,
+      "octree_nodes": 598457,
+      "bucket_scan_entries": 6361578,
+      "maximum_bucket_size": 14,
+      "ticks": 720,
+      "geometry_triangle_calls": 224701,
+      "geometry_triangle_seconds": 0.2187882,
+      "broadphase_calls": 19226,
+      "broadphase_seconds": 1.3298667,
+      "triangle_bounds_seconds": 0.0773455,
+      "geometry_group_seconds": 1.38e-05,
+      "conclusion": "Repeated merge/chaining dominated startup. Bucket rescanning was not pathological, so no octree or solver change was made.",
+      "results_sha256": "6d0f3416282d4a585157dbc8e02e62ef9aeb501d86be3687f3ced35bb3d6641c",
+      "native_log_sha256": "bb047a15d2c4895d9a6bf05796fc629f848d6d413fcd4aae68dcad1e6cc77fd3"
+    },
+    "cold_merged_cache": {
+      "startup_seconds": 37.48212899995269,
+      "world_rails": 1844484,
+      "active_triangles": 77012155,
+      "samples": [
+        {
+          "site": 0,
+          "ticks": 180,
+          "mean_ms": 7.700687778479834,
+          "p95_ms": 10.49870002316311,
+          "max_ms": 14.104300003964454,
+          "state_counts": {
+            "PhysicsGround": 175,
+            "PhysicsAir": 5
+          },
+          "pose_digest": "9242a8373b2b7d10193f972dc6622aaf6d62b35991e641c76b52edc84df8165b"
+        },
+        {
+          "site": 1,
+          "ticks": 180,
+          "mean_ms": 5.46455500039479,
+          "p95_ms": 7.235200027935207,
+          "max_ms": 9.248599992133677,
+          "state_counts": {
+            "PhysicsGround": 175,
+            "PhysicsAir": 5
+          },
+          "pose_digest": "ce3fd66d00a3041ee849616d9f18f5cfa3172fc56d862c657eb33606ddbced21"
+        },
+        {
+          "site": 2,
+          "ticks": 180,
+          "mean_ms": 5.236187220564009,
+          "p95_ms": 7.1199999656528234,
+          "max_ms": 9.171899990178645,
+          "state_counts": {
+            "PhysicsGround": 175,
+            "PhysicsAir": 5
+          },
+          "pose_digest": "57b6aa799afc7908644219db22821f1bebdb512ef84df0e0f23c58f032237598"
+        },
+        {
+          "site": 3,
+          "ticks": 180,
+          "mean_ms": 5.797709999023937,
+          "p95_ms": 7.74279999313876,
+          "max_ms": 9.532299998681992,
+          "state_counts": {
+            "PhysicsGround": 175,
+            "PhysicsAir": 5
+          },
+          "pose_digest": "55f591e23fad6d270da66b6f1200a9204b96aa4a99e39f6d9074577134f24795"
+        }
+      ],
+      "results_sha256": "472b8a4272c337fa2ceb61d8c33521928b01d4e71c5275c19700de1e671d5b92",
+      "native_log_sha256": "8103fbbe4fcffecd213e0d1f6c39599b31d4add1fbc9caa754e3c9ed0ff14129"
+    },
+    "warm_merged_cache": {
+      "startup_seconds": 20.034713900007773,
+      "world_rails": 1844484,
+      "active_triangles": 77012155,
+      "samples": [
+        {
+          "site": 0,
+          "ticks": 180,
+          "mean_ms": 7.746166666685086,
+          "p95_ms": 10.730000038165599,
+          "max_ms": 12.696299992967397,
+          "state_counts": {
+            "PhysicsGround": 175,
+            "PhysicsAir": 5
+          },
+          "pose_digest": "9242a8373b2b7d10193f972dc6622aaf6d62b35991e641c76b52edc84df8165b"
+        },
+        {
+          "site": 1,
+          "ticks": 180,
+          "mean_ms": 4.667298890288091,
+          "p95_ms": 6.61679997574538,
+          "max_ms": 8.562999952118844,
+          "state_counts": {
+            "PhysicsGround": 175,
+            "PhysicsAir": 5
+          },
+          "pose_digest": "ce3fd66d00a3041ee849616d9f18f5cfa3172fc56d862c657eb33606ddbced21"
+        },
+        {
+          "site": 2,
+          "ticks": 180,
+          "mean_ms": 5.585213886742066,
+          "p95_ms": 7.7034999849274755,
+          "max_ms": 9.444399969652295,
+          "state_counts": {
+            "PhysicsGround": 175,
+            "PhysicsAir": 5
+          },
+          "pose_digest": "57b6aa799afc7908644219db22821f1bebdb512ef84df0e0f23c58f032237598"
+        },
+        {
+          "site": 3,
+          "ticks": 180,
+          "mean_ms": 6.135259999104568,
+          "p95_ms": 9.016800031531602,
+          "max_ms": 11.234700039494783,
+          "state_counts": {
+            "PhysicsGround": 175,
+            "PhysicsAir": 5
+          },
+          "pose_digest": "55f591e23fad6d270da66b6f1200a9204b96aa4a99e39f6d9074577134f24795"
+        }
+      ],
+      "results_sha256": "372ba380896da3efaeb8060f0c2b24cb85a225416691202cbda8eb5ab05d97eb",
+      "native_log_sha256": "351e83b8e7d2f5b44c8b559b73922336025516d1e4504e6abd695b3f065fcda2"
+    },
+    "ordered_pose_equivalence": {
+      "sites": 4,
+      "ticks_per_site": 180,
+      "root_bones_state_camera_digests_equal_to_profile_baseline_and_cold_warm": true
+    },
+    "original_summon": {
+      "passed": true,
+      "headings": 2,
+      "held_y_latch_and_release": true,
+      "finite_bones_and_camera": true,
+      "recovery_passed": true,
+      "init_seconds": 24.814626000006683,
+      "results_sha256": "e5e71531bf0dd9f52bf166a534792d99f8cac4b263e62a7d2792b31ebc9697ca",
+      "native_log_sha256": "292ef92efca5d5c04b9a033bb5ae93d1b44a4aff0bbaac3c2efac14f9319f454"
+    }
+  },
+  "cache": {
+    "format": "S3R1 version1",
+    "identity": "Exact ordered validated lip payload/census/fingerprint plus original merge/conversion source, cache implementation and Cargo.lock",
+    "representation": "Original ordered polyline boundaries and little-endian f32 point bit patterns in source metres",
+    "original_cold_merge_and_save_ms": 19967,
+    "warm_read_ms": 1250,
+    "validation": [
+      "Full header and payload BLAKE3 checksum",
+      "Exact file length before allocation",
+      "Rail/point counts bounded by input lip count",
+      "Every polyline has at least2 finite points",
+      "Expected content identity and format version",
+      "Atomic rename after flush and sync_all"
+    ],
+    "failure_behavior": "Missing/corrupt cache recomputes the unchanged original routine. Init retains a valid in-memory result if writing fails; prepare_world rejects unpersisted output.",
+    "nondeterminism": "The original HashMap merge can select different valid rail representatives between uncached processes. Reuse retains exactly the first persisted result and its ordering.",
+    "live_scene_history": "Incremental accepted-scene changes retain their existing merge/update path; this cache only serves immutable initial content."
+  },
+  "limits": [
+    "No installed game, live IPC, controller or keyboard input was used.",
+    "No continuous player-driven route across the complete world was tested.",
+    "The earlier captured capsule was5.31m above independently verified floor; these native tests use the verified floor, not that unexplained host pose.",
+    "This change improves repeated startup. It does not claim higher in-game frame rate.",
+    "Original core baseline failures and optional host test-harness limitations remain documented separately."
+  ]
+}

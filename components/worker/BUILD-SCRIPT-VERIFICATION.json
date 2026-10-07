@@ -1,0 +1,32 @@
+{
+  "passed": [
+    "Plan is nonexecuting and keeps paths with spaces as individual arguments",
+    "Test generates numeric fixtures, verifies source, applies remaps, and restores the caller environment",
+    "Nonzero Cargo status fails the build and still restores environment",
+    "Source hash mismatch stops before invoking a compiler or fixture generator",
+    "Source inventory cannot escape its folder"
+  ],
+  "compiled": false,
+  "count": 5,
+  "script_files": [
+    {
+      "path": "Build-Worker.ps1",
+      "sha256": "3e8eb23cf1d8c16f816ee31535ca4eff3ed9aeeaa003c1c3675b15779682ca9f"
+    },
+    {
+      "path": "Verify-Source.ps1",
+      "sha256": "1a6749ec3dc06d133a4f4bb745b969340f7547412cfe2ba175516c10d4cbfbf8"
+    },
+    {
+      "path": "tools/test_worker_build_script.ps1",
+      "sha256": "8174d9126009afb161f362a8875e2d630804af8cf50f45631ecd374836e13c40"
+    }
+  ],
+  "fixture_generation": {
+    "passed": true,
+    "python": "3.12.14 embedded",
+    "numpy": "2.3.5",
+    "assets_used": false
+  },
+  "scope": "Isolated fake-tool orchestration tests and actual synthetic fixture generation; no new remapped compiler artifact was produced. Earlier compilation/runtime checks are reported separately."
+}

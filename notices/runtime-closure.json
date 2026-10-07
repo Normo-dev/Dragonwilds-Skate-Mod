@@ -1,0 +1,475 @@
+{
+  "schema": 1,
+  "python": {
+    "modules": [
+      "authored_policy",
+      "runtime_paths",
+      "skate_asset_import",
+      "skate_authored_gate",
+      "skate_building_cleanup",
+      "skate_building_metadata",
+      "skate_building_packets",
+      "skate_building_scene",
+      "skate_building_setup",
+      "skate_cache_background",
+      "skate_cache_retention",
+      "skate_cache_worker",
+      "skate_checkpoint_worker",
+      "skate_collision_codec",
+      "skate_exposed_cache",
+      "skate_host_render",
+      "skate_input",
+      "skate_install",
+      "skate_ipc",
+      "skate_launcher",
+      "skate_loading_progress",
+      "skate_map_cache",
+      "skate_native_render",
+      "skate_observed_world",
+      "skate_overlay_reuse",
+      "skate_preflight",
+      "skate_process",
+      "skate_progress",
+      "skate_relay",
+      "skate_setup",
+      "skate_setup_progress",
+      "skate_setup_tools",
+      "skate_spline_collision",
+      "skate_warm_world",
+      "skate_wizard",
+      "skate_world_export"
+    ],
+    "external": [
+      "PIL",
+      "__future__",
+      "argparse",
+      "collections",
+      "concurrent",
+      "contextlib",
+      "copy",
+      "ctypes",
+      "dataclasses",
+      "fcntl",
+      "hashlib",
+      "http",
+      "importlib",
+      "io",
+      "json",
+      "math",
+      "mmap",
+      "msvcrt",
+      "numpy",
+      "os",
+      "pathlib",
+      "re",
+      "shutil",
+      "stat",
+      "struct",
+      "subprocess",
+      "sys",
+      "tempfile",
+      "threading",
+      "time",
+      "traceback",
+      "urllib",
+      "uuid",
+      "zipfile"
+    ],
+    "edges": {
+      "skate_wizard": [
+        "runtime_paths",
+        "skate_install",
+        "skate_preflight",
+        "skate_process",
+        "skate_setup",
+        "skate_setup_progress",
+        "skate_setup_tools"
+      ],
+      "skate_setup": [
+        "authored_policy",
+        "runtime_paths",
+        "skate_asset_import",
+        "skate_building_setup",
+        "skate_exposed_cache",
+        "skate_map_cache",
+        "skate_preflight",
+        "skate_process",
+        "skate_world_export"
+      ],
+      "skate_building_setup": [
+        "skate_preflight",
+        "skate_process"
+      ],
+      "skate_process": [],
+      "skate_preflight": [
+        "authored_policy",
+        "runtime_paths",
+        "skate_authored_gate",
+        "skate_building_setup",
+        "skate_exposed_cache",
+        "skate_map_cache",
+        "skate_spline_collision",
+        "skate_world_export"
+      ],
+      "skate_world_export": [
+        "skate_authored_gate",
+        "skate_map_cache"
+      ],
+      "skate_authored_gate": [],
+      "skate_map_cache": [
+        "runtime_paths",
+        "skate_authored_gate",
+        "skate_spline_collision"
+      ],
+      "skate_spline_collision": [],
+      "runtime_paths": [],
+      "authored_policy": [],
+      "skate_exposed_cache": [],
+      "skate_asset_import": [
+        "skate_preflight"
+      ],
+      "skate_install": [
+        "skate_preflight"
+      ],
+      "skate_setup_progress": [
+        "skate_progress"
+      ],
+      "skate_progress": [],
+      "skate_setup_tools": [],
+      "skate_cache_worker": [
+        "runtime_paths",
+        "skate_authored_gate",
+        "skate_building_cleanup",
+        "skate_building_scene",
+        "skate_building_setup",
+        "skate_collision_codec",
+        "skate_map_cache",
+        "skate_observed_world",
+        "skate_overlay_reuse",
+        "skate_preflight",
+        "skate_world_export"
+      ],
+      "skate_collision_codec": [],
+      "skate_building_cleanup": [],
+      "skate_building_scene": [
+        "skate_authored_gate",
+        "skate_building_metadata",
+        "skate_building_packets",
+        "skate_map_cache"
+      ],
+      "skate_building_packets": [],
+      "skate_building_metadata": [
+        "skate_authored_gate"
+      ],
+      "skate_overlay_reuse": [
+        "skate_authored_gate",
+        "skate_map_cache",
+        "skate_overlay_reuse",
+        "skate_spline_collision",
+        "skate_world_export"
+      ],
+      "skate_observed_world": [
+        "skate_map_cache"
+      ],
+      "skate_launcher": [
+        "runtime_paths",
+        "skate_cache_retention",
+        "skate_launcher",
+        "skate_preflight",
+        "skate_process",
+        "skate_relay"
+      ],
+      "skate_cache_retention": [
+        "skate_exposed_cache",
+        "skate_process"
+      ],
+      "skate_relay": [
+        "runtime_paths",
+        "skate_cache_background",
+        "skate_cache_worker",
+        "skate_collision_codec",
+        "skate_host_render",
+        "skate_input",
+        "skate_ipc",
+        "skate_loading_progress",
+        "skate_warm_world"
+      ],
+      "skate_host_render": [
+        "runtime_paths",
+        "skate_native_render"
+      ],
+      "skate_native_render": [
+        "runtime_paths",
+        "skate_host_render"
+      ],
+      "skate_input": [
+        "runtime_paths"
+      ],
+      "skate_cache_background": [
+        "skate_cache_retention",
+        "skate_checkpoint_worker",
+        "skate_process"
+      ],
+      "skate_checkpoint_worker": [
+        "skate_exposed_cache",
+        "skate_process",
+        "skate_warm_world"
+      ],
+      "skate_warm_world": [
+        "skate_cache_retention",
+        "skate_exposed_cache"
+      ],
+      "skate_loading_progress": [
+        "skate_progress"
+      ],
+      "skate_ipc": [
+        "runtime_paths"
+      ]
+    }
+  },
+  "lua": {
+    "modules": [
+      "board_material",
+      "bridge",
+      "building_baseline",
+      "building_capture_runner",
+      "building_collision",
+      "building_native",
+      "building_native_capture",
+      "building_state",
+      "collision_policy",
+      "frame_codec",
+      "gameplay_input_gate",
+      "ground_probe",
+      "host_rig",
+      "json",
+      "mount_badge_layer",
+      "mount_control",
+      "mount_icon",
+      "mount_interaction",
+      "mount_menu_selection",
+      "mount_selection",
+      "mount_zone",
+      "physics_settings",
+      "quick_wheel_block",
+      "scene_collision",
+      "shared_transport",
+      "skate_bindings",
+      "skate_camera",
+      "skate_floor",
+      "skate_input",
+      "skate_mount",
+      "skate_spline",
+      "skate_world",
+      "spell_wheel_block"
+    ],
+    "external": [
+      "UEHelpers",
+      "skate_config"
+    ],
+    "edges": {
+      "bridge": [
+        "UEHelpers",
+        "board_material",
+        "building_capture_runner",
+        "frame_codec",
+        "gameplay_input_gate",
+        "ground_probe",
+        "host_rig",
+        "json",
+        "mount_control",
+        "mount_selection",
+        "mount_zone",
+        "physics_settings",
+        "quick_wheel_block",
+        "scene_collision",
+        "shared_transport",
+        "skate_camera",
+        "skate_config",
+        "skate_floor",
+        "skate_input",
+        "skate_mount",
+        "skate_world",
+        "spell_wheel_block"
+      ],
+      "mount_selection": [
+        "json",
+        "skate_config"
+      ],
+      "json": [],
+      "skate_world": [],
+      "mount_zone": [],
+      "building_capture_runner": [
+        "building_baseline",
+        "building_collision",
+        "building_state",
+        "json",
+        "shared_transport",
+        "skate_config"
+      ],
+      "building_baseline": [
+        "json"
+      ],
+      "building_collision": [
+        "building_native_capture"
+      ],
+      "building_native_capture": [
+        "building_native",
+        "skate_config"
+      ],
+      "building_native": [
+        "skate_config"
+      ],
+      "building_state": [
+        "building_native",
+        "skate_config",
+        "skate_world"
+      ],
+      "shared_transport": [
+        "skate_config"
+      ],
+      "host_rig": [
+        "json",
+        "skate_config"
+      ],
+      "board_material": [],
+      "physics_settings": [],
+      "ground_probe": [
+        "UEHelpers"
+      ],
+      "skate_camera": [],
+      "skate_floor": [],
+      "quick_wheel_block": [],
+      "spell_wheel_block": [],
+      "gameplay_input_gate": [],
+      "mount_control": [
+        "mount_interaction",
+        "mount_zone"
+      ],
+      "mount_interaction": [],
+      "skate_mount": [
+        "mount_icon",
+        "mount_menu_selection"
+      ],
+      "mount_icon": [],
+      "mount_menu_selection": [
+        "mount_badge_layer"
+      ],
+      "mount_badge_layer": [],
+      "skate_input": [
+        "skate_bindings"
+      ],
+      "skate_bindings": [],
+      "scene_collision": [
+        "building_collision",
+        "json",
+        "shared_transport",
+        "skate_config",
+        "skate_spline"
+      ],
+      "skate_spline": [],
+      "frame_codec": [],
+      "collision_policy": [
+        "physics_settings"
+      ]
+    }
+  },
+  "generated_runtime": [
+    "app/runtime.json",
+    "skate_config.lua"
+  ],
+  "helpers": [
+    {
+      "component": "ipc",
+      "binary": "bin/skate_ipc.dll",
+      "sha256": "86d4f39bb7a7eb0554614b3722d1b4e6d817b09b5077a1bb4e6a8a0aac6ad768",
+      "compiled_source_sha256": "9145a49641ab8f92938e52e9d70bdbd224c5a66ccf42c06fd3f2c073ef4183d5",
+      "source_files": [
+        {
+          "path": "Cargo.lock",
+          "sha256": "1a7ce9a6da8dbccba3e5d011da72a8debb23d36fbd3b6ada85df864e9d4fd47d"
+        },
+        {
+          "path": "Cargo.toml",
+          "sha256": "909c188bc32b423a81f59ba724185c038f9d59a9899cf9064ff1039170c685d2"
+        },
+        {
+          "path": "src/launcher.rs",
+          "sha256": "fd2290a7e3148a691cef23b1874acb1872d252a6df0142af1bac958e522990b3"
+        },
+        {
+          "path": "src/lib.rs",
+          "sha256": "2c0af2c2c654bf1e3919ba49d130a273c465f2898b38e69cc96784eee0b3941b"
+        },
+        {
+          "path": "src/loader_constants.rs",
+          "sha256": "724947af59814d14d8786829ee9f7aabb617f5c2b5a76fe998fbf46efc12b72e"
+        }
+      ]
+    },
+    {
+      "component": "render",
+      "binary": "bin/skate_render.dll",
+      "sha256": "6af6481fa2f35485402f042618afddc01ad63a233259547a0815394955cfad1d",
+      "compiled_source_sha256": "f59aa5330efb1828205528b7a95a66783d69fd04e260ac2c06d4db9168174f63",
+      "source_files": [
+        {
+          "path": "Cargo.lock",
+          "sha256": "322ec1f37ed5b72a2a9f0ed9fb429041734d9d8652572c8facbedff3f30f89ad"
+        },
+        {
+          "path": "Cargo.toml",
+          "sha256": "4f9e0fd3f746d8642e5a38401d02b8d275c1f257b4ab1355b577afb6f26fe7e2"
+        },
+        {
+          "path": "src/lib.rs",
+          "sha256": "2c91e37595db02b9cda5060c29afb8740d4b16dbdee9efb7748b520def8c0120"
+        }
+      ]
+    },
+    {
+      "component": "buildings",
+      "binary": "bin/skate_buildings.dll",
+      "sha256": "2bd2967d85cd7c89a579a2aa9b817f4b54294f95b6095b77125d3735a6da8cad",
+      "compiled_source_sha256": "97df9697e0deb5e891b1024d7e912a3cba03c98503f8cbca409b9409e3643558",
+      "source_files": [
+        {
+          "path": "Cargo.lock",
+          "sha256": "6315024652ea1516d3bf3eef2c0a095dc941ea57048da2ace2ec0f97cc31902c"
+        },
+        {
+          "path": "Cargo.toml",
+          "sha256": "c33c0c1ddc4c690ce21604f4039a7e40d019d21a7b50f4f4620bf0d3cadf2afd"
+        },
+        {
+          "path": "src/game_constants.rs",
+          "sha256": "1e772d48b06c5d925e7444d023823b3a6d6e2f7875270cafc9ecfcc125a448e2"
+        },
+        {
+          "path": "src/lib.rs",
+          "sha256": "70982c7e2eff88d27705dddba041e3b6e28cbf3e14a10d39007c1cba6a35dc8d"
+        },
+        {
+          "path": "src/loader_constants.rs",
+          "sha256": "724947af59814d14d8786829ee9f7aabb617f5c2b5a76fe998fbf46efc12b72e"
+        },
+        {
+          "path": "src/mass.rs",
+          "sha256": "3c2e6182d8420cf3b438f2f696fb66d82439edec76d3f50674ae1be6f8f11c97"
+        },
+        {
+          "path": "src/mass/tests.rs",
+          "sha256": "fadd6550f7e3b759ab8bacc584fc6eab8deab29812e1d93da122273afbabdc7d"
+        },
+        {
+          "path": "src/mass_signatures.rs",
+          "sha256": "b98a0aba362052b068b5a0e553b4dec414bf94d7b1e2ca080b5d6c63a18bc489"
+        },
+        {
+          "path": "src/tests.rs",
+          "sha256": "4ffb67ea289fb1a37ef7034771bb334a9e9ed8c9e670520325a5fc9ab31889f4"
+        }
+      ]
+    }
+  ]
+}

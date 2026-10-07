@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "status": "Candidate19 verified empty-volume world-query correction; live playtest pending",
+  "artifact_sha256": "abf1e42606ecccaf9c658f079e3f7cda3f3c826a5f7949a6b74a69136a81cfa3",
+  "artifact_bytes": 7045632,
+  "compiled_source_sha256": "761d6baeca70d3f4b0e3cbc69c82745ecd8c899b66a02fc3ce4a62772d1c4032",
+  "compiled_source_records": 1236,
+  "compiled_source_hash_algorithm": {
+    "selection": "Every SOURCE-PROVENANCE.json files entry whose relative POSIX path ends .rs or has basename Cargo.toml or Cargo.lock",
+    "records": "Objects containing only path and lowercase sha256, sorted lexicographically by path",
+    "encoding": "UTF-8 of Python json.dumps(records, sort_keys=True, separators=(',', ':'), ensure_ascii=True)",
+    "digest": "SHA256"
+  },
+  "baseline_source_archive_sha256": "982d597b0e230f6254f1bced0ff7e32d61ac46920bde7c656de2afbdcecc12ab",
+  "changed_existing_rust_files": [
+    "skate3-mashup/skate/crates/skate-core/src/physics/board_world.rs"
+  ],
+  "new_rust_tests": [
+    "dragonwilds-skate-worker/tests/empty_world_query.rs"
+  ],
+  "unchanged_rust_and_cargo_files": 1234,
+  "patch": "patches/dragonwilds-empty-world-query.patch",
+  "patch_sha256": "3ebf4b7d83c5d53d630e6e2f2097b49c88e4cdf8122337df279eea71acd01086",
+  "root_cause": {
+    "native18_query_primitives_rva": "0x38c9a0",
+    "sample_rva": "0x38ccf9",
+    "volumes_count": 0,
+    "observation": "The native query receives an empty moving-volume slice. Empty bounds become None and enumerate all host triangles despite having no possible contact pairs.",
+    "matching_private_map_text_sha256": "8cdb16d453ae905b9d88ba5b7219daea74521e9ac80fb4b3741e19a14b04be52"
+  },
+  "correction": "Return empty contacts after the original contact/buffer reset when volumes.is_empty(); every nonempty query executes the unchanged implementation.",
+  "cache_compatibility": "All native world, scene, accepted checkpoint and merged-rail cache code and identity inputs are byte-identical to candidate18.",
+  "build": {
+    "toolchain": "rustc 1.96.0 (ac68faa20 2026-05-25)",
+    "target": "x86_64-pc-windows-msvc",
+    "offline": true,
+    "locked": true,
+    "jobs": 2,
+    "incremental": false,
+    "source_remap": "/source/dragonwilds-skate",
+    "cargo_registry_remap": "/cargo/registry",
+    "build_log_sha256": "d3374eeb88dda5fc50f3ab8bc8b663718fcf130b017e9d9913dfdace6a41e9c9"
+  },
+  "checks": {
+    "worker_tests_passed": 70,
+    "worker_tests_failed": 0,
+    "ignored_owned_data_tests": 7,
+    "empty_query_tests": [
+      "Zero geometry-provider access with empty volumes, including unbounded query settings",
+      "Previous contacts and dropped counts cleared; subsequent nonempty contacts bit-identical at729 positions"
+    ],
+    "proof": {
+      "passed": true,
+      "worker_sha256": "abf1e42606ecccaf9c658f079e3f7cda3f3c826a5f7949a6b74a69136a81cfa3",
+      "baseline_worker_sha256": "a0b294e197b4df324589de7ee0507d9126dfdddcc737a82eb7478f7354806265",
+      "exact_before_after_simulation": true,
+      "baseline": {
+        "pose_digest": "35e852612d30c0a3d1ad1c7ba581e6347f6363aff46768ce3b4a038d171af220",
+        "frames": 451,
+        "states": {
+          "PhysicsGround": 64,
+          "PhysicsAir": 5,
+          "GroundAnimation": 5,
+          "BipedGround": 377
+        },
+        "mean_ms": 3.7856543241244247,
+        "max_ms": 12.47369998600334
+      },
+      "candidate": {
+        "pose_digest": "35e852612d30c0a3d1ad1c7ba581e6347f6363aff46768ce3b4a038d171af220",
+        "frames": 451,
+        "states": {
+          "PhysicsGround": 64,
+          "PhysicsAir": 5,
+          "GroundAnimation": 5,
+          "BipedGround": 377
+        },
+        "mean_ms": 4.490004435667929,
+        "max_ms": 17.516399966552854
+      },
+      "recorded_world": {
+        "init_ms": 30919.53310003737,
+        "checkpoint_durable": true,
+        "scene_fingerprint": "6e13f49f16f65cb31b3b8b8e46bd5b9107725794a7c74a2107c428e95a8e09ca",
+        "frames": 180,
+        "states": {
+          "BipedGround": 180
+        },
+        "mean_ms": 15.893182778705118,
+        "p95_ms": 23.608300019986928,
+        "max_ms": 56.91619997378439
+      },
+      "native18_checkpoint_reused_without_bake": true,
+      "recorded_unbounded_queries": 0
+    }
+  },
+  "assets_included": false,
+  "published": false
+}

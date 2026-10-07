@@ -1,0 +1,15 @@
+patternsleuth and patternsleuth_scanner
+Source: https://raw.githubusercontent.com/trumank/patternsleuth/1d90b02c7610b595f940af04ce97e0f6feb06923/Cargo.toml
+
+Exact workspace.package declaration:
+{
+  "repository": "https://github.com/trumank/patternsleuth",
+  "authors": [
+    "trumank"
+  ],
+  "license": "MIT OR Apache-2.0",
+  "version": "0.1.0",
+  "edition": "2024"
+}
+
+Use the Apache-2.0 alternative; the full Apache-2.0 text is included.

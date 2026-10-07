@@ -1,0 +1,989 @@
+--- a/dragonwilds-skate-worker/src/main.rs
++++ b/dragonwilds-skate-worker/src/main.rs
+@@ -1,336 +1,337 @@
+-//! Transport adapter for the existing mashup's Session. No skating solver here.
+-use serde::Deserialize;
+-use serde_json::{json, Value};
+-use skate_host::bridge::{Controls, ControllerTransport, InputFrame, Pose, Session};
+-use skate_host::bridge::PreparedCollision;
+-use std::{io::{self, BufRead, Write}, path::PathBuf};
+-#[path = "../../skate3-mashup/crates/render_anim/src/skate/rails.rs"]
+-mod example_rails;
+-mod rail_cache;
+-mod compact_world;
+-mod compact_geometry;
+-mod compact_rails;
+-mod scene_rail_cache;
+-mod world_runtime;
+-
+-// Dense host windows can exceed the old one-million-triangle ceiling. Sixteen
+-// million bounds the binary payload at 576 MB. Allocation still uses only the
+-// file's validated actual count; both transport paths share the same limit.
+-const MAX_TRIANGLES:usize=16_000_000;
+-// A triangle contributes at most three edges to imported grind derivation.
+-// Host runtime owners are wide; individual Pegasus conversion blobs remain u16.
+-const MAX_RAILS:usize=MAX_TRIANGLES*3;
+-
+-#[derive(Deserialize, Default)]
+-#[serde(deny_unknown_fields)]
+-struct Pad {
+-    #[serde(default)] buttons: u16,
+-    #[serde(default)] triggers: [u8; 2],
+-    #[serde(default)] left: [i16; 2],
+-    #[serde(default)] right: [i16; 2],
+-}
+-impl From<Pad> for Controls {
+-    fn from(p: Pad) -> Self {
+-        Self { buttons: p.buttons, triggers: p.triggers, left: p.left, right: p.right }
+-    }
+-}
+-
+-#[derive(Deserialize)]
+-#[serde(tag = "op", rename_all = "snake_case", deny_unknown_fields)]
+-enum Command {
+-    PrepareWorld { manifest:PathBuf,#[serde(default)] scene_file:Option<PathBuf> },
+-    InitWorld { assets:PathBuf,manifest:PathBuf,anchor:[f64;3],#[serde(default)] scene_file:Option<PathBuf>,
+-        #[serde(default)] rail_file:Option<PathBuf>,spawn:[f32;3],heading:f32 },
+-    WorldScene {revision:u32,scene_file:PathBuf},
+-    Surface {point:[f32;3],above:f32,below:f32},
+-    Camera { mode: CameraMode },
+-    Init { assets: PathBuf, #[serde(default)] triangles: Vec<[[f32; 3]; 3]>, #[serde(default)] collision_file: Option<PathBuf>, rails: Vec<Vec<[f32; 3]>>,
+-           spawn: [f32; 3], heading: f32, #[serde(default)] derive_rails: bool },
+-    Activate { spawn: [f32; 3], heading: f32 },
+-    Summon { spawn: [f32; 3], heading: f32 },
+-    Tick { #[serde(default)] controls: Pad, #[serde(default = "one")] steps: u32 },
+-    Poll { #[serde(default = "one")] steps: u32, #[serde(default)] mirror_steering: bool },
+-    Collision { #[serde(default)] triangles: Vec<[[f32; 3]; 3]>, #[serde(default)] collision_file: Option<PathBuf>, rails: Vec<Vec<[f32; 3]>>, #[serde(default)] derive_rails: bool },
+-    QueueCollision { revision:u32, #[serde(default)] triangles: Vec<[[f32; 3]; 3]>, #[serde(default)] collision_file: Option<PathBuf>, rails: Vec<Vec<[f32; 3]>>, #[serde(default)] derive_rails: bool },
+-    Pose,
+-    Shutdown,
+-}
+-#[derive(Deserialize)]
+-#[serde(rename_all="lowercase")]
+-enum CameraMode { High, Low }
+-fn one() -> u32 { 1 }
+-
+-fn collision_input(triangles:Vec<[[f32;3];3]>,path:Option<PathBuf>)->Result<Vec<[[f32;3];3]>,String> {
+-    let Some(path)=path else {return Ok(triangles)};
+-    if !triangles.is_empty() {return Err("Use collision_file or triangles, not both".into())}
+-    use std::io::Read;
+-    let mut file=std::fs::File::open(path).map_err(|e|e.to_string())?;
+-    let mut header=[0u8;8];file.read_exact(&mut header).map_err(|e|e.to_string())?;
+-    let count=u32::from_le_bytes(header[4..8].try_into().unwrap()) as usize;
+-    if &header[..4]!=b"S3T1" || count==0 || count>MAX_TRIANGLES {return Err("Invalid collision file header".into())}
+-    let payload_size=count.checked_mul(36).ok_or("Collision file size overflow")?;
+-    let file_size=payload_size.checked_add(8).ok_or("Collision file size overflow")?;
+-    if file.metadata().map_err(|e|e.to_string())?.len()!=file_size as u64 {return Err("Collision file size mismatch".into())}
+-    let mut bytes=vec![0u8;payload_size];file.read_exact(&mut bytes).map_err(|e|e.to_string())?;
+-    let triangles=bytes.chunks_exact(36).map(|chunk|std::array::from_fn(|vertex|
+-        std::array::from_fn(|axis| {let offset=(vertex*3+axis)*4;f32::from_le_bytes(chunk[offset..offset+4].try_into().unwrap())}))).collect();
+-    Ok(triangles)
+-}
+-
+-// All input I/O, validation, rail derivation and acceleration building for a
+-// queued update run on its builder thread. The live Session keeps its world.
+-fn world_input(triangles:Vec<[[f32;3];3]>,path:Option<PathBuf>,mut rails:Vec<Vec<[f32;3]>>,derive:bool)
+-    ->Result<(Vec<[[f32;3];3]>,Vec<Vec<[f32;3]>>),String> {
+-    let triangles=collision_input(triangles,path.clone())?;
+-    validate_world(&triangles,&rails)?;
+-    if derive { rails.extend(rail_cache::derive(path.as_deref(),&triangles)); }
+-    validate_world(&triangles,&rails)?;
+-    Ok((triangles,rails))
+-}
+-
+-// Input transport only: preserve the example's raw XInput packet and original
+-// input processing while correcting the host's horizontal steering convention.
+-#[repr(C)]
+-#[derive(Default)]
+-struct RawGamepad { buttons:u16, lt:u8, rt:u8, lx:i16, ly:i16, rx:i16, ry:i16 }
+-#[repr(C)]
+-#[derive(Default)]
+-struct RawState { packet:u32, pad:RawGamepad }
+-#[link(name="xinput")]
+-unsafe extern "system" { fn XInputGetState(index:u32,state:*mut RawState)->u32; }
+-fn remap_steering(frame:InputFrame) -> InputFrame {
+-    let Some(index)=frame.controller() else { return frame; };
+-    let mut raw=RawState::default();
+-    // Exact Windows SDK ABI; storage is writable and read only after success.
+-    if unsafe { XInputGetState(index as u32,&mut raw) } != 0 { return InputFrame::neutral(); }
+-    let p=raw.pad;
+-    InputFrame::from_pad(p.buttons,[p.lt,p.rt],[p.lx.saturating_neg(),p.ly],[p.rx,p.ry],raw.packet)
+-}
+-fn find_rails(triangles: &[[[f32; 3]; 3]]) -> Vec<Vec<[f32; 3]>> {
+-    use bevy::math::Vec3;
+-    // Keep the example's inch-based rail thresholds exactly as authored.
+-    let map = triangles.iter().map(|t| t.map(|p| Vec3::new(p[0], -p[2], p[1]) / 0.0254)).collect::<Vec<_>>();
+-    let (rails, census) = example_rails::find(&map);
+-    eprintln!("SOURCE_RAILS candidates={} lips={} runs={} rails={}", census.candidates,census.lips,census.runs,census.rails);
+-    rails.into_iter().map(|r| r.into_iter().map(|p| [p.x*0.0254,p.z*0.0254,-p.y*0.0254]).collect()).collect()
+-}
+-
+-fn valid_point(p: &[f32; 3]) -> bool { p.iter().all(|v| v.is_finite() && v.abs() < 1e7) }
+-fn validate_world(tris: &[[[f32; 3]; 3]], rails: &[Vec<[f32; 3]>]) -> Result<(), String> {
+-    if tris.is_empty() || tris.len() > MAX_TRIANGLES {
+-        return Err(format!("Collision needs 1..{MAX_TRIANGLES} host triangles; there is no default floor"));
+-    }
+-    if !tris.iter().flatten().all(valid_point) || rails.len() > MAX_RAILS
+-        || !rails.iter().all(|r| r.len() >= 2 && r.len() < 100_000 && r.iter().all(valid_point)) {
+-        return Err("Invalid collision coordinates or rails".into());
+-    }
+-    Ok(())
+-}
+-fn pose_value(p: Pose, period: f32) -> Result<Value, String> {
+-    if !p.root.is_finite() || !p.velocity.is_finite() || !p.bones.iter().all(|m| m.is_finite()) {
+-        return Err("Upstream simulation returned a non-finite pose".into());
+-    }
+-    if p.names.len() != p.bones.len() { return Err("Bone names and matrices disagree".into()); }
+-    Ok(json!({"ok":true, "period":period, "tick":p.tick, "state":p.state,
+-        "root":p.root.to_cols_array(), "velocity":p.velocity.to_array(),
+-        "bones":p.bones.iter().map(|b| b.to_cols_array()).collect::<Vec<_>>(),
+-        "names":p.names, "camera":p.camera.map(|(position,basis,fov)|
+-            json!({"position":position.to_array(),"basis":basis.to_cols_array(),"fov":fov}))}))
+-}
+-type PendingCollision=(u32,std::thread::JoinHandle<Result<PreparedCollision,String>>);
+-type PendingWorld=(u32,std::thread::JoinHandle<Result<(Option<PreparedCollision>,world_runtime::WorldRuntime),String>>);
+-fn retire(collision:Option<PreparedCollision>,world:Option<world_runtime::WorldRuntime>) {
+-    let _=std::thread::Builder::new().name("skate-retired-world".into()).spawn(move||drop((collision,world)));
+-}
+-fn execute(command: Command, session: &mut Option<Session>, pad: &mut ControllerTransport,
+-           pending:&mut Option<PendingCollision>,revision:&mut u32,
+-           collision_error:&mut Option<(u32,String)>,world:&mut Option<world_runtime::WorldRuntime>,
+-           pending_world:&mut Option<PendingWorld>) -> Result<Value, String> {
+-    if let Command::PrepareWorld{manifest,scene_file}=command {
+-        if session.is_some(){return Err("Offline preparation requires a fresh worker without an active Session".into());}
+-        return world_runtime::prepare_offline(&manifest,scene_file.as_deref());
+-    }
+-    if let Command::InitWorld{assets,manifest,anchor,scene_file,rail_file,spawn,heading}=command {
+-        if anchor!=[0.;3]||!valid_point(&spawn)||!heading.is_finite(){return Err("Invalid fixed world origin/spawn".into());}
+-        let (new_session,new_world)=world_runtime::WorldRuntime::init(&assets,&manifest,scene_file.as_deref(),rail_file.as_deref(),spawn,heading)?;
+-        *session=Some(new_session);*world=Some(new_world);*pending=None;*pending_world=None;*revision=0;*collision_error=None;
+-        return Ok(json!({"ok":true,"status":"ready","period":session.as_ref().unwrap().period()}));
+-    }
+-    if let Command::Init { assets, triangles, collision_file, rails, spawn, heading, derive_rails } = command {
+-        if !valid_point(&spawn) || !heading.is_finite() { return Err("Invalid spawn".into()); }
+-        let (triangles,rails)=world_input(triangles,collision_file,rails,derive_rails)?;
+-        let new_session = Session::new(&assets, triangles, rails, spawn, heading)?;
+-        *pending=None;*pending_world=None;*world=None;*revision=0;*collision_error=None;
+-        *session = Some(new_session);
+-        return Ok(json!({"ok":true,"status":"ready","period":session.as_ref().unwrap().period()}));
+-    }
+-    let s = session.as_mut().ok_or("Initialize a session first")?;
+-    match command {
+-        Command::WorldScene{revision:requested,scene_file}=>{
+-            if requested<=*revision||pending.is_some()||pending_world.is_some(){return Err("Invalid or already pending world scene revision".into());}
+-            let runtime=world.as_ref().ok_or("Initialize the whole world first")?.clone();
+-            let builder=s.collision_builder();
+-            let task=std::thread::Builder::new().name("skate-world-scene".into()).spawn(move||runtime.scene(builder,&scene_file)).map_err(|e|e.to_string())?;
+-            *pending_world=Some((requested,task));*collision_error=None;
+-            Ok(json!({"ok":true,"status":"collision_queued"}))
+-        },
+-        Command::Surface{point,above,below}=>{
+-            if !valid_point(&point)||!above.is_finite()||!below.is_finite()||above<0.||below<0.||above>1000.||below>1000.{return Err("Invalid surface query".into());}
+-            Ok(json!({"ok":true,"surface":s.surface_below(point,above,below).map(|(position,normal)|json!({"position":position,"normal":normal}))}))
+-        },
+-        Command::Activate { spawn, heading } => {
+-            if !valid_point(&spawn) || !heading.is_finite() { return Err("Invalid spawn".into()); }
+-            let pose = s.activate(spawn, heading)?;
+-            pose_value(pose, s.period())
+-        },
+-        Command::Summon { spawn, heading } => {
+-            if !valid_point(&spawn) || !heading.is_finite() { return Err("Invalid spawn".into()); }
+-            let pose=s.summon(spawn,heading)?;
+-            pose_value(pose,s.period())
+-        },
+-        Command::Camera { mode } => {
+-            s.set_low_camera(matches!(mode, CameraMode::Low));
+-            Ok(json!({"ok":true,"camera_mode":s.camera_mode()}))
+-        },
+-        Command::Tick { controls, steps } => {
+-            if steps == 0 || steps > 600 { return Err("steps must be 1..600".into()); }
+-            let controls: Controls = controls.into();
+-            for _ in 0..steps { s.tick(controls)?; }
+-            pose_value(s.pose(), s.period())
+-        },
+-        Command::Poll { steps, mirror_steering } => {
+-            if steps == 0 || steps > 6 { return Err("poll steps must be 1..6".into()); }
+-            let mut connected = false;
+-            for _ in 0..steps {
+-                let frame = pad.poll();
+-                let frame = if mirror_steering { remap_steering(frame) } else { frame };
+-                connected = frame.controller().is_some();
+-                s.collect(frame, s.period());
+-                s.advance()?;
+-            }
+-            let mut response = pose_value(s.pose(), s.period())?;
+-            response["controller_connected"] = json!(connected);
+-            Ok(response)
+-        },
+-        Command::Collision { triangles, collision_file, rails, derive_rails } => {
+-            if world.is_some(){return Err("Use world_scene for a persistent whole-world session".into());}
+-            let (triangles,rails)=world_input(triangles,collision_file,rails,derive_rails)?;
+-            let prepared = s.collision_builder().build(triangles, rails)?;
+-            let retired=s.swap_collision(prepared)?;retire(Some(retired),None);
+-            *pending=None;*revision=0;*collision_error=None;
+-            Ok(json!({"ok":true,"status":"collision_installed"}))
+-        },
+-        Command::QueueCollision { revision:requested, triangles, collision_file, rails, derive_rails } => {
+-            if world.is_some(){return Err("Use world_scene for a persistent whole-world session".into());}
+-            if pending.is_some()||pending_world.is_some() { return Err("Collision build is already pending".into()); }
+-            let builder=s.collision_builder();
+-            let task=std::thread::Builder::new().name("skate-collision-build".into()).spawn(move || {
+-                let start=std::time::Instant::now();
+-                let (triangles,rails)=world_input(triangles,collision_file,rails,derive_rails)?;
+-                let result=builder.build(triangles,rails);
+-                eprintln!("COLLISION_BUILD revision={requested} elapsed_ms={:.3}",start.elapsed().as_secs_f64()*1000.);
+-                result
+-            }).map_err(|e|e.to_string())?;
+-            *pending=Some((requested,task));
+-            *collision_error=None;
+-            Ok(json!({"ok":true,"status":"collision_queued","collision_revision":*revision}))
+-        },
+-        Command::Pose => pose_value(s.pose(), s.period()),
+-        _ => unreachable!(),
+-    }
+-}
+-fn run() -> Result<(), String> {
+-    let mut session:Option<Session> = None;
+-    let mut pad = ControllerTransport::default();
+-    let mut pending:Option<PendingCollision>=None;
+-    let mut world:Option<world_runtime::WorldRuntime>=None;
+-    let mut pending_world:Option<PendingWorld>=None;
+-    let mut revision=0u32;
+-    let mut collision_error:Option<(u32,String)>=None;
+-    let stdin = io::stdin();
+-    let mut stdout = io::BufWriter::new(io::stdout());
+-    for line in stdin.lock().lines() {
+-        let line = line.map_err(|e| e.to_string())?;
+-        let parsed = serde_json::from_str::<Command>(&line);
+-        if matches!(parsed, Ok(Command::Shutdown)) { break; }
+-        if pending.as_ref().is_some_and(|(_,task)|task.is_finished()) {
+-            let (requested,task)=pending.take().unwrap();
+-            let start=std::time::Instant::now();
+-            let result=task.join().map_err(|_|"Collision build thread panicked".to_owned()).and_then(|r|r)
+-                .and_then(|collision|session.as_mut().ok_or("Session unavailable".to_owned())?.swap_collision(collision))
+-                .map(|retired|retire(Some(retired),None))
+-                .map(|_|revision=requested);
+-            match result {
+-                Ok(())=>{collision_error=None;eprintln!("COLLISION_INSTALL revision={requested} elapsed_ms={:.3}",start.elapsed().as_secs_f64()*1000.);},
+-                Err(error)=>{eprintln!("COLLISION_ERROR revision={requested}: {error}");collision_error=Some((requested,error));},
+-            }
+-        }
+-        if pending_world.as_ref().is_some_and(|(_,task)|task.is_finished()) {
+-            let (requested,task)=pending_world.take().unwrap();let started=std::time::Instant::now();
+-            let result=task.join().map_err(|_|"World scene build thread panicked".to_owned()).and_then(|r|r)
+-                .and_then(|(collision,new_world)|{
+-                    let retired=match collision {
+-                        Some(collision)=>Some(session.as_mut().ok_or("Session unavailable".to_owned())?.swap_collision(collision)?),
+-                        None=>None,
+-                    };
+-                    let previous_world=world.replace(new_world);retire(retired,previous_world);revision=requested;Ok(())
+-                });
+-            match result {
+-                Ok(())=>{collision_error=None;eprintln!("WORLD_SCENE_INSTALL revision={requested} elapsed_ms={:.3}",started.elapsed().as_secs_f64()*1000.);},
+-                Err(error)=>{eprintln!("WORLD_SCENE_ERROR revision={requested}: {error}");collision_error=Some((requested,error));},
+-            }
+-        }
+-        let mut response = parsed.map_err(|e| e.to_string()).and_then(|c| execute(c, &mut session, &mut pad,&mut pending,&mut revision,&mut collision_error,&mut world,&mut pending_world))
+-            .unwrap_or_else(|e| json!({"ok":false,"error":e}));
+-        response["collision_revision"]=json!(revision);
+-        if let Some(session)=&session {
+-            response["camera_mode"]=json!(session.camera_mode());
+-            let mount=session.summon_status();
+-            response["summon"]=json!({"phase":mount.phase,"error":mount.error,"motion_state":mount.motion_state,
+-                "holding_board":mount.holding_board,"supported":mount.supported,"locomotion":mount.locomotion});
+-        }
+-        response["collision_pending_revision"]=json!(pending.as_ref().map(|(requested,_)|requested).or_else(||pending_world.as_ref().map(|(requested,_)|requested)));
+-        if let Some(world)=&world {response["collision_scope"]=json!("whole_world");response["world"]=world.status();}
+-        if let Some((requested,error))=&collision_error {
+-            response["collision_error"]=json!(error);
+-            response["collision_error_revision"]=json!(requested);
+-        }
+-        serde_json::to_writer(&mut stdout, &response).map_err(|e| e.to_string())?;
+-        writeln!(stdout).and_then(|_| stdout.flush()).map_err(|e| e.to_string())?;
+-    }
+-    Ok(())
+-}
+-fn main() {
+-    let result = std::thread::Builder::new().name("skate-session".into())
+-        .stack_size(32 * 1024 * 1024).spawn(run)
+-        .expect("Cannot start simulation worker").join().expect("Simulation worker panicked");
+-    if let Err(error) = result { eprintln!("{error}"); std::process::exit(1); }
+-}
+-
+-#[cfg(test)]
+-mod collision_limit_tests {
+-    use super::*;
+-
+-    #[test]
+-    fn json_world_validation_accepts_limit_and_rejects_next_triangle() {
+-        let mut triangles=Vec::with_capacity(MAX_TRIANGLES+1);
+-        triangles.resize(MAX_TRIANGLES,[[0.,0.,0.],[0.,0.,1.],[1.,0.,0.]]);
+-        assert!(validate_world(&triangles,&[]).is_ok());
+-        triangles.push(triangles[0]);
+-        assert!(validate_world(&triangles,&[]).unwrap_err().contains(&MAX_TRIANGLES.to_string()));
+-    }
+-
+-    #[test]
+-    fn binary_count_and_size_reject_before_payload_allocation() {
+-        let folder=PathBuf::from(env!("CARGO_MANIFEST_DIR")).parent().unwrap()
+-            .join("persistent-worker-limit-checks");
+-        std::fs::create_dir_all(&folder).unwrap();
+-        for (count,expected) in [(0,"header"),(MAX_TRIANGLES as u32,"size mismatch"),
+-                                  (MAX_TRIANGLES as u32+1,"header"),(u32::MAX,"header")] {
+-            let path=folder.join(format!("count-{count}.triangles"));
+-            let mut bytes=b"S3T1".to_vec();bytes.extend_from_slice(&count.to_le_bytes());
+-            std::fs::write(&path,bytes).unwrap();
+-            assert!(collision_input(Vec::new(),Some(path)).unwrap_err().contains(expected));
+-        }
+-    }
+-}
++//! Transport adapter for the existing mashup's Session. No skating solver here.
++use serde::Deserialize;
++use serde_json::{json, Value};
++use skate_host::bridge::{Controls, ControllerTransport, InputFrame, Pose, Session};
++use skate_host::bridge::PreparedCollision;
++use std::{io::{self, BufRead, Write}, path::PathBuf};
++#[path = "../../skate3-mashup/crates/render_anim/src/skate/rails.rs"]
++mod example_rails;
++mod rail_cache;
++mod compact_world;
++mod compact_geometry;
++mod compact_rails;
++mod scene_rail_cache;
++mod world_runtime;
++mod merged_rail_cache;
++
++// Dense host windows can exceed the old one-million-triangle ceiling. Sixteen
++// million bounds the binary payload at 576 MB. Allocation still uses only the
++// file's validated actual count; both transport paths share the same limit.
++const MAX_TRIANGLES:usize=16_000_000;
++// A triangle contributes at most three edges to imported grind derivation.
++// Host runtime owners are wide; individual Pegasus conversion blobs remain u16.
++const MAX_RAILS:usize=MAX_TRIANGLES*3;
++
++#[derive(Deserialize, Default)]
++#[serde(deny_unknown_fields)]
++struct Pad {
++    #[serde(default)] buttons: u16,
++    #[serde(default)] triggers: [u8; 2],
++    #[serde(default)] left: [i16; 2],
++    #[serde(default)] right: [i16; 2],
++}
++impl From<Pad> for Controls {
++    fn from(p: Pad) -> Self {
++        Self { buttons: p.buttons, triggers: p.triggers, left: p.left, right: p.right }
++    }
++}
++
++#[derive(Deserialize)]
++#[serde(tag = "op", rename_all = "snake_case", deny_unknown_fields)]
++enum Command {
++    PrepareWorld { manifest:PathBuf,#[serde(default)] scene_file:Option<PathBuf> },
++    InitWorld { assets:PathBuf,manifest:PathBuf,anchor:[f64;3],#[serde(default)] scene_file:Option<PathBuf>,
++        #[serde(default)] rail_file:Option<PathBuf>,spawn:[f32;3],heading:f32 },
++    WorldScene {revision:u32,scene_file:PathBuf},
++    Surface {point:[f32;3],above:f32,below:f32},
++    Camera { mode: CameraMode },
++    Init { assets: PathBuf, #[serde(default)] triangles: Vec<[[f32; 3]; 3]>, #[serde(default)] collision_file: Option<PathBuf>, rails: Vec<Vec<[f32; 3]>>,
++           spawn: [f32; 3], heading: f32, #[serde(default)] derive_rails: bool },
++    Activate { spawn: [f32; 3], heading: f32 },
++    Summon { spawn: [f32; 3], heading: f32 },
++    Tick { #[serde(default)] controls: Pad, #[serde(default = "one")] steps: u32 },
++    Poll { #[serde(default = "one")] steps: u32, #[serde(default)] mirror_steering: bool },
++    Collision { #[serde(default)] triangles: Vec<[[f32; 3]; 3]>, #[serde(default)] collision_file: Option<PathBuf>, rails: Vec<Vec<[f32; 3]>>, #[serde(default)] derive_rails: bool },
++    QueueCollision { revision:u32, #[serde(default)] triangles: Vec<[[f32; 3]; 3]>, #[serde(default)] collision_file: Option<PathBuf>, rails: Vec<Vec<[f32; 3]>>, #[serde(default)] derive_rails: bool },
++    Pose,
++    Shutdown,
++}
++#[derive(Deserialize)]
++#[serde(rename_all="lowercase")]
++enum CameraMode { High, Low }
++fn one() -> u32 { 1 }
++
++fn collision_input(triangles:Vec<[[f32;3];3]>,path:Option<PathBuf>)->Result<Vec<[[f32;3];3]>,String> {
++    let Some(path)=path else {return Ok(triangles)};
++    if !triangles.is_empty() {return Err("Use collision_file or triangles, not both".into())}
++    use std::io::Read;
++    let mut file=std::fs::File::open(path).map_err(|e|e.to_string())?;
++    let mut header=[0u8;8];file.read_exact(&mut header).map_err(|e|e.to_string())?;
++    let count=u32::from_le_bytes(header[4..8].try_into().unwrap()) as usize;
++    if &header[..4]!=b"S3T1" || count==0 || count>MAX_TRIANGLES {return Err("Invalid collision file header".into())}
++    let payload_size=count.checked_mul(36).ok_or("Collision file size overflow")?;
++    let file_size=payload_size.checked_add(8).ok_or("Collision file size overflow")?;
++    if file.metadata().map_err(|e|e.to_string())?.len()!=file_size as u64 {return Err("Collision file size mismatch".into())}
++    let mut bytes=vec![0u8;payload_size];file.read_exact(&mut bytes).map_err(|e|e.to_string())?;
++    let triangles=bytes.chunks_exact(36).map(|chunk|std::array::from_fn(|vertex|
++        std::array::from_fn(|axis| {let offset=(vertex*3+axis)*4;f32::from_le_bytes(chunk[offset..offset+4].try_into().unwrap())}))).collect();
++    Ok(triangles)
++}
++
++// All input I/O, validation, rail derivation and acceleration building for a
++// queued update run on its builder thread. The live Session keeps its world.
++fn world_input(triangles:Vec<[[f32;3];3]>,path:Option<PathBuf>,mut rails:Vec<Vec<[f32;3]>>,derive:bool)
++    ->Result<(Vec<[[f32;3];3]>,Vec<Vec<[f32;3]>>),String> {
++    let triangles=collision_input(triangles,path.clone())?;
++    validate_world(&triangles,&rails)?;
++    if derive { rails.extend(rail_cache::derive(path.as_deref(),&triangles)); }
++    validate_world(&triangles,&rails)?;
++    Ok((triangles,rails))
++}
++
++// Input transport only: preserve the example's raw XInput packet and original
++// input processing while correcting the host's horizontal steering convention.
++#[repr(C)]
++#[derive(Default)]
++struct RawGamepad { buttons:u16, lt:u8, rt:u8, lx:i16, ly:i16, rx:i16, ry:i16 }
++#[repr(C)]
++#[derive(Default)]
++struct RawState { packet:u32, pad:RawGamepad }
++#[link(name="xinput")]
++unsafe extern "system" { fn XInputGetState(index:u32,state:*mut RawState)->u32; }
++fn remap_steering(frame:InputFrame) -> InputFrame {
++    let Some(index)=frame.controller() else { return frame; };
++    let mut raw=RawState::default();
++    // Exact Windows SDK ABI; storage is writable and read only after success.
++    if unsafe { XInputGetState(index as u32,&mut raw) } != 0 { return InputFrame::neutral(); }
++    let p=raw.pad;
++    InputFrame::from_pad(p.buttons,[p.lt,p.rt],[p.lx.saturating_neg(),p.ly],[p.rx,p.ry],raw.packet)
++}
++fn find_rails(triangles: &[[[f32; 3]; 3]]) -> Vec<Vec<[f32; 3]>> {
++    use bevy::math::Vec3;
++    // Keep the example's inch-based rail thresholds exactly as authored.
++    let map = triangles.iter().map(|t| t.map(|p| Vec3::new(p[0], -p[2], p[1]) / 0.0254)).collect::<Vec<_>>();
++    let (rails, census) = example_rails::find(&map);
++    eprintln!("SOURCE_RAILS candidates={} lips={} runs={} rails={}", census.candidates,census.lips,census.runs,census.rails);
++    rails.into_iter().map(|r| r.into_iter().map(|p| [p.x*0.0254,p.z*0.0254,-p.y*0.0254]).collect()).collect()
++}
++
++fn valid_point(p: &[f32; 3]) -> bool { p.iter().all(|v| v.is_finite() && v.abs() < 1e7) }
++fn validate_world(tris: &[[[f32; 3]; 3]], rails: &[Vec<[f32; 3]>]) -> Result<(), String> {
++    if tris.is_empty() || tris.len() > MAX_TRIANGLES {
++        return Err(format!("Collision needs 1..{MAX_TRIANGLES} host triangles; there is no default floor"));
++    }
++    if !tris.iter().flatten().all(valid_point) || rails.len() > MAX_RAILS
++        || !rails.iter().all(|r| r.len() >= 2 && r.len() < 100_000 && r.iter().all(valid_point)) {
++        return Err("Invalid collision coordinates or rails".into());
++    }
++    Ok(())
++}
++fn pose_value(p: Pose, period: f32) -> Result<Value, String> {
++    if !p.root.is_finite() || !p.velocity.is_finite() || !p.bones.iter().all(|m| m.is_finite()) {
++        return Err("Upstream simulation returned a non-finite pose".into());
++    }
++    if p.names.len() != p.bones.len() { return Err("Bone names and matrices disagree".into()); }
++    Ok(json!({"ok":true, "period":period, "tick":p.tick, "state":p.state,
++        "root":p.root.to_cols_array(), "velocity":p.velocity.to_array(),
++        "bones":p.bones.iter().map(|b| b.to_cols_array()).collect::<Vec<_>>(),
++        "names":p.names, "camera":p.camera.map(|(position,basis,fov)|
++            json!({"position":position.to_array(),"basis":basis.to_cols_array(),"fov":fov}))}))
++}
++type PendingCollision=(u32,std::thread::JoinHandle<Result<PreparedCollision,String>>);
++type PendingWorld=(u32,std::thread::JoinHandle<Result<(Option<PreparedCollision>,world_runtime::WorldRuntime),String>>);
++fn retire(collision:Option<PreparedCollision>,world:Option<world_runtime::WorldRuntime>) {
++    let _=std::thread::Builder::new().name("skate-retired-world".into()).spawn(move||drop((collision,world)));
++}
++fn execute(command: Command, session: &mut Option<Session>, pad: &mut ControllerTransport,
++           pending:&mut Option<PendingCollision>,revision:&mut u32,
++           collision_error:&mut Option<(u32,String)>,world:&mut Option<world_runtime::WorldRuntime>,
++           pending_world:&mut Option<PendingWorld>) -> Result<Value, String> {
++    if let Command::PrepareWorld{manifest,scene_file}=command {
++        if session.is_some(){return Err("Offline preparation requires a fresh worker without an active Session".into());}
++        return world_runtime::prepare_offline(&manifest,scene_file.as_deref());
++    }
++    if let Command::InitWorld{assets,manifest,anchor,scene_file,rail_file,spawn,heading}=command {
++        if anchor!=[0.;3]||!valid_point(&spawn)||!heading.is_finite(){return Err("Invalid fixed world origin/spawn".into());}
++        let (new_session,new_world)=world_runtime::WorldRuntime::init(&assets,&manifest,scene_file.as_deref(),rail_file.as_deref(),spawn,heading)?;
++        *session=Some(new_session);*world=Some(new_world);*pending=None;*pending_world=None;*revision=0;*collision_error=None;
++        return Ok(json!({"ok":true,"status":"ready","period":session.as_ref().unwrap().period()}));
++    }
++    if let Command::Init { assets, triangles, collision_file, rails, spawn, heading, derive_rails } = command {
++        if !valid_point(&spawn) || !heading.is_finite() { return Err("Invalid spawn".into()); }
++        let (triangles,rails)=world_input(triangles,collision_file,rails,derive_rails)?;
++        let new_session = Session::new(&assets, triangles, rails, spawn, heading)?;
++        *pending=None;*pending_world=None;*world=None;*revision=0;*collision_error=None;
++        *session = Some(new_session);
++        return Ok(json!({"ok":true,"status":"ready","period":session.as_ref().unwrap().period()}));
++    }
++    let s = session.as_mut().ok_or("Initialize a session first")?;
++    match command {
++        Command::WorldScene{revision:requested,scene_file}=>{
++            if requested<=*revision||pending.is_some()||pending_world.is_some(){return Err("Invalid or already pending world scene revision".into());}
++            let runtime=world.as_ref().ok_or("Initialize the whole world first")?.clone();
++            let builder=s.collision_builder();
++            let task=std::thread::Builder::new().name("skate-world-scene".into()).spawn(move||runtime.scene(builder,&scene_file)).map_err(|e|e.to_string())?;
++            *pending_world=Some((requested,task));*collision_error=None;
++            Ok(json!({"ok":true,"status":"collision_queued"}))
++        },
++        Command::Surface{point,above,below}=>{
++            if !valid_point(&point)||!above.is_finite()||!below.is_finite()||above<0.||below<0.||above>1000.||below>1000.{return Err("Invalid surface query".into());}
++            Ok(json!({"ok":true,"surface":s.surface_below(point,above,below).map(|(position,normal)|json!({"position":position,"normal":normal}))}))
++        },
++        Command::Activate { spawn, heading } => {
++            if !valid_point(&spawn) || !heading.is_finite() { return Err("Invalid spawn".into()); }
++            let pose = s.activate(spawn, heading)?;
++            pose_value(pose, s.period())
++        },
++        Command::Summon { spawn, heading } => {
++            if !valid_point(&spawn) || !heading.is_finite() { return Err("Invalid spawn".into()); }
++            let pose=s.summon(spawn,heading)?;
++            pose_value(pose,s.period())
++        },
++        Command::Camera { mode } => {
++            s.set_low_camera(matches!(mode, CameraMode::Low));
++            Ok(json!({"ok":true,"camera_mode":s.camera_mode()}))
++        },
++        Command::Tick { controls, steps } => {
++            if steps == 0 || steps > 600 { return Err("steps must be 1..600".into()); }
++            let controls: Controls = controls.into();
++            for _ in 0..steps { s.tick(controls)?; }
++            pose_value(s.pose(), s.period())
++        },
++        Command::Poll { steps, mirror_steering } => {
++            if steps == 0 || steps > 6 { return Err("poll steps must be 1..6".into()); }
++            let mut connected = false;
++            for _ in 0..steps {
++                let frame = pad.poll();
++                let frame = if mirror_steering { remap_steering(frame) } else { frame };
++                connected = frame.controller().is_some();
++                s.collect(frame, s.period());
++                s.advance()?;
++            }
++            let mut response = pose_value(s.pose(), s.period())?;
++            response["controller_connected"] = json!(connected);
++            Ok(response)
++        },
++        Command::Collision { triangles, collision_file, rails, derive_rails } => {
++            if world.is_some(){return Err("Use world_scene for a persistent whole-world session".into());}
++            let (triangles,rails)=world_input(triangles,collision_file,rails,derive_rails)?;
++            let prepared = s.collision_builder().build(triangles, rails)?;
++            let retired=s.swap_collision(prepared)?;retire(Some(retired),None);
++            *pending=None;*revision=0;*collision_error=None;
++            Ok(json!({"ok":true,"status":"collision_installed"}))
++        },
++        Command::QueueCollision { revision:requested, triangles, collision_file, rails, derive_rails } => {
++            if world.is_some(){return Err("Use world_scene for a persistent whole-world session".into());}
++            if pending.is_some()||pending_world.is_some() { return Err("Collision build is already pending".into()); }
++            let builder=s.collision_builder();
++            let task=std::thread::Builder::new().name("skate-collision-build".into()).spawn(move || {
++                let start=std::time::Instant::now();
++                let (triangles,rails)=world_input(triangles,collision_file,rails,derive_rails)?;
++                let result=builder.build(triangles,rails);
++                eprintln!("COLLISION_BUILD revision={requested} elapsed_ms={:.3}",start.elapsed().as_secs_f64()*1000.);
++                result
++            }).map_err(|e|e.to_string())?;
++            *pending=Some((requested,task));
++            *collision_error=None;
++            Ok(json!({"ok":true,"status":"collision_queued","collision_revision":*revision}))
++        },
++        Command::Pose => pose_value(s.pose(), s.period()),
++        _ => unreachable!(),
++    }
++}
++fn run() -> Result<(), String> {
++    let mut session:Option<Session> = None;
++    let mut pad = ControllerTransport::default();
++    let mut pending:Option<PendingCollision>=None;
++    let mut world:Option<world_runtime::WorldRuntime>=None;
++    let mut pending_world:Option<PendingWorld>=None;
++    let mut revision=0u32;
++    let mut collision_error:Option<(u32,String)>=None;
++    let stdin = io::stdin();
++    let mut stdout = io::BufWriter::new(io::stdout());
++    for line in stdin.lock().lines() {
++        let line = line.map_err(|e| e.to_string())?;
++        let parsed = serde_json::from_str::<Command>(&line);
++        if matches!(parsed, Ok(Command::Shutdown)) { break; }
++        if pending.as_ref().is_some_and(|(_,task)|task.is_finished()) {
++            let (requested,task)=pending.take().unwrap();
++            let start=std::time::Instant::now();
++            let result=task.join().map_err(|_|"Collision build thread panicked".to_owned()).and_then(|r|r)
++                .and_then(|collision|session.as_mut().ok_or("Session unavailable".to_owned())?.swap_collision(collision))
++                .map(|retired|retire(Some(retired),None))
++                .map(|_|revision=requested);
++            match result {
++                Ok(())=>{collision_error=None;eprintln!("COLLISION_INSTALL revision={requested} elapsed_ms={:.3}",start.elapsed().as_secs_f64()*1000.);},
++                Err(error)=>{eprintln!("COLLISION_ERROR revision={requested}: {error}");collision_error=Some((requested,error));},
++            }
++        }
++        if pending_world.as_ref().is_some_and(|(_,task)|task.is_finished()) {
++            let (requested,task)=pending_world.take().unwrap();let started=std::time::Instant::now();
++            let result=task.join().map_err(|_|"World scene build thread panicked".to_owned()).and_then(|r|r)
++                .and_then(|(collision,new_world)|{
++                    let retired=match collision {
++                        Some(collision)=>Some(session.as_mut().ok_or("Session unavailable".to_owned())?.swap_collision(collision)?),
++                        None=>None,
++                    };
++                    let previous_world=world.replace(new_world);retire(retired,previous_world);revision=requested;Ok(())
++                });
++            match result {
++                Ok(())=>{collision_error=None;eprintln!("WORLD_SCENE_INSTALL revision={requested} elapsed_ms={:.3}",started.elapsed().as_secs_f64()*1000.);},
++                Err(error)=>{eprintln!("WORLD_SCENE_ERROR revision={requested}: {error}");collision_error=Some((requested,error));},
++            }
++        }
++        let mut response = parsed.map_err(|e| e.to_string()).and_then(|c| execute(c, &mut session, &mut pad,&mut pending,&mut revision,&mut collision_error,&mut world,&mut pending_world))
++            .unwrap_or_else(|e| json!({"ok":false,"error":e}));
++        response["collision_revision"]=json!(revision);
++        if let Some(session)=&session {
++            response["camera_mode"]=json!(session.camera_mode());
++            let mount=session.summon_status();
++            response["summon"]=json!({"phase":mount.phase,"error":mount.error,"motion_state":mount.motion_state,
++                "holding_board":mount.holding_board,"supported":mount.supported,"locomotion":mount.locomotion});
++        }
++        response["collision_pending_revision"]=json!(pending.as_ref().map(|(requested,_)|requested).or_else(||pending_world.as_ref().map(|(requested,_)|requested)));
++        if let Some(world)=&world {response["collision_scope"]=json!("whole_world");response["world"]=world.status();}
++        if let Some((requested,error))=&collision_error {
++            response["collision_error"]=json!(error);
++            response["collision_error_revision"]=json!(requested);
++        }
++        serde_json::to_writer(&mut stdout, &response).map_err(|e| e.to_string())?;
++        writeln!(stdout).and_then(|_| stdout.flush()).map_err(|e| e.to_string())?;
++    }
++    Ok(())
++}
++fn main() {
++    let result = std::thread::Builder::new().name("skate-session".into())
++        .stack_size(32 * 1024 * 1024).spawn(run)
++        .expect("Cannot start simulation worker").join().expect("Simulation worker panicked");
++    if let Err(error) = result { eprintln!("{error}"); std::process::exit(1); }
++}
++
++#[cfg(test)]
++mod collision_limit_tests {
++    use super::*;
++
++    #[test]
++    fn json_world_validation_accepts_limit_and_rejects_next_triangle() {
++        let mut triangles=Vec::with_capacity(MAX_TRIANGLES+1);
++        triangles.resize(MAX_TRIANGLES,[[0.,0.,0.],[0.,0.,1.],[1.,0.,0.]]);
++        assert!(validate_world(&triangles,&[]).is_ok());
++        triangles.push(triangles[0]);
++        assert!(validate_world(&triangles,&[]).unwrap_err().contains(&MAX_TRIANGLES.to_string()));
++    }
++
++    #[test]
++    fn binary_count_and_size_reject_before_payload_allocation() {
++        let folder=PathBuf::from(env!("CARGO_MANIFEST_DIR")).parent().unwrap()
++            .join("persistent-worker-limit-checks");
++        std::fs::create_dir_all(&folder).unwrap();
++        for (count,expected) in [(0,"header"),(MAX_TRIANGLES as u32,"size mismatch"),
++                                  (MAX_TRIANGLES as u32+1,"header"),(u32::MAX,"header")] {
++            let path=folder.join(format!("count-{count}.triangles"));
++            let mut bytes=b"S3T1".to_vec();bytes.extend_from_slice(&count.to_le_bytes());
++            std::fs::write(&path,bytes).unwrap();
++            assert!(collision_input(Vec::new(),Some(path)).unwrap_err().contains(expected));
++        }
++    }
++}
+--- a/dragonwilds-skate-worker/src/world_runtime.rs
++++ b/dragonwilds-skate-worker/src/world_runtime.rs
+@@ -1,87 +1,89 @@
+-use crate::{compact_world::CompactWorld,compact_geometry::CompactGeometry,compact_rails::{self,LipBake}};
+-use skate_host::bridge::{Session,CollisionBuilder,PreparedCollision};
+-use std::{path::{Path,PathBuf},sync::Arc,time::Instant};
+-use serde_json::{Value,json};
+-
+-#[derive(Clone)]
+-pub struct WorldRuntime {
+-    base:Arc<CompactWorld>,bake:Arc<LipBake>,pub source:Arc<CompactGeometry>,
+-    pub rail_count:usize,status:Value,
+-}
+-fn source(base:&Arc<CompactWorld>,scene:Option<&Path>)->Result<Arc<CompactGeometry>,String> {
+-    let world=match scene {Some(path)=>Arc::new(CompactWorld::with_overlay(base,path)?),None=>base.clone()};
+-    Ok(Arc::new(CompactGeometry::new(world,[0.;3])?))
+-}
+-fn base_bake(manifest:&Path,rail_file:Option<&Path>)->Result<(Arc<CompactWorld>,LipBake,PathBuf),String> {
+-    let base=Arc::new(CompactWorld::load(manifest)?);
+-    let rail_path=rail_file.map(Path::to_path_buf).unwrap_or_else(||manifest.with_file_name("world.lips"));
+-    let bake=match compact_rails::load(&rail_path,&base) {
+-        Ok(bake)=>{eprintln!("WORLD_RAIL_CACHE hit lips={}",bake.lips.len());bake},
+-        Err(error)=>{
+-            if rail_file.is_some(){return Err(format!("Explicit permanent rail file rejected: {error}"));}
+-            eprintln!("WORLD_RAIL_CACHE preparing: {error}");
+-            let view=CompactGeometry::new(base.clone(),[0.;3])?;let bake=compact_rails::bake(&view)?;
+-            compact_rails::save(&rail_path,&bake)?;bake
+-        }
+-    };Ok((base,bake,rail_path))
+-}
+-/// Offline setup entry: owned geometry only, no Session, input or Skate assets.
+-pub fn prepare_offline(manifest:&Path,scene:Option<&Path>)->Result<Value,String> {
+-    let started=Instant::now();let(base,bake,rail_path)=base_bake(manifest,None)?;
+-    let base_lips=bake.lips.len();let source=source(&base,scene)?;
+-    let(cache,bake)=if let Some(scene)=scene {
+-        let key=crate::scene_rail_cache::key(&bake,&source)?;
+-        let path=crate::scene_rail_cache::path(scene,&key)?;
+-        let prepared=crate::scene_rail_cache::prepare(&bake,&source,scene)?;
+-        // Offline setup must leave a reusable file, not only a valid in-memory
+-        // result that disappears when this short-lived worker exits.
+-        compact_rails::load_with_identity(&path,&source.world,&key)
+-            .map_err(|e|format!("Offline scene cache was not persisted: {e}"))?;
+-        (Some(path),prepared)
+-    }else{(None,bake)};
+-    Ok(json!({"ok":true,"status":"prepared","session_loaded":false,"scope":"whole_world",
+-        "source_fingerprint":base.source_fingerprint,"base_fingerprint":base.source_fingerprint,"scene_fingerprint":source.world.scene_fingerprint,
+-        "rail_file":rail_path,"scene_cache":cache,"base_lips":base_lips,"lips":bake.lips.len(),
+-        "candidates":bake.candidates,"elapsed_ms":started.elapsed().as_millis()}))
+-}
+-impl WorldRuntime {
+-    pub fn init(assets:&Path,manifest:&Path,scene:Option<&Path>,rail_file:Option<&Path>,spawn:[f32;3],heading:f32)
+-        ->Result<(Session,Self),String> {
+-        let started=Instant::now();let(base,bake,_)=base_bake(manifest,rail_file)?;
+-        let source=source(&base,scene)?;
+-        let bake=Arc::new(if let Some(scene)=scene {crate::scene_rail_cache::prepare(&bake,&source,scene)?}else{bake});
+-        let rails=compact_rails::rails(&bake);
+-        let rail_count=rails.len();let session=Session::new_with_source(assets,source.clone(),rails,spawn,heading)?;
+-        eprintln!("WORLD_SESSION_READY triangles={} rails={} elapsed_ms={}",source.world.triangle_count(),rail_count,started.elapsed().as_millis());
+-        let status=Self::describe(&base,&source,rail_count);
+-        Ok((session,Self{base,bake,source,rail_count,status}))
+-    }
+-    pub fn scene(&self,builder:CollisionBuilder,path:&Path)->Result<(Option<PreparedCollision>,Self),String> {
+-        let started=Instant::now();let source=source(&self.base,Some(path))?;
+-        if source.world.scene_fingerprint==self.source.world.scene_fingerprint {
+-            // The exporter fingerprints exact mesh/instance/package content,
+-            // excluding capture timestamps/revisions. All files were validated
+-            // above. Retain the actual Session world and grind provider as-is.
+-            eprintln!("WORLD_SCENE_UNCHANGED elapsed_ms={}",started.elapsed().as_millis());
+-            return Ok((None,self.clone()));
+-        }
+-        let difference=source.world.difference_bounds(&self.source.world)?;
+-        eprintln!("WORLD_SCENE_DIFFERENCE bounds={}",difference.len());
+-        let bake=Arc::new(compact_rails::update(&self.bake,&self.source,&source,difference)?);
+-        let rails=compact_rails::rails(&bake);let rail_count=rails.len();
+-        let collision=builder.build_source(source.clone(),rails)?;
+-        eprintln!("WORLD_SCENE_READY active_triangles={} rails={} elapsed_ms={}",
+-            source.world.counts.static_triangles+source.world.counts.terrain_triangles,rail_count,started.elapsed().as_millis());
+-        let status=Self::describe(&self.base,&source,rail_count);
+-        Ok((Some(collision),Self{base:self.base.clone(),bake,source,rail_count,status}))
+-    }
+-    pub fn status(&self)->Value {self.status.clone()}
+-    fn describe(base:&CompactWorld,source:&CompactGeometry,rail_count:usize)->Value {
+-        let mut lo=[f64::INFINITY;3];let mut hi=[f64::NEG_INFINITY;3];
+-        for group in source.world.groups(){for i in 0..3 {lo[i]=lo[i].min(group.bounds.min[i]);hi[i]=hi[i].max(group.bounds.max[i]);}}
+-        json!({"scope":"whole_world","anchor":[0,0,0],"bounds_unreal":{"min":lo,"max":hi},
+-            "source_fingerprint":base.source_fingerprint,"scene_fingerprint":source.world.scene_fingerprint,
+-            "active_triangles":source.world.counts.static_triangles+source.world.counts.terrain_triangles,
+-            "triangle_ordinals":source.world.triangle_count(),"grinding_ready":true,"rails":rail_count})
+-    }
+-}
++use crate::{compact_world::CompactWorld,compact_geometry::CompactGeometry,compact_rails::{self,LipBake}};
++use skate_host::bridge::{Session,CollisionBuilder,PreparedCollision};
++use std::{path::{Path,PathBuf},sync::Arc,time::Instant};
++use serde_json::{Value,json};
++
++#[derive(Clone)]
++pub struct WorldRuntime {
++    base:Arc<CompactWorld>,bake:Arc<LipBake>,pub source:Arc<CompactGeometry>,
++    pub rail_count:usize,status:Value,
++}
++fn source(base:&Arc<CompactWorld>,scene:Option<&Path>)->Result<Arc<CompactGeometry>,String> {
++    let world=match scene {Some(path)=>Arc::new(CompactWorld::with_overlay(base,path)?),None=>base.clone()};
++    Ok(Arc::new(CompactGeometry::new(world,[0.;3])?))
++}
++fn base_bake(manifest:&Path,rail_file:Option<&Path>)->Result<(Arc<CompactWorld>,LipBake,PathBuf),String> {
++    let base=Arc::new(CompactWorld::load(manifest)?);
++    let rail_path=rail_file.map(Path::to_path_buf).unwrap_or_else(||manifest.with_file_name("world.lips"));
++    let bake=match compact_rails::load(&rail_path,&base) {
++        Ok(bake)=>{eprintln!("WORLD_RAIL_CACHE hit lips={}",bake.lips.len());bake},
++        Err(error)=>{
++            if rail_file.is_some(){return Err(format!("Explicit permanent rail file rejected: {error}"));}
++            eprintln!("WORLD_RAIL_CACHE preparing: {error}");
++            let view=CompactGeometry::new(base.clone(),[0.;3])?;let bake=compact_rails::bake(&view)?;
++            compact_rails::save(&rail_path,&bake)?;bake
++        }
++    };Ok((base,bake,rail_path))
++}
++/// Offline setup entry: owned geometry only, no Session, input or Skate assets.
++pub fn prepare_offline(manifest:&Path,scene:Option<&Path>)->Result<Value,String> {
++    let started=Instant::now();let(base,bake,rail_path)=base_bake(manifest,None)?;
++    let base_lips=bake.lips.len();let source=source(&base,scene)?;
++    let(cache,bake)=if let Some(scene)=scene {
++        let key=crate::scene_rail_cache::key(&bake,&source)?;
++        let path=crate::scene_rail_cache::path(scene,&key)?;
++        let prepared=crate::scene_rail_cache::prepare(&bake,&source,scene)?;
++        // Offline setup must leave a reusable file, not only a valid in-memory
++        // result that disappears when this short-lived worker exits.
++        compact_rails::load_with_identity(&path,&source.world,&key)
++            .map_err(|e|format!("Offline scene cache was not persisted: {e}"))?;
++        (Some(path),prepared)
++    }else{(None,bake)};
++    let merged=crate::merged_rail_cache::prepare(manifest,&bake)?;
++    if merged.path.is_none(){return Err("Offline merged rails were not persisted".into());}
++    Ok(json!({"ok":true,"status":"prepared","session_loaded":false,"scope":"whole_world",
++        "source_fingerprint":base.source_fingerprint,"base_fingerprint":base.source_fingerprint,"scene_fingerprint":source.world.scene_fingerprint,
++        "rail_file":rail_path,"scene_cache":cache,"base_lips":base_lips,"lips":bake.lips.len(),
++        "candidates":bake.candidates,"merged_rails":merged.rails.len(),"merged_rail_cache":merged.path,"elapsed_ms":started.elapsed().as_millis()}))
++}
++impl WorldRuntime {
++    pub fn init(assets:&Path,manifest:&Path,scene:Option<&Path>,rail_file:Option<&Path>,spawn:[f32;3],heading:f32)
++        ->Result<(Session,Self),String> {
++        let started=Instant::now();let(base,bake,_)=base_bake(manifest,rail_file)?;
++        let source=source(&base,scene)?;
++        let bake=Arc::new(if let Some(scene)=scene {crate::scene_rail_cache::prepare(&bake,&source,scene)?}else{bake});
++        let rails=crate::merged_rail_cache::prepare(manifest,&bake)?.rails;
++        let rail_count=rails.len();let session=Session::new_with_source(assets,source.clone(),rails,spawn,heading)?;
++        eprintln!("WORLD_SESSION_READY triangles={} rails={} elapsed_ms={}",source.world.triangle_count(),rail_count,started.elapsed().as_millis());
++        let status=Self::describe(&base,&source,rail_count);
++        Ok((session,Self{base,bake,source,rail_count,status}))
++    }
++    pub fn scene(&self,builder:CollisionBuilder,path:&Path)->Result<(Option<PreparedCollision>,Self),String> {
++        let started=Instant::now();let source=source(&self.base,Some(path))?;
++        if source.world.scene_fingerprint==self.source.world.scene_fingerprint {
++            // The exporter fingerprints exact mesh/instance/package content,
++            // excluding capture timestamps/revisions. All files were validated
++            // above. Retain the actual Session world and grind provider as-is.
++            eprintln!("WORLD_SCENE_UNCHANGED elapsed_ms={}",started.elapsed().as_millis());
++            return Ok((None,self.clone()));
++        }
++        let difference=source.world.difference_bounds(&self.source.world)?;
++        eprintln!("WORLD_SCENE_DIFFERENCE bounds={}",difference.len());
++        let bake=Arc::new(compact_rails::update(&self.bake,&self.source,&source,difference)?);
++        let rails=compact_rails::rails(&bake);let rail_count=rails.len();
++        let collision=builder.build_source(source.clone(),rails)?;
++        eprintln!("WORLD_SCENE_READY active_triangles={} rails={} elapsed_ms={}",
++            source.world.counts.static_triangles+source.world.counts.terrain_triangles,rail_count,started.elapsed().as_millis());
++        let status=Self::describe(&self.base,&source,rail_count);
++        Ok((Some(collision),Self{base:self.base.clone(),bake,source,rail_count,status}))
++    }
++    pub fn status(&self)->Value {self.status.clone()}
++    fn describe(base:&CompactWorld,source:&CompactGeometry,rail_count:usize)->Value {
++        let mut lo=[f64::INFINITY;3];let mut hi=[f64::NEG_INFINITY;3];
++        for group in source.world.groups(){for i in 0..3 {lo[i]=lo[i].min(group.bounds.min[i]);hi[i]=hi[i].max(group.bounds.max[i]);}}
++        json!({"scope":"whole_world","anchor":[0,0,0],"bounds_unreal":{"min":lo,"max":hi},
++            "source_fingerprint":base.source_fingerprint,"scene_fingerprint":source.world.scene_fingerprint,
++            "active_triangles":source.world.counts.static_triangles+source.world.counts.terrain_triangles,
++            "triangle_ordinals":source.world.triangle_count(),"grinding_ready":true,"rails":rail_count})
++    }
++}
+--- /dev/null
++++ b/dragonwilds-skate-worker/src/merged_rail_cache.rs
+@@ -0,0 +1,123 @@
++//! Persist the exact ordered output of the original lip merge/chaining routine.
++//! No geometry admission, merge predicate, coordinate arithmetic or query order
++//! is replaced here. The first successful original result is reused verbatim.
++use crate::compact_rails::{self,LipBake};
++use std::{io::{BufReader,BufWriter,Read,Write},path::{Path,PathBuf},sync::atomic::{AtomicU64,Ordering},time::Instant};
++
++const VERSION:u32=1;
++const HEADER:usize=88;
++pub struct Prepared {pub rails:Vec<Vec<[f32;3]>>,pub path:Option<PathBuf>}
++pub fn key(bake:&LipBake)->[u8;32] {
++    let mut hash=blake3::Hasher::new();hash.update(b"Dragonwilds exact ordered merged rails v1\0");
++    hash.update(&(bake.fingerprint.len() as u64).to_le_bytes());hash.update(bake.fingerprint.as_bytes());
++    hash.update(compact_rails::payload_digest(bake).as_bytes());
++    for bytes in [include_bytes!("compact_rails.rs").as_slice(),include_bytes!("merged_rail_cache.rs").as_slice(),
++        include_bytes!("../Cargo.lock").as_slice(),
++        include_bytes!("../../skate3-mashup/crates/render_anim/src/skate/rails.rs").as_slice()] {
++        hash.update(&(bytes.len() as u64).to_le_bytes());hash.update(bytes);
++    }
++    *hash.finalize().as_bytes()
++}
++fn cache_path(manifest:&Path,identity:&[u8;32])->Result<PathBuf,String>{
++    let root=manifest.parent().ok_or("Merged rail manifest has no parent")?;
++    Ok(root.join("merged-rails-cache").join(format!("{}.rails",blake3::Hash::from(*identity).to_hex())))
++}
++fn limits(bake:&LipBake)->Result<(usize,usize),String>{
++    Ok((bake.lips.len(),bake.lips.len().checked_mul(2).ok_or("Merged rail limit overflow")?))
++}
++fn load(path:&Path,identity:&[u8;32],bake:&LipBake)->Result<Vec<Vec<[f32;3]>>,String>{
++    let file=std::fs::File::open(path).map_err(|e|e.to_string())?;
++    let size=file.metadata().map_err(|e|e.to_string())?.len();
++    let mut file=BufReader::with_capacity(1024*1024,file);let mut header=[0u8;HEADER];
++    file.read_exact(&mut header).map_err(|e|e.to_string())?;
++    let u64_at=|i|u64::from_le_bytes(header[i..i+8].try_into().unwrap());
++    if &header[..4]!=b"S3R1"||u32::from_le_bytes(header[4..8].try_into().unwrap())!=VERSION||&header[24..56]!=identity {
++        return Err("Merged rail identity/version mismatch".into());
++    }
++    let count=usize::try_from(u64_at(8)).map_err(|_|"Merged rail count overflow")?;
++    let points=usize::try_from(u64_at(16)).map_err(|_|"Merged point count overflow")?;
++    let(max_rails,max_points)=limits(bake)?;
++    let expected=(HEADER as u64).checked_add((count as u64).checked_mul(8).ok_or("Merged size overflow")?)
++        .and_then(|v|v.checked_add((points as u64).checked_mul(12)?)).ok_or("Merged size overflow")?;
++    if count>max_rails||points>max_points||points<count.checked_mul(2).ok_or("Merged minimum overflow")?||size!=expected {
++        return Err("Invalid merged rail count/size".into());
++    }
++    let mut hash=blake3::Hasher::new();hash.update(&header[..56]);
++    let mut rails=Vec::with_capacity(count);let mut consumed=0usize;
++    for _ in 0..count {
++        let mut bytes=[0u8;8];file.read_exact(&mut bytes).map_err(|e|e.to_string())?;hash.update(&bytes);
++        let len=usize::try_from(u64::from_le_bytes(bytes)).map_err(|_|"Merged polyline overflow")?;
++        if len<2||len>points-consumed{return Err("Invalid merged polyline boundary".into());}
++        let mut rail=Vec::with_capacity(len);
++        for _ in 0..len {
++            let mut bytes=[0u8;12];file.read_exact(&mut bytes).map_err(|e|e.to_string())?;hash.update(&bytes);
++            let point=std::array::from_fn(|i|f32::from_le_bytes(bytes[i*4..i*4+4].try_into().unwrap()));
++            if !point.iter().all(|x|x.is_finite()){return Err("Non-finite merged point".into());}
++            rail.push(point);
++        }
++        consumed+=len;rails.push(rail);
++    }
++    if consumed!=points||hash.finalize().as_bytes()!=&header[56..88]{return Err("Merged rail checksum/count mismatch".into());}
++    Ok(rails)
++}
++fn save(path:&Path,identity:&[u8;32],bake:&LipBake,rails:&[Vec<[f32;3]>])->Result<(),String>{
++    let(max_rails,max_points)=limits(bake)?;
++    let points=rails.iter().try_fold(0usize,|n,r|n.checked_add(r.len())).ok_or("Merged point overflow")?;
++    if rails.len()>max_rails||points>max_points||rails.iter().any(|r|r.len()<2||r.iter().flatten().any(|v|!v.is_finite())) {
++        return Err("Invalid original merged rail result".into());
++    }
++    let mut header=[0u8;HEADER];header[..4].copy_from_slice(b"S3R1");header[4..8].copy_from_slice(&VERSION.to_le_bytes());
++    header[8..16].copy_from_slice(&(rails.len() as u64).to_le_bytes());header[16..24].copy_from_slice(&(points as u64).to_le_bytes());header[24..56].copy_from_slice(identity);
++    let mut hash=blake3::Hasher::new();hash.update(&header[..56]);
++    for rail in rails {hash.update(&(rail.len() as u64).to_le_bytes());for point in rail {for v in point {hash.update(&v.to_le_bytes());}}}
++    header[56..88].copy_from_slice(hash.finalize().as_bytes());
++    std::fs::create_dir_all(path.parent().unwrap()).map_err(|e|e.to_string())?;
++    static SERIAL:AtomicU64=AtomicU64::new(0);
++    let temporary=path.with_extension(format!("tmp-{}-{}",std::process::id(),SERIAL.fetch_add(1,Ordering::Relaxed)));
++    let result=(||{
++        let file=std::fs::OpenOptions::new().write(true).create_new(true).open(&temporary).map_err(|e|e.to_string())?;
++        let mut out=BufWriter::with_capacity(1024*1024,file);out.write_all(&header).map_err(|e|e.to_string())?;
++        for rail in rails {out.write_all(&(rail.len() as u64).to_le_bytes()).map_err(|e|e.to_string())?;
++            for point in rail {for v in point {out.write_all(&v.to_le_bytes()).map_err(|e|e.to_string())?;}}}
++        out.flush().map_err(|e|e.to_string())?;out.get_ref().sync_all().map_err(|e|e.to_string())?;drop(out);
++        std::fs::rename(&temporary,path).map_err(|e|e.to_string())
++    })();
++    if result.is_err(){let _=std::fs::remove_file(temporary);}result
++}
++pub fn prepare(manifest:&Path,bake:&LipBake)->Result<Prepared,String>{
++    prepare_with(manifest,bake,||Ok(compact_rails::rails(bake)))
++}
++fn prepare_with(manifest:&Path,bake:&LipBake,build:impl FnOnce()->Result<Vec<Vec<[f32;3]>>,String>)->Result<Prepared,String>{
++    let started=Instant::now();let identity=key(bake);let path=cache_path(manifest,&identity)?;
++    match load(&path,&identity,bake){
++        Ok(rails)=>{eprintln!("WORLD_MERGED_RAIL_CACHE hit rails={} elapsed_ms={}",rails.len(),started.elapsed().as_millis());return Ok(Prepared{rails,path:Some(path)})},
++        Err(e)=>eprintln!("WORLD_MERGED_RAIL_CACHE preparing: {e}"),
++    }
++    let rails=build()?;
++    let persisted=match save(&path,&identity,bake,&rails){
++        Ok(())=>{eprintln!("WORLD_MERGED_RAIL_CACHE saved rails={} elapsed_ms={}",rails.len(),started.elapsed().as_millis());Some(path)},
++        Err(e)=>{eprintln!("WORLD_MERGED_RAIL_CACHE write failed (original result retained): {e}");None},
++    };
++    Ok(Prepared{rails,path:persisted})
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    use bevy::math::Vec3;
++    fn fixture()->LipBake{LipBake{fingerprint:"fixture".into(),candidates:8,lips:(0..4).map(|i|compact_rails::Lip{
++        a:Vec3::new(i as f32,0.,0.),b:Vec3::new(i as f32+1.,0.,0.),normal:Vec3::Z,centroid:Vec3::ZERO}).collect()}}
++    fn directory()->PathBuf{static N:AtomicU64=AtomicU64::new(0);let p=std::env::temp_dir().join(format!("s3-merged-rail-test-{}-{}",std::process::id(),N.fetch_add(1,Ordering::Relaxed)));std::fs::create_dir(&p).unwrap();p}
++    fn cleanup(dir:PathBuf){let absolute=dir.canonicalize().unwrap();assert!(absolute.starts_with(std::env::temp_dir().canonicalize().unwrap()));assert!(absolute.file_name().unwrap().to_str().unwrap().starts_with("s3-merged-rail-test-"));std::fs::remove_dir_all(absolute).unwrap();}
++    fn sample()->Vec<Vec<[f32;3]>>{vec![vec![[0.,-0.,1.],[3.,2.,1.],[0.,-0.,1.]],vec![[9.,8.,7.],[6.,5.,4.]]]}
++    fn bits(v:&[Vec<[f32;3]>])->Vec<Vec<[u32;3]>>{v.iter().map(|r|r.iter().map(|p|p.map(f32::to_bits)).collect()).collect()}
++    #[test]fn cold_warm_reuses_exact_order_boundaries_and_float_bits(){let dir=directory();let bake=fixture();let file=dir.join("manifest.json");let expected=sample();
++        let a=prepare_with(&file,&bake,||Ok(expected.clone())).unwrap();let b=prepare_with(&file,&bake,||panic!("valid cache rebuilt")).unwrap();assert_eq!(bits(&a.rails),bits(&b.rails));assert_eq!(bits(&b.rails),bits(&expected));cleanup(dir);}
++    #[test]fn damaged_headers_payload_boundaries_and_nan_rebuild(){let dir=directory();let bake=fixture();let identity=key(&bake);let file=dir.join("manifest.json");let path=cache_path(&file,&identity).unwrap();let expected=sample();save(&path,&identity,&bake,&expected).unwrap();let valid=std::fs::read(&path).unwrap();
++        for kind in 0..7 {let mut bad=valid.clone();match kind{0=>bad[8..16].copy_from_slice(&u64::MAX.to_le_bytes()),1=>bad[16]^=1,2=>bad[24]^=1,3=>{bad.pop();},4=>bad[HEADER..HEADER+8].copy_from_slice(&1u64.to_le_bytes()),5=>bad[HEADER+8..HEADER+12].copy_from_slice(&f32::NAN.to_le_bytes()),_=>bad[HEADER+12]^=1}
++            if kind==4||kind==5{let mut hash=blake3::Hasher::new();hash.update(&bad[..56]);hash.update(&bad[HEADER..]);bad[56..88].copy_from_slice(hash.finalize().as_bytes());}
++            std::fs::write(&path,bad).unwrap();assert!(load(&path,&identity,&bake).is_err());let restored=prepare_with(&file,&bake,||Ok(expected.clone())).unwrap();assert_eq!(bits(&restored.rails),bits(&expected));assert!(load(&path,&identity,&bake).is_ok());}
++        cleanup(dir);}
++    #[test]fn input_identity_and_order_change_keys_and_failed_build_never_publishes(){let dir=directory();let bake=fixture();let mut other=fixture();other.lips.reverse();assert_ne!(key(&bake),key(&other));other=fixture();other.candidates+=1;assert_ne!(key(&bake),key(&other));other=fixture();other.fingerprint.push('x');assert_ne!(key(&bake),key(&other));
++        let file=dir.join("manifest.json");let path=cache_path(&file,&key(&bake)).unwrap();assert!(prepare_with(&file,&bake,||Err("expected".into())).is_err());assert!(!path.exists());std::fs::create_dir_all(path.parent().unwrap()).unwrap();std::fs::write(path.with_extension("tmp-abandoned"),b"partial").unwrap();let value=prepare_with(&file,&bake,||Ok(sample())).unwrap();assert!(value.path.is_some());cleanup(dir);}
++}
+--- /dev/null
++++ b/dragonwilds-skate-worker/tests/merged_rail_cache.rs
+@@ -0,0 +1,5 @@
++#[path="../src/compact_world.rs"]mod compact_world;
++#[path="../src/compact_geometry.rs"]mod compact_geometry;
++#[path="../src/compact_rails.rs"]mod compact_rails;
++#[path="../../skate3-mashup/crates/render_anim/src/skate/rails.rs"]mod example_rails;
++#[path="../src/merged_rail_cache.rs"]mod merged_rail_cache;

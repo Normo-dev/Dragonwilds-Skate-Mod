@@ -1,0 +1,4 @@
+# Preserve exact audited source bytes and mixed upstream line endings.
+* -text
+*.png binary
+

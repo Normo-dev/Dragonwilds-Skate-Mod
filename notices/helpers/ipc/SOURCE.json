@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "component": "ipc",
+  "artifact_sha256": "86d4f39bb7a7eb0554614b3722d1b4e6d817b09b5077a1bb4e6a8a0aac6ad768",
+  "compiled_source_sha256": "9145a49641ab8f92938e52e9d70bdbd224c5a66ccf42c06fd3f2c073ef4183d5",
+  "files": [
+    {
+      "path": "Cargo.lock",
+      "sha256": "1a7ce9a6da8dbccba3e5d011da72a8debb23d36fbd3b6ada85df864e9d4fd47d"
+    },
+    {
+      "path": "Cargo.toml",
+      "sha256": "909c188bc32b423a81f59ba724185c038f9d59a9899cf9064ff1039170c685d2"
+    },
+    {
+      "path": "src/launcher.rs",
+      "sha256": "fd2290a7e3148a691cef23b1874acb1872d252a6df0142af1bac958e522990b3"
+    },
+    {
+      "path": "src/lib.rs",
+      "sha256": "2c0af2c2c654bf1e3919ba49d130a273c465f2898b38e69cc96784eee0b3941b"
+    },
+    {
+      "path": "src/loader_constants.rs",
+      "sha256": "724947af59814d14d8786829ee9f7aabb617f5c2b5a76fe998fbf46efc12b72e"
+    }
+  ],
+  "build": "cargo build --release --locked --offline with source/user/tool path remaps; Rust 1.96.0",
+  "source_status": "Exact source files retained unchanged since designated public helper build"
+}

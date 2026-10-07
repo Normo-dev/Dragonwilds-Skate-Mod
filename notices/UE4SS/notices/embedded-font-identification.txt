@@ -1,0 +1,92 @@
+{
+  "Roboto": [
+    [
+      0,
+      "Copyright 2011 Google Inc. All Rights Reserved."
+    ],
+    [
+      1,
+      "Roboto"
+    ],
+    [
+      2,
+      "Regular"
+    ],
+    [
+      3,
+      "Roboto"
+    ],
+    [
+      5,
+      "Version 2.137; 2017"
+    ],
+    [
+      9,
+      "Google"
+    ],
+    [
+      13,
+      "Licensed under the Apache License, Version 2.0"
+    ],
+    [
+      14,
+      "http://www.apache.org/licenses/LICENSE-2.0"
+    ]
+  ],
+  "RobotoMono": [
+    [
+      0,
+      "Copyright 2015 The Roboto Mono Project Authors (https://github.com/googlefonts/robotomono)"
+    ],
+    [
+      1,
+      "Roboto Mono"
+    ],
+    [
+      2,
+      "Regular"
+    ],
+    [
+      3,
+      "3.001;GOOG;RobotoMono-Regular"
+    ],
+    [
+      5,
+      "Version 3.001"
+    ],
+    [
+      9,
+      "Google"
+    ],
+    [
+      13,
+      "This Font Software is licensed under the SIL Open Font License, Version 1.1. This license is available with a FAQ at: https://openfontlicense.org"
+    ],
+    [
+      14,
+      "https://openfontlicense.org"
+    ]
+  ],
+  "FaSolid900": [
+    [
+      0,
+      "Copyright (c) Font Awesome"
+    ],
+    [
+      1,
+      "Font Awesome 5 Free Solid"
+    ],
+    [
+      2,
+      "Solid"
+    ],
+    [
+      3,
+      "Font Awesome 5 Free Solid-5.15.4"
+    ],
+    [
+      5,
+      "331.524 (Font Awesome version: 5.15.4)"
+    ]
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "component": "SDL3",
+  "version": "3.4.16",
+  "source_revision": "fa2c02bb6e21974a89ea9824bc53c9932abe5f9c",
+  "archive": "SDL3-3.4.16-win32-x64.zip",
+  "archive_sha256": "4217944b4e51457af4a59c82d883f8443b3e65964b2acd8943484c492756c4b6",
+  "binary_sha256": "1f98969319302a100931f4385e5918a0bd53ab07773040682d22e7edb54858c0",
+  "upstream": "https://github.com/libsdl-org/SDL",
+  "archive_member": "SDL3.dll",
+  "binary_matches_official_archive": true
+}

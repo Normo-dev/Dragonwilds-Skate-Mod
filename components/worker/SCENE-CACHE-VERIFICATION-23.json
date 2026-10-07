@@ -1,0 +1,19 @@
+{
+  "schema": 2,
+  "status": "Candidate23 public native tests and 451-frame synthetic source-pose parity passed. Full-map cache reuse, live progress integration and gameplay acceptance remain separate uncompleted gates.",
+  "artifact_sha256": "f6ca12a29ae2f26bd9939c6d8a175dd2ba89c708e416b9212aa99d3a25669fd2",
+  "compiled_source_sha256": "dd04d32f442e9090d4ba62c3c6afd9e7837da3d7e89efc8042a74f1274dcdadc",
+  "compiled_source_records": 1256,
+  "compiled_source_hash_algorithm": {
+    "selection": "Every SOURCE-PROVENANCE.json files entry whose relative POSIX path ends .rs or has basename Cargo.toml or Cargo.lock",
+    "records": "Objects containing only path and lowercase sha256, sorted lexicographically by path",
+    "encoding": "UTF-8 of Python json.dumps(records, sort_keys=True, separators=(',', ':'), ensure_ascii=True)",
+    "digest": "SHA256"
+  },
+  "verification": "CACHE-PROGRESS-VERIFICATION.json",
+  "verification_sha256": "77dc7dd5736a400438c1312247cb9cb6b2d3786fa71d1d7bcf1fb96970fd6cfe",
+  "previous_verification": "SCENE-CACHE-VERIFICATION-22.json",
+  "previous_verification_sha256": "64bc16f216442e151f307195a58b8e25b622ca83fedce668a0d998f6700d6995",
+  "assets_included": false,
+  "published": false
+}

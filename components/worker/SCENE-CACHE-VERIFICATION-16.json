@@ -1,0 +1,19 @@
+{
+  "schema": 2,
+  "status": "Latest verified candidate16; historical candidate15 scene-cache evidence preserved separately",
+  "artifact_sha256": "1641fb78dc96109bec380059efcba78eeb00b98600463674b8e9e821b8b729f0",
+  "compiled_source_sha256": "4e6125e43f4a16111d3546a3a37f2e7adc3e29043a30e0df9762ba814765a04b",
+  "compiled_source_records": 1233,
+  "compiled_source_hash_algorithm": {
+    "selection": "Every SOURCE-PROVENANCE.json files entry whose relative POSIX path ends .rs or has basename Cargo.toml or Cargo.lock",
+    "records": "Objects containing only path and lowercase sha256, sorted lexicographically by path",
+    "encoding": "UTF-8 of Python json.dumps(records, sort_keys=True, separators=(',', ':'), ensure_ascii=True)",
+    "digest": "SHA256"
+  },
+  "verification": "MERGED-RAIL-CACHE-VERIFICATION.json",
+  "verification_sha256": "685c6b9dcf1654040ba64c99049577a15a510ef6e66fd74eb0e252fd45f24351",
+  "previous_verification": "SCENE-CACHE-VERIFICATION-15.json",
+  "previous_verification_sha256": "5a94c7d74ec452006d1aa7da5553b725d8ff3faa99be743cbd3d2d68d45fd2a2",
+  "assets_included": false,
+  "published": false
+}

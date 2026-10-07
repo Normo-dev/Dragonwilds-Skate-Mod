@@ -1,0 +1,214 @@
+{
+  "schema": 1,
+  "status": "Candidate22 public native tests and 451-frame synthetic source-pose parity passed. Full-map cache reuse, live retirement integration and gameplay acceptance remain separate uncompleted gates.",
+  "artifact_sha256": "e9bad6fb2ae489abe80de317aad09e8eec5a55dee5ee05b4b67b5cd868e44481",
+  "artifact_bytes": 8148480,
+  "compiled_source_sha256": "b7e7f23ee02b4b5df05627d98a75ea335f114cf94c2ae5fa6abc7a525bb1332b",
+  "compiled_source_records": 1254,
+  "compiled_source_hash_algorithm": {
+    "selection": "Every SOURCE-PROVENANCE.json files entry whose relative POSIX path ends .rs or has basename Cargo.toml or Cargo.lock",
+    "records": "Objects containing only path and lowercase sha256, sorted lexicographically by path",
+    "encoding": "UTF-8 of Python json.dumps(records, sort_keys=True, separators=(',', ':'), ensure_ascii=True)",
+    "digest": "SHA256"
+  },
+  "baseline_source_archive_sha256": "30af7d2563b3109ff1ffeb29e9a4d5f34d421615a3cd8bd9e7738283c22962bc",
+  "baseline_artifact_sha256": "6548829d22043109c4321c7aa3c1b9ec214f22499d335945ce781295cb499ab2",
+  "changed_existing_rust_files": [
+    "dragonwilds-skate-worker/src/main.rs"
+  ],
+  "new_rust_files": [
+    "dragonwilds-skate-worker/src/maintenance.rs",
+    "dragonwilds-skate-worker/tests/cache_maintenance.rs"
+  ],
+  "unchanged_rust_and_cargo_files": 1251,
+  "patch": "patches/dragonwilds-native-maintenance.patch",
+  "patch_sha256": "c6ed47cdf96daf5927299eafccebfc5b82cd5bb50feb5b96e5d2a60858e686e2",
+  "patch_reverse_apply_check": true,
+  "scope": "Adds worker identity, RAII accounting for synchronous and detached background cache jobs, and an explicit maintenance lease. It does not perform cache retirement or filesystem deletion.",
+  "contract": {
+    "commands": [
+      "maintenance_status",
+      "maintenance_begin",
+      "maintenance_end"
+    ],
+    "begin_requires": "Matching worker identity, zero active cache jobs and no tracked uninstalled result.",
+    "atomicity": "Job acquisition and lease acquisition share one mutex; detached job permits live until closure exit.",
+    "lease_blocks_before_io": [
+      "prepare_world",
+      "init_world",
+      "world_scene",
+      "init",
+      "collision",
+      "queue_collision"
+    ],
+    "resident_commands_continue": [
+      "tick",
+      "poll",
+      "pose",
+      "surface",
+      "camera",
+      "activate",
+      "summon",
+      "shutdown"
+    ],
+    "release": "Requires exact worker identity and current opaque lease token; stale/malformed releases cannot clear a lease.",
+    "failure": "Mutex poison fails closed. Early returns, closure cancellation and panics release owned job permits.",
+    "reset_semantics": "Existing entrypoint reset/replacement semantics outside the lease are unchanged; detached jobs remain counted."
+  },
+  "source_mechanics": "No simulation, collision, rail extraction, source grind contact, candidate admission, input or camera algorithm changes from candidate21.",
+  "cache_compatibility": {
+    "old_eight_identity_inputs_identical": true,
+    "old_identity_inputs": [
+      {
+        "path": "dragonwilds-skate-worker/src/compact_world.rs",
+        "sha256": "159d354ed49d5b2dc128bfe857d1a8f6aecd2ef9449d5de9f442cf370a44958b"
+      },
+      {
+        "path": "dragonwilds-skate-worker/src/compact_geometry.rs",
+        "sha256": "74b1821b5ce9eb79cc80bdee674fcca833181b218c0d193a245444695fe7cb7d"
+      },
+      {
+        "path": "dragonwilds-skate-worker/src/compact_rails.rs",
+        "sha256": "4d086947cc8e08234f2b71eea800ed531b5483b03e7fd835cf9f87c753e3ff7c"
+      },
+      {
+        "path": "dragonwilds-skate-worker/src/scene_rail_cache.rs",
+        "sha256": "c1df95c90bcf97e28e79bc214f4b6d715a34be8a3ce60f5c45bc95373e863fc8"
+      },
+      {
+        "path": "dragonwilds-skate-worker/src/accepted_scene_cache.rs",
+        "sha256": "e58c8d3ae39d4bfe120ff97dfdf10968985ed16ea0c5bcab86a55cba0eeff4df"
+      },
+      {
+        "path": "dragonwilds-skate-worker/src/merged_rail_cache.rs",
+        "sha256": "9d88ecf3852a5a1fd4eccc972a90540faf26d635157c54bbe687445961bc39ad"
+      },
+      {
+        "path": "dragonwilds-skate-worker/Cargo.lock",
+        "sha256": "320c408d09581755d041c9c7a598011e32780f4baa81d6c13581b71a7c0fa23d"
+      },
+      {
+        "path": "skate3-mashup/crates/render_anim/src/skate/rails.rs",
+        "sha256": "3dfc6d763eeaebd6dfb2bce9c846aa732da3144e81818b0f7aa00c161badc76a"
+      }
+    ],
+    "dwe_dwr_algorithm_inputs_identical": true,
+    "dwe_dwr_algorithm_inputs": [
+      {
+        "path": "dragonwilds-skate-worker/src/exposed_edge_cache.rs",
+        "sha256": "6ed38df832e058c3c1a2d3846fadd27bcda404bf51aeec3ca769b9c19ad1394f"
+      },
+      {
+        "path": "dragonwilds-skate-worker/src/exposed_edges.rs",
+        "sha256": "f93193444ccc4e857a33568083c780caccc9a907d8d40a2abe80318f2bdc6c51"
+      },
+      {
+        "path": "dragonwilds-skate-worker/src/exposed_query.rs",
+        "sha256": "605ff0cd3e5d03e600ef65a3326009aeeec407d9539feaafa40d034feb96ecac"
+      },
+      {
+        "path": "dragonwilds-skate-worker/src/exposed_rail_cache.rs",
+        "sha256": "e2c740596b7bb6c7b446f7caa1ba1132df2bcf5163397c5555dee23d00d4e803"
+      },
+      {
+        "path": "dragonwilds-skate-worker/src/compact_world.rs",
+        "sha256": "159d354ed49d5b2dc128bfe857d1a8f6aecd2ef9449d5de9f442cf370a44958b"
+      },
+      {
+        "path": "dragonwilds-skate-worker/src/compact_geometry.rs",
+        "sha256": "74b1821b5ce9eb79cc80bdee674fcca833181b218c0d193a245444695fe7cb7d"
+      },
+      {
+        "path": "dragonwilds-skate-worker/Cargo.lock",
+        "sha256": "320c408d09581755d041c9c7a598011e32780f4baa81d6c13581b71a7c0fa23d"
+      },
+      {
+        "path": "skate3-mashup/skate/crates/skate-core/src/air/trajectory/grind_surface.rs",
+        "sha256": "8c29b00ae39174e2f96288eb451a83f776315902e2f303ed640683dce3552f5e"
+      },
+      {
+        "path": "skate3-mashup/skate/crates/skate-core/src/air/trajectory/grind_surface/classify.rs",
+        "sha256": "508426f634f68b9dbfb27fe3a4d5f553c1803abe2c29e0eede115b4daae3cbed"
+      }
+    ],
+    "runtime_full_map_reuse_verified": false,
+    "limit": "Source identity supports reuse; a completed candidate22 full-map load/cache proof is not asserted here."
+  },
+  "build": {
+    "toolchain": "rustc 1.96.0 (ac68faa20 2026-05-25)",
+    "target": "x86_64-pc-windows-msvc",
+    "offline": true,
+    "locked": true,
+    "jobs": 2,
+    "incremental": false,
+    "source_remap": "/source/dragonwilds-skate",
+    "cargo_registry_remap": "/cargo/registry",
+    "build_log_sha256": "5ce93d384dcea6488f20a75d8449557c75f8efff5e0dee73b2399a24ac385c88"
+  },
+  "checks": {
+    "worker_test_case_executions_passed": 160,
+    "worker_test_case_executions_failed": 0,
+    "ignored_owned_data_test_executions": 15,
+    "test_target_results": 22,
+    "count_note": "Some imported module tests execute in more than one target; execution totals are not unique test counts.",
+    "unique_maintenance_tests_passed": [
+      "maintenance::tests::concurrent_job_start_and_lease_acquisition_cannot_both_succeed",
+      "maintenance::tests::detached_job_remains_counted_until_its_closure_finishes",
+      "maintenance::tests::finished_but_uninstalled_result_blocks_begin_only",
+      "maintenance::tests::lease_blocks_cache_jobs_and_wrong_release_never_clears_it",
+      "maintenance::tests::os_worker_identity_is_unique_and_tokens_cannot_cross_workers",
+      "maintenance::tests::panic_releases_job_but_not_the_uninstalled_result_gate",
+      "maintenance::tests::permit_outlives_other_owner_clones_and_spawn_failure_drop",
+      "maintenance::tests::poisoned_coordinator_fails_closed_even_after_permit_unwinds",
+      "maintenance::tests::validation_error_and_sync_panic_release_without_resetting_state",
+      "maintenance_command_tests::every_cache_entrypoint_is_blocked_before_io_or_session_validation",
+      "maintenance_command_tests::malformed_release_cannot_reach_the_coordinator_or_clear_lease",
+      "maintenance_command_tests::resident_operations_are_explicitly_outside_the_cache_gate"
+    ],
+    "exact_source_simulation": {
+      "baseline_artifact_sha256": "e8b89433aa633dc16b695bbd22366729883fdf80ce6a2a6dbefc0df7bd6f73a4",
+      "proof_sha256": "14a7fde84800c4e11fdfc6da4b10bcc6ecfc62192ff6812cc93f1f2be7bc9ed2",
+      "scope": "451 identical poses on a synthetic plane; not a full-world or gameplay test.",
+      "exact_before_after_simulation": true,
+      "baseline": {
+        "pose_digest": "35e852612d30c0a3d1ad1c7ba581e6347f6363aff46768ce3b4a038d171af220",
+        "frames": 451,
+        "states": {
+          "PhysicsGround": 64,
+          "PhysicsAir": 5,
+          "GroundAnimation": 5,
+          "BipedGround": 377
+        },
+        "mean_ms": 1.1630906882704113,
+        "max_ms": 4.216300032567233
+      },
+      "candidate": {
+        "pose_digest": "35e852612d30c0a3d1ad1c7ba581e6347f6363aff46768ce3b4a038d171af220",
+        "frames": 451,
+        "states": {
+          "PhysicsGround": 64,
+          "PhysicsAir": 5,
+          "GroundAnimation": 5,
+          "BipedGround": 377
+        },
+        "mean_ms": 1.178129712437711,
+        "max_ms": 4.619400016963482
+      },
+      "diagnostic_enabled": {
+        "pose_digest": "35e852612d30c0a3d1ad1c7ba581e6347f6363aff46768ce3b4a038d171af220",
+        "frames": 451,
+        "states": {
+          "PhysicsGround": 64,
+          "PhysicsAir": 5,
+          "GroundAnimation": 5,
+          "BipedGround": 377
+        },
+        "mean_ms": 1.1667394659537698,
+        "max_ms": 4.483099968638271
+      }
+    },
+    "test_inputs": "Public tests use synthetic inputs. Owned data, world identifiers and private full-map evidence are not included."
+  },
+  "assets_included": false,
+  "published": false
+}

@@ -1,0 +1,4712 @@
+{
+  "schema": 1,
+  "target": "x86_64-pc-windows-msvc",
+  "selection": "cargo tree --locked --offline --edges normal,build --target x86_64-pc-windows-msvc",
+  "selected_packages_including_local": 139,
+  "registry_packages": 134,
+  "root_lockfile_sha256": "320c408d09581755d041c9c7a598011e32780f4baa81d6c13581b71a7c0fa23d",
+  "packages": [
+    {
+      "name": "adler2",
+      "version": "2.0.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa",
+      "declared_license": "0BSD OR MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/oyvindln/adler2",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-0BSD",
+          "path": "licenses/cargo/adler2-2.0.1/LICENSE-0BSD",
+          "sha256": "861399f8c21c042b110517e76dc6b63a2b334276c8cf17412fc3c8908ca8dc17",
+          "bytes": 665
+        },
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/adler2-2.0.1/LICENSE-APACHE",
+          "sha256": "8ada45cd9f843acf64e4722ae262c622a2b3b3007c7310ef36ac1061a30f6adb",
+          "bytes": 10860
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/adler2-2.0.1/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "arrayvec",
+      "version": "0.7.8",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "d3fb67a6e08acf24fdeccbac2cb6ac4305825bd1f117462e0e6f2f193345ad56",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/bluss/arrayvec",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/arrayvec-0.7.8/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/arrayvec-0.7.8/LICENSE-MIT",
+          "sha256": "4da95ec4ecb65b738d470b7d762894ad9c97da93e6cbfb18b570fc2c96f4b871",
+          "bytes": 1071
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "assert_type_match",
+      "version": "0.1.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "f548ad2c4031f2902e3edc1f29c29e835829437de49562d8eb5dc5584d3a1043",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/MrGVSV/assert_type_match",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/assert_type_match-0.1.1/LICENSE-APACHE",
+          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+          "bytes": 11357
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/assert_type_match-0.1.1/LICENSE-MIT",
+          "sha256": "111c12e8342b9ecb81fe22044a4c410231aea40f7740ecfb74e95d397259bb63",
+          "bytes": 1069
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "async-channel",
+      "version": "2.5.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "924ed96dd52d1b75e9c1a3e6275715fd320f5f9439fb5a4a11fa51f4221158d2",
+      "declared_license": "Apache-2.0 OR MIT",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/smol-rs/async-channel",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/async-channel-2.5.0/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/async-channel-2.5.0/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "async-executor",
+      "version": "1.14.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "c96bf972d85afc50bf5ab8fe2d54d1586b4e0b46c97c50a0c9e71e2f7bcd812a",
+      "declared_license": "Apache-2.0 OR MIT",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/smol-rs/async-executor",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/async-executor-1.14.0/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/async-executor-1.14.0/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "async-task",
+      "version": "4.7.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "8b75356056920673b02621b35afd0f7dda9306d03c79a30f5c56c44cf256e3de",
+      "declared_license": "Apache-2.0 OR MIT",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/smol-rs/async-task",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/async-task-4.7.1/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/async-task-4.7.1/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "atomic-waker",
+      "version": "1.1.2",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0",
+      "declared_license": "Apache-2.0 OR MIT",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/smol-rs/atomic-waker",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/atomic-waker-1.1.2/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/atomic-waker-1.1.2/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        },
+        {
+          "source_path": "LICENSE-THIRD-PARTY",
+          "path": "licenses/cargo/atomic-waker-1.1.2/LICENSE-THIRD-PARTY",
+          "sha256": "6226d0632e2e1a80c23597e964da9812ae193c535fe058154afb034e94167aa5",
+          "bytes": 1849
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "bevy",
+      "version": "0.19.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "4bfadbebfc6599aa59289b754ac30023959854304f3d393da2cf62bb3cd5df8f",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/bevyengine/bevy",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/bevy-0.19.1/LICENSE-APACHE",
+          "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+          "bytes": 10173
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/bevy-0.19.1/LICENSE-MIT",
+          "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+          "bytes": 1036
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "bevy_app",
+      "version": "0.19.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "5fd2aa472d43b4d081ef41d26300d17bd22cba6d68df2a223eb358782fa40bc6",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/bevyengine/bevy",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/bevy_app-0.19.1/LICENSE-APACHE",
+          "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+          "bytes": 10173
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/bevy_app-0.19.1/LICENSE-MIT",
+          "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+          "bytes": 1036
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "bevy_derive",
+      "version": "0.19.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "9d2a03321f3bd8016a041b3ae6afe83e636b3540fbc61d571bf069a21fda3231",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/bevyengine/bevy",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/bevy_derive-0.19.1/LICENSE-APACHE",
+          "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+          "bytes": 10173
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/bevy_derive-0.19.1/LICENSE-MIT",
+          "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+          "bytes": 1036
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "bevy_diagnostic",
+      "version": "0.19.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "07a3a736f15486650c4c6866798a78d625c7063c991a3cc7b13f1577d89c82ae",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/bevyengine/bevy",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/bevy_diagnostic-0.19.1/LICENSE-APACHE",
+          "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+          "bytes": 10173
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/bevy_diagnostic-0.19.1/LICENSE-MIT",
+          "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+          "bytes": 1036
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "bevy_ecs",
+      "version": "0.19.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "a350b2e4c2e47f7903d688affb8a723b31bca63af9789f1da88703f1ba04e354",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/bevyengine/bevy",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/bevy_ecs-0.19.1/LICENSE-APACHE",
+          "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+          "bytes": 10173
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/bevy_ecs-0.19.1/LICENSE-MIT",
+          "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+          "bytes": 1036
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "bevy_ecs_macro_logic",
+      "version": "0.19.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "76a10fef45a3e7dad717ba03e8b5f7ecdf3b3fd1cd1c5e425793525938e90d5f",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": null,
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/bevy_ecs_macro_logic-0.19.1/LICENSE-APACHE",
+          "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+          "bytes": 10173
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/bevy_ecs_macro_logic-0.19.1/LICENSE-MIT",
+          "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+          "bytes": 1036
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "bevy_ecs_macros",
+      "version": "0.19.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "3916d712264b6f3ec9c964ba10719450ea371e537e202a2ffcfa9f6a5e68169d",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": null,
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/bevy_ecs_macros-0.19.1/LICENSE-APACHE",
+          "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+          "bytes": 10173
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/bevy_ecs_macros-0.19.1/LICENSE-MIT",
+          "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+          "bytes": 1036
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "bevy_input",
+      "version": "0.19.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "b22e8b1119ff5c0b551cc11b672d25732c4e3eda72aceabc380595bd0e7bbe88",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/bevyengine/bevy",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/bevy_input-0.19.1/LICENSE-APACHE",
+          "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+          "bytes": 10173
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/bevy_input-0.19.1/LICENSE-MIT",
+          "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+          "bytes": 1036
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "bevy_internal",
+      "version": "0.19.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "4ba99ca2e501f14f4af3322d66ae41b5c5b6ebd3aac4d00cda47dea4c00290ae",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/bevyengine/bevy",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/bevy_internal-0.19.1/LICENSE-APACHE",
+          "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+          "bytes": 10173
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/bevy_internal-0.19.1/LICENSE-MIT",
+          "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+          "bytes": 1036
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "bevy_log",
+      "version": "0.19.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "e24488594832237c1e3abc823642823fa057b810c3a21e14e65bdbd15d1579d5",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/bevyengine/bevy",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/bevy_log-0.19.1/LICENSE-APACHE",
+          "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+          "bytes": 10173
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/bevy_log-0.19.1/LICENSE-MIT",
+          "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+          "bytes": 1036
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "bevy_macro_utils",
+      "version": "0.19.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "7164fe229422295bba15f1885048f34f4660db069aacb895208f996b0c7784fb",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/bevyengine/bevy",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/bevy_macro_utils-0.19.1/LICENSE-APACHE",
+          "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+          "bytes": 10173
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/bevy_macro_utils-0.19.1/LICENSE-MIT",
+          "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+          "bytes": 1036
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "bevy_math",
+      "version": "0.19.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "98ead494dcfaa9b4594eed7f09a27d868b7cc7fc9ebd655c5643322778f4a8a2",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/bevyengine/bevy",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/bevy_math-0.19.1/LICENSE-APACHE",
+          "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+          "bytes": 10173
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/bevy_math-0.19.1/LICENSE-MIT",
+          "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+          "bytes": 1036
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "bevy_platform",
+      "version": "0.19.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "fd610a417e7b4a3b9602cf11264d16cbbff8eabe689c5fed8be4e84c6a2680a3",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/bevyengine/bevy",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/bevy_platform-0.19.1/LICENSE-APACHE",
+          "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+          "bytes": 10173
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/bevy_platform-0.19.1/LICENSE-MIT",
+          "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+          "bytes": 1036
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "bevy_ptr",
+      "version": "0.19.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "1974de4b140f102fded747229ff4a61921acec07f02f0d1dcdadfe9ce177d0ff",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/bevyengine/bevy",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/bevy_ptr-0.19.1/LICENSE-APACHE",
+          "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+          "bytes": 10173
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/bevy_ptr-0.19.1/LICENSE-MIT",
+          "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+          "bytes": 1036
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "bevy_reflect",
+      "version": "0.19.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "9b76c3d056da3e299b84652ccf914c487b786857225d8ffbc8fc9509441a9e6b",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/bevyengine/bevy",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/bevy_reflect-0.19.1/LICENSE-APACHE",
+          "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+          "bytes": 10173
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/bevy_reflect-0.19.1/LICENSE-MIT",
+          "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+          "bytes": 1036
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "bevy_reflect_derive",
+      "version": "0.19.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "5fc5f820ee52afeca6d3bb83f15c1bf61ea6196c840a761a21a8bc266a3b166e",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/bevyengine/bevy",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/bevy_reflect_derive-0.19.1/LICENSE-APACHE",
+          "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+          "bytes": 10173
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/bevy_reflect_derive-0.19.1/LICENSE-MIT",
+          "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+          "bytes": 1036
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "bevy_tasks",
+      "version": "0.19.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "1f787d4ba7237b64b30bd2d690a8cbae1ba775e0eec326711c446654cb720e7c",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/bevyengine/bevy",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/bevy_tasks-0.19.1/LICENSE-APACHE",
+          "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+          "bytes": 10173
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/bevy_tasks-0.19.1/LICENSE-MIT",
+          "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+          "bytes": 1036
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "bevy_time",
+      "version": "0.19.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "f6896d83d7ed32a2f89da127b7aeddf01eb702e603897cf5ddac231480a1870e",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/bevyengine/bevy",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/bevy_time-0.19.1/LICENSE-APACHE",
+          "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+          "bytes": 10173
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/bevy_time-0.19.1/LICENSE-MIT",
+          "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+          "bytes": 1036
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "bevy_transform",
+      "version": "0.19.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "d94cc6065320ebeb58ae88a0863a4c4c2a642c6db698e283eb50be01a834ca5a",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/bevyengine/bevy",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/bevy_transform-0.19.1/LICENSE-APACHE",
+          "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+          "bytes": 10173
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/bevy_transform-0.19.1/LICENSE-MIT",
+          "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+          "bytes": 1036
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "bevy_utils",
+      "version": "0.19.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "de51fa7ea2e95d4c2d1278c5629285d59eec951cc60c992964c03f30910ef5a1",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/bevyengine/bevy",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/bevy_utils-0.19.1/LICENSE-APACHE",
+          "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+          "bytes": 10173
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/bevy_utils-0.19.1/LICENSE-MIT",
+          "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+          "bytes": 1036
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "bitflags",
+      "version": "2.13.2",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "3ded4057c258ba199e2d26386d3af3780957ecaee6c4ef4041c6b4b8b97c0b06",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/bitflags/bitflags",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/bitflags-2.13.2/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/bitflags-2.13.2/LICENSE-MIT",
+          "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+          "bytes": 1071
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "blake3",
+      "version": "1.8.7",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "6d9e454fc11f76977dc803893aff6304ed33d6a26efae8696573bea74baa27ae",
+      "declared_license": "CC0-1.0 OR Apache-2.0 OR Apache-2.0 WITH LLVM-exception",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/BLAKE3-team/BLAKE3",
+      "notice_files": [
+        {
+          "source_path": "LICENSE_A2",
+          "path": "licenses/cargo/blake3-1.8.7/LICENSE_A2",
+          "sha256": "00fcc7a934ddbc9ece2a7cc063ac788e284b703b1d705ccbba72d462aa97921e",
+          "bytes": 11361
+        },
+        {
+          "source_path": "LICENSE_A2LLVM",
+          "path": "licenses/cargo/blake3-1.8.7/LICENSE_A2LLVM",
+          "sha256": "a5695f57ea0c221e0e8b7d784ff774c35e88c3d3270353646a925880bb3492cc",
+          "bytes": 12267
+        },
+        {
+          "source_path": "LICENSE_CC0",
+          "path": "licenses/cargo/blake3-1.8.7/LICENSE_CC0",
+          "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+          "bytes": 7048
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "block-buffer",
+      "version": "0.12.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "cdd35008169921d80bc60d3d0ab416eecb028c4cd653352907921d95084790be",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/RustCrypto/utils",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/block-buffer-0.12.0/LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5",
+          "bytes": 10849
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/block-buffer-0.12.0/LICENSE-MIT",
+          "sha256": "98181e7249d0c01737645ec982499ce99a0f07eb8f7d625b8840d799d10dbc01",
+          "bytes": 1082
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "bumpalo",
+      "version": "3.20.3",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "72f5acc6cb2ba439de613abc23857ec3d78374d8ed5ac84e9d11336e87da8649",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/fitzgen/bumpalo",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/bumpalo-3.20.3/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/bumpalo-3.20.3/LICENSE-MIT",
+          "sha256": "65f94e99ddaf4f5d1782a6dae23f35d4293a9a01444a13135a6887017d353cee",
+          "bytes": 1059
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "bytemuck",
+      "version": "1.25.2",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "95832e849adfb21180ccb6826a99da14e5d266ae5c2e668e1602cf234f153797",
+      "declared_license": "Zlib OR Apache-2.0 OR MIT",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/Lokathor/bytemuck",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/bytemuck-1.25.2/LICENSE-APACHE",
+          "sha256": "e3ba223bb1423f0aad8c3dfce0fe3148db48926d41e6fbc3afbbf5ff9e1c89cb",
+          "bytes": 10398
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/bytemuck-1.25.2/LICENSE-MIT",
+          "sha256": "9df9ba60a11af705f2e451b53762686e615d86f76b169cf075c3237730dbd7e2",
+          "bytes": 1110
+        },
+        {
+          "source_path": "LICENSE-ZLIB",
+          "path": "licenses/cargo/bytemuck-1.25.2/LICENSE-ZLIB",
+          "sha256": "84b34dd7608f7fb9b17bd588a6bf392bf7de504e2716f024a77d89f1b145a151",
+          "bytes": 851
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "bytemuck_derive",
+      "version": "1.12.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "6a1f896587b6f2c069c73d2f0913e2d590c3990285cd2f0b6aa02b786b4c679c",
+      "declared_license": "Zlib OR Apache-2.0 OR MIT",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/Lokathor/bytemuck",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/bytemuck_derive-1.12.1/LICENSE-APACHE",
+          "sha256": "e3ba223bb1423f0aad8c3dfce0fe3148db48926d41e6fbc3afbbf5ff9e1c89cb",
+          "bytes": 10398
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/bytemuck_derive-1.12.1/LICENSE-MIT",
+          "sha256": "9df9ba60a11af705f2e451b53762686e615d86f76b169cf075c3237730dbd7e2",
+          "bytes": 1110
+        },
+        {
+          "source_path": "LICENSE-ZLIB",
+          "path": "licenses/cargo/bytemuck_derive-1.12.1/LICENSE-ZLIB",
+          "sha256": "84b34dd7608f7fb9b17bd588a6bf392bf7de504e2716f024a77d89f1b145a151",
+          "bytes": 851
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "cc",
+      "version": "1.6.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "f74872d07caf508b30a21f6836e7d7016a2eaf7d9ff4f48deaa58cd8a0407630",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/rust-lang/cc-rs",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/cc-1.6.0/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/cc-1.6.0/LICENSE-MIT",
+          "sha256": "378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397",
+          "bytes": 1057
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "cfg-if",
+      "version": "1.0.5",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "4e7648175b45a9a48536d676f68d918270699102aa8dab5496df06904c914600",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/rust-lang/cfg-if",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/cfg-if-1.0.5/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/cfg-if-1.0.5/LICENSE-MIT",
+          "sha256": "378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397",
+          "bytes": 1057
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "concurrent-queue",
+      "version": "2.5.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "4ca0197aee26d1ae37445ee532fefce43251d24cc7c166799f4d46817f1d3973",
+      "declared_license": "Apache-2.0 OR MIT",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/smol-rs/concurrent-queue",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/concurrent-queue-2.5.0/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/concurrent-queue-2.5.0/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "const-fnv1a-hash",
+      "version": "1.1.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "32b13ea120a812beba79e34316b3942a857c86ec1593cb34f27bb28272ce2cca",
+      "declared_license": "MIT",
+      "selected_license": "MIT",
+      "repository": "https://github.com/HindrikStegenga/const-fnv1a-hash",
+      "notice_files": [
+        {
+          "source_path": "LICENSE",
+          "path": "licenses/cargo/const-fnv1a-hash-1.1.0/LICENSE",
+          "sha256": "6597097f2ed0a4e4211501275ec991ed11e2412476e199b8a9f467b9933ffa46",
+          "bytes": 1073
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "const-oid",
+      "version": "0.10.2",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "a6ef517f0926dd24a1582492c791b6a4818a4d94e789a334894aa15b0d12f55c",
+      "declared_license": "Apache-2.0 OR MIT",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/RustCrypto/formats",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/const-oid-0.10.2/LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5",
+          "bytes": 10849
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/const-oid-0.10.2/LICENSE-MIT",
+          "sha256": "73b9dc2e79c7308998dd30296e073aefaefb944a68fb89aa412c23c0edcabcaa",
+          "bytes": 1082
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "constant_time_eq",
+      "version": "0.4.2",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "3d52eff69cd5e647efe296129160853a42795992097e8af39800e1060caeea9b",
+      "declared_license": "CC0-1.0 OR MIT-0 OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/cesarb/constant_time_eq",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/constant_time_eq-0.4.2/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "bytes": 9723
+        },
+        {
+          "source_path": "LICENSE-CC0",
+          "path": "licenses/cargo/constant_time_eq-0.4.2/LICENSE-CC0",
+          "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+          "bytes": 7048
+        },
+        {
+          "source_path": "LICENSE-MIT0",
+          "path": "licenses/cargo/constant_time_eq-0.4.2/LICENSE-MIT0",
+          "sha256": "9a3aeb3f63659c4c6302d315e1d98784d1e8559858a47ff9562e091bb922d28d",
+          "bytes": 858
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "convert_case",
+      "version": "0.10.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "633458d4ef8c78b72454de2d54fd6ab2e60f9e02be22f3c6104cdc8a4e0fceb9",
+      "declared_license": "MIT",
+      "selected_license": "MIT",
+      "repository": "https://github.com/rutrum/convert-case",
+      "notice_files": [
+        {
+          "source_path": "LICENSE",
+          "path": "licenses/cargo/convert_case-0.10.0/LICENSE",
+          "sha256": "aed7b1758e35afa0cd0fde059d61950747ca11cd0e5e169cb21c11608daed772",
+          "bytes": 1062
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "cpufeatures",
+      "version": "0.3.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "5ca28b0ae3115b884660db4118d803791fd6756b6e88f39c0f3f7859060d7566",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/RustCrypto/utils",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/cpufeatures-0.3.1/LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5",
+          "bytes": 10849
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/cpufeatures-0.3.1/LICENSE-MIT",
+          "sha256": "73b9dc2e79c7308998dd30296e073aefaefb944a68fb89aa412c23c0edcabcaa",
+          "bytes": 1082
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "crc32fast",
+      "version": "1.5.2",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "01a7799fd6b852db0e61728dde9a204c423b44d689dbd432522543614b490e78",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/srijs/rust-crc32fast",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/crc32fast-1.5.2/LICENSE-APACHE",
+          "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08",
+          "bytes": 11358
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/crc32fast-1.5.2/LICENSE-MIT",
+          "sha256": "61d383b05b87d78f94d2937e2580cce47226d17823c0430fbcad09596537efcf",
+          "bytes": 1097
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "crossbeam-channel",
+      "version": "0.5.17",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "98b0cc327b5bc766e7fda9c9260cc0fa81b43a8e240440422dff70788e3f9ef1",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/crossbeam-rs/crossbeam",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/crossbeam-channel-0.5.17/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/crossbeam-channel-0.5.17/LICENSE-MIT",
+          "sha256": "5734ed989dfca1f625b40281ee9f4530f91b2411ec01cb748223e7eb87e201ab",
+          "bytes": 1099
+        },
+        {
+          "source_path": "LICENSE-THIRD-PARTY",
+          "path": "licenses/cargo/crossbeam-channel-0.5.17/LICENSE-THIRD-PARTY",
+          "sha256": "b16db96b93b1d7cf7bea533f572091ec6bca3234fbe0a83038be772ff391a44c",
+          "bytes": 33447
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "crossbeam-queue",
+      "version": "0.3.14",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "03e8bd762f7479489c70ed6c768ddca99d7296857de437a68dcb2a94365b3fae",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/crossbeam-rs/crossbeam",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/crossbeam-queue-0.3.14/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/crossbeam-queue-0.3.14/LICENSE-MIT",
+          "sha256": "5734ed989dfca1f625b40281ee9f4530f91b2411ec01cb748223e7eb87e201ab",
+          "bytes": 1099
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "crossbeam-utils",
+      "version": "0.8.23",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "a31eee39dddec8330830986fcd7625edb5a24ec90ea038215273bbc3adb08ac6",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/crossbeam-rs/crossbeam",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/crossbeam-utils-0.8.23/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/crossbeam-utils-0.8.23/LICENSE-MIT",
+          "sha256": "5734ed989dfca1f625b40281ee9f4530f91b2411ec01cb748223e7eb87e201ab",
+          "bytes": 1099
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "crypto-common",
+      "version": "0.2.2",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "ce6e4c961d6cd6c9a86db418387425e8bdeaf05b3c8bc1411e6dca4c252f1453",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/RustCrypto/traits",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/crypto-common-0.2.2/LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5",
+          "bytes": 10849
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/crypto-common-0.2.2/LICENSE-MIT",
+          "sha256": "d2e7ec5355c96eeade56b09187ceb48a6a30299da3ce7531a66d3d11405ab963",
+          "bytes": 1070
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "ctrlc",
+      "version": "3.5.2",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "e0b1fab2ae45819af2d0731d60f2afe17227ebb1a1538a236da84c93e9a60162",
+      "declared_license": "MIT/Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/Detegr/rust-ctrlc.git",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/ctrlc-3.5.2/LICENSE-APACHE",
+          "sha256": "3481c338b8e2760b5a58e129339501c01e640f7597767f91d1a84e25e68fbdb4",
+          "bytes": 10836
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/ctrlc-3.5.2/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "derive_more",
+      "version": "2.1.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "d751e9e49156b02b44f9c1815bcb94b984cdcc4396ecc32521c739452808b134",
+      "declared_license": "MIT",
+      "selected_license": "MIT",
+      "repository": "https://github.com/JelteF/derive_more",
+      "notice_files": [
+        {
+          "source_path": "LICENSE",
+          "path": "licenses/cargo/derive_more-2.1.1/LICENSE",
+          "sha256": "8a35369f3ca263b3c62fbb5032947e53b6bfebc6c8a4d1bb982de1c069f6fba5",
+          "bytes": 1080
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "derive_more-impl",
+      "version": "2.1.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "799a97264921d8623a957f6c3b9011f3b5492f557bbb7a5a19b7fa6d06ba8dcb",
+      "declared_license": "MIT",
+      "selected_license": "MIT",
+      "repository": "https://github.com/JelteF/derive_more",
+      "notice_files": [
+        {
+          "source_path": "LICENSE",
+          "path": "licenses/cargo/derive_more-impl-2.1.1/LICENSE",
+          "sha256": "8a35369f3ca263b3c62fbb5032947e53b6bfebc6c8a4d1bb982de1c069f6fba5",
+          "bytes": 1080
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "digest",
+      "version": "0.11.3",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "f1dd6dbb5841937940781866fa1281a1ff7bd3bf827091440879f9994983d5c2",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/RustCrypto/traits",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/digest-0.11.3/LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5",
+          "bytes": 10849
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/digest-0.11.3/LICENSE-MIT",
+          "sha256": "af59cea35d7f5e2777a713b8d155d65efa2c339eb43f3c14e868c6ac8506edad",
+          "bytes": 1103
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "disqualified",
+      "version": "1.1.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "e90a5dd66beeca277ae954f8055b02a712792b6b6b43f2bc2f92b0b7d8291614",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/bevyengine/disqualified",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/disqualified-1.1.0/LICENSE-APACHE",
+          "sha256": "6d1d968fb225eca367cb7f0b8831ab012a35d92b547e945e17ef8e7b05c3e5cc",
+          "bytes": 10349
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/disqualified-1.1.0/LICENSE-MIT",
+          "sha256": "9eb6f69d48a1dd764e8a33f14a584f460d3cec653477c136a95dd6df9c249211",
+          "bytes": 1055
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "downcast-rs",
+      "version": "2.0.2",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "117240f60069e65410b3ae1bb213295bd828f707b5bec6596a1afc8793ce0cbc",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/marcianx/downcast-rs",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/downcast-rs-2.0.2/LICENSE-APACHE",
+          "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90",
+          "bytes": 10850
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/downcast-rs-2.0.2/LICENSE-MIT",
+          "sha256": "fb252fecf98d9af8f1d9201c5860319a514f5a8a24700dc84fc6ea287a7a4958",
+          "bytes": 1073
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "either",
+      "version": "1.18.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "252afb9ae5eaa683babdc6a068b3f5726eb19e05070c731f9b2a23a7c3e8ed34",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/rayon-rs/either",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/either-1.18.0/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/either-1.18.0/LICENSE-MIT",
+          "sha256": "7576269ea71f767b99297934c0b2367532690f8c4badc695edf8e04ab6a1e545",
+          "bytes": 1043
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "equivalent",
+      "version": "1.0.2",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f",
+      "declared_license": "Apache-2.0 OR MIT",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/indexmap-rs/equivalent",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/equivalent-1.0.2/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/equivalent-1.0.2/LICENSE-MIT",
+          "sha256": "7365cc8878a1d7ce155a58c4ca09c3d7a6be413efa5334a80ea842912b669349",
+          "bytes": 1049
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "erased-serde",
+      "version": "0.4.10",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "d2add8a07dd6a8d93ff627029c51de145e12686fbc36ecb298ac22e74cf02dec",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/dtolnay/erased-serde",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/erased-serde-0.4.10/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "bytes": 9723
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/erased-serde-0.4.10/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "event-listener",
+      "version": "5.4.2",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "5a23add41df1562121a9393cb065eab5146a1242410f23a644851e90cfd669d2",
+      "declared_license": "Apache-2.0 OR MIT",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/smol-rs/event-listener",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/event-listener-5.4.2/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/event-listener-5.4.2/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "event-listener-strategy",
+      "version": "0.5.4",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "8be9f3dfaaffdae2972880079a491a1a8bb7cbed0b8dd7a347f668b4150a3b93",
+      "declared_license": "Apache-2.0 OR MIT",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/smol-rs/event-listener-strategy",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/event-listener-strategy-0.5.4/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/event-listener-strategy-0.5.4/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "fastrand",
+      "version": "2.5.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "da7c62ceae207dd37ea5b845da6a0696c799f85e97da1ab5b7910be3c1c80223",
+      "declared_license": "Apache-2.0 OR MIT",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/smol-rs/fastrand",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/fastrand-2.5.0/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/fastrand-2.5.0/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "find-msvc-tools",
+      "version": "0.1.14",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "aedcfb3409746eddb02b9e19ebda1c3394f759a152e48ee875a0844d1b955484",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/rust-lang/cc-rs",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/find-msvc-tools-0.1.14/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/find-msvc-tools-0.1.14/LICENSE-MIT",
+          "sha256": "378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397",
+          "bytes": 1057
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "fixedbitset",
+      "version": "0.5.7",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "1d674e81391d1e1ab681a28d99df07927c6d4aa5b027d7da16ba32d1d21ecd99",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/petgraph/fixedbitset",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/fixedbitset-0.5.7/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/fixedbitset-0.5.7/LICENSE-MIT",
+          "sha256": "ce592787ff2321feab698a4c612237f4378cc658ebb1d472913e5802cc47afb4",
+          "bytes": 1048
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "flate2",
+      "version": "1.1.10",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "6e634e2e0ebac1ee034020da1ca582e17ffe4e0f5e985823721e168928136dcb",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/rust-lang/flate2-rs",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/flate2-1.1.10/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/flate2-1.1.10/LICENSE-MIT",
+          "sha256": "025436edff4cfcdde17a5811fdea78892d8482efd1abdec5a17872d07a4f2112",
+          "bytes": 1062
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "foldhash",
+      "version": "0.2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "77ce24cb58228fbb8aa041425bb1050850ac19177686ea6e0f41a70416f56fdb",
+      "declared_license": "Zlib",
+      "selected_license": "Zlib",
+      "repository": "https://github.com/orlp/foldhash",
+      "notice_files": [
+        {
+          "source_path": "LICENSE",
+          "path": "licenses/cargo/foldhash-0.2.0/LICENSE",
+          "sha256": "b1181a40b2a7b25cf66fd01481713bc1005df082c53ef73e851e55071b102744",
+          "bytes": 856
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "futures-core",
+      "version": "0.3.34",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "92d699e522242e69e3003b94ecc1f960f3a5e015aa7c5d7486e65ad01dd94f5e",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/rust-lang/futures-rs",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/futures-core-0.3.34/LICENSE-APACHE",
+          "sha256": "275c491d6d1160553c32fd6127061d7f9606c3ea25abfad6ca3f6ed088785427",
+          "bytes": 10874
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/futures-core-0.3.34/LICENSE-MIT",
+          "sha256": "6652c868f35dfe5e8ef636810a4e576b9d663f3a17fb0f5613ad73583e1b88fd",
+          "bytes": 1094
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "futures-io",
+      "version": "0.3.34",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "53c0fa8157de1303bfffdaa1cc2a673bfffb60102f76b0ef4441659124373fed",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/rust-lang/futures-rs",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/futures-io-0.3.34/LICENSE-APACHE",
+          "sha256": "275c491d6d1160553c32fd6127061d7f9606c3ea25abfad6ca3f6ed088785427",
+          "bytes": 10874
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/futures-io-0.3.34/LICENSE-MIT",
+          "sha256": "6652c868f35dfe5e8ef636810a4e576b9d663f3a17fb0f5613ad73583e1b88fd",
+          "bytes": 1094
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "futures-lite",
+      "version": "2.6.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "f78e10609fe0e0b3f4157ffab1876319b5b0db102a2c60dc4626306dc46b44ad",
+      "declared_license": "Apache-2.0 OR MIT",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/smol-rs/futures-lite",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/futures-lite-2.6.1/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/futures-lite-2.6.1/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        },
+        {
+          "source_path": "LICENSE-THIRD-PARTY",
+          "path": "licenses/cargo/futures-lite-2.6.1/LICENSE-THIRD-PARTY",
+          "sha256": "6226d0632e2e1a80c23597e964da9812ae193c535fe058154afb034e94167aa5",
+          "bytes": 1849
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "getrandom",
+      "version": "0.4.3",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "300e883d756b2e4ec94e02791f39b04b522276138852cfc41d9fb7e904106099",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/rust-random/getrandom",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/getrandom-0.4.3/LICENSE-APACHE",
+          "sha256": "aaff376532ea30a0cd5330b9502ad4a4c8bf769c539c87ffe78819d188a18ebf",
+          "bytes": 10849
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/getrandom-0.4.3/LICENSE-MIT",
+          "sha256": "523a42c25d245dde9c015f882cec7f4555aad883382a6cf19b4b7d9b2cd5419b",
+          "bytes": 1130
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "glam",
+      "version": "0.32.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "f70749695b063ecbf6b62949ccccde2e733ec3ecbbd71d467dca4e5c6c97cca0",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/bitshifter/glam-rs",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/glam-0.32.1/LICENSE-APACHE",
+          "sha256": "be33ddb87a30fd321ab100e2d922cba512e50ec7a63d8e62e5bfc0798dd4b585",
+          "bytes": 10834
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/glam-0.32.1/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "half",
+      "version": "2.7.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "6ea2d84b969582b4b1864a92dc5d27cd2b77b622a8d79306834f1be5ba20d84b",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/VoidStarKat/half-rs",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/half-2.7.1/LICENSE-APACHE",
+          "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+          "bytes": 10173
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/half-2.7.1/LICENSE-MIT",
+          "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+          "bytes": 1036
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "hashbrown",
+      "version": "0.16.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "841d1cc9bed7f9236f321df977030373f4a4163ae1a7dbfe1a51a2c1a51d9100",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/rust-lang/hashbrown",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/hashbrown-0.16.1/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/hashbrown-0.16.1/LICENSE-MIT",
+          "sha256": "ff8f68cb076caf8cefe7a6430d4ac086ce6af2ca8ce2c4e5a2004d4552ef52a2",
+          "bytes": 1060
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "hashbrown",
+      "version": "0.17.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "ed5909b6e89a2db4456e54cd5f673791d7eca6732202bbf2a9cc504fe2f9b84a",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/rust-lang/hashbrown",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/hashbrown-0.17.1/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/hashbrown-0.17.1/LICENSE-MIT",
+          "sha256": "ff8f68cb076caf8cefe7a6430d4ac086ce6af2ca8ce2c4e5a2004d4552ef52a2",
+          "bytes": 1060
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "hybrid-array",
+      "version": "0.4.12",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "9155a582abd142abc056962c29e3ce5ff2ad5469f4246b537ed42c5deba857da",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/RustCrypto/hybrid-array",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/hybrid-array-0.4.12/LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5",
+          "bytes": 10849
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/hybrid-array-0.4.12/LICENSE-MIT",
+          "sha256": "70c9d40f1f9545c3f133b8a67206e89da850f6468eed072281bb3701514114a9",
+          "bytes": 1082
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "indexmap",
+      "version": "2.14.2",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "cc4e190f5d26ca7051642629da2c52fc03bde85a03197c99408dcd291734c855",
+      "declared_license": "Apache-2.0 OR MIT",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/indexmap-rs/indexmap",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/indexmap-2.14.2/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/indexmap-2.14.2/LICENSE-MIT",
+          "sha256": "ecc269ef87fd38a1d98e30bfac9ba964a9dbd9315c3770fed98d4d7cb5882055",
+          "bytes": 1049
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "itertools",
+      "version": "0.14.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "2b192c782037fadd9cfa75548310488aabdbf3d2da73885b31bd0abd03351285",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/rust-itertools/itertools",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/itertools-0.14.0/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/itertools-0.14.0/LICENSE-MIT",
+          "sha256": "7576269ea71f767b99297934c0b2367532690f8c4badc695edf8e04ab6a1e545",
+          "bytes": 1043
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "itoa",
+      "version": "1.0.18",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/dtolnay/itoa",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/itoa-1.0.18/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "bytes": 9723
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/itoa-1.0.18/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "jobserver",
+      "version": "0.1.35",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "1c00acbd29eabad4a2392fa0e921c874934dbbf4194312ad20f04a0ed67a3cb3",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/rust-lang/jobserver-rs",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/jobserver-0.1.35/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/jobserver-0.1.35/LICENSE-MIT",
+          "sha256": "378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397",
+          "bytes": 1057
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "lazy_static",
+      "version": "1.5.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "20870f649af7073d53e38067b2a84312175d56ea15217e1b15bc83506ec50afb",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/rust-lang-nursery/lazy-static.rs",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/lazy_static-1.5.1/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/lazy_static-1.5.1/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "libm",
+      "version": "0.2.16",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "b6d2cec3eae94f9f509c767b45932f1ada8350c4bdb85af2fcab4a3c14807981",
+      "declared_license": "MIT",
+      "selected_license": "MIT",
+      "repository": "https://github.com/rust-lang/compiler-builtins",
+      "notice_files": [
+        {
+          "source_path": "LICENSE.txt",
+          "path": "licenses/cargo/libm-0.2.16/LICENSE.txt",
+          "sha256": "3823dda7cf046602f4b4e77ec8e227863dc4736037cc85bb33d9f19febe16bb7",
+          "bytes": 14088
+        }
+      ],
+      "embedded_notice_comments": [
+        {
+          "path": "licenses/cargo/libm-0.2.16/header-notices/0c3d0381d2cd647be68590170490be5f624c962d9f95eb698489e578c1de8f05.txt",
+          "sha256": "0c3d0381d2cd647be68590170490be5f624c962d9f95eb698489e578c1de8f05",
+          "bytes": 379,
+          "sources": [
+            {
+              "path": "src/math/acosf.rs",
+              "line": 5
+            },
+            {
+              "path": "src/math/asinf.rs",
+              "line": 5
+            },
+            {
+              "path": "src/math/atan.rs",
+              "line": 2
+            },
+            {
+              "path": "src/math/atan2f.rs",
+              "line": 5
+            },
+            {
+              "path": "src/math/atanf.rs",
+              "line": 5
+            },
+            {
+              "path": "src/math/cbrtf.rs",
+              "line": 6
+            },
+            {
+              "path": "src/math/cosf.rs",
+              "line": 6
+            },
+            {
+              "path": "src/math/erf.rs",
+              "line": 3
+            },
+            {
+              "path": "src/math/erff.rs",
+              "line": 5
+            },
+            {
+              "path": "src/math/expf.rs",
+              "line": 5
+            },
+            {
+              "path": "src/math/expm1.rs",
+              "line": 2
+            },
+            {
+              "path": "src/math/expm1f.rs",
+              "line": 5
+            },
+            {
+              "path": "src/math/j0f.rs",
+              "line": 5
+            },
+            {
+              "path": "src/math/j1f.rs",
+              "line": 5
+            },
+            {
+              "path": "src/math/jnf.rs",
+              "line": 5
+            },
+            {
+              "path": "src/math/k_cosf.rs",
+              "line": 6
+            },
+            {
+              "path": "src/math/k_sinf.rs",
+              "line": 6
+            },
+            {
+              "path": "src/math/lgammaf_r.rs",
+              "line": 5
+            },
+            {
+              "path": "src/math/log10f.rs",
+              "line": 2
+            },
+            {
+              "path": "src/math/log1p.rs",
+              "line": 2
+            },
+            {
+              "path": "src/math/log1pf.rs",
+              "line": 2
+            },
+            {
+              "path": "src/math/log2f.rs",
+              "line": 2
+            },
+            {
+              "path": "src/math/logf.rs",
+              "line": 5
+            },
+            {
+              "path": "src/math/powf.rs",
+              "line": 5
+            },
+            {
+              "path": "src/math/rem_pio2f.rs",
+              "line": 6
+            },
+            {
+              "path": "src/math/sincos.rs",
+              "line": 2
+            },
+            {
+              "path": "src/math/sincosf.rs",
+              "line": 6
+            },
+            {
+              "path": "src/math/sinf.rs",
+              "line": 6
+            },
+            {
+              "path": "src/math/tanf.rs",
+              "line": 6
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/libm-0.2.16/header-notices/11f476f899dacfef801a097465ad0755ad4546afe03b02c9a17aa38e228344e1.txt",
+          "sha256": "11f476f899dacfef801a097465ad0755ad4546afe03b02c9a17aa38e228344e1",
+          "bytes": 383,
+          "sources": [
+            {
+              "path": "src/math/atan2.rs",
+              "line": 2
+            },
+            {
+              "path": "src/math/lgamma_r.rs",
+              "line": 2
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/libm-0.2.16/header-notices/15e78071c8347a689c48ec92bbdd5eba7bd8dc74f86ee3e7ad31d34b24fefe83.txt",
+          "sha256": "15e78071c8347a689c48ec92bbdd5eba7bd8dc74f86ee3e7ad31d34b24fefe83",
+          "bytes": 320,
+          "sources": [
+            {
+              "path": "src/math/exp.rs",
+              "line": 2
+            },
+            {
+              "path": "src/math/pow.rs",
+              "line": 2
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/libm-0.2.16/header-notices/2107e3e5de387fabe762a28c869386ba8fb01520aa34044c7e48bfe6a12c1683.txt",
+          "sha256": "2107e3e5de387fabe762a28c869386ba8fb01520aa34044c7e48bfe6a12c1683",
+          "bytes": 1887,
+          "sources": [
+            {
+              "path": "src/math/k_tan.rs",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/libm-0.2.16/header-notices/225167f203ade8fe5b0714aed4abf358d23fb9dd385a63580ba216ac88a7b799.txt",
+          "sha256": "225167f203ade8fe5b0714aed4abf358d23fb9dd385a63580ba216ac88a7b799",
+          "bytes": 137,
+          "sources": [
+            {
+              "path": "src/math/cbrt.rs",
+              "line": 2
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/libm-0.2.16/header-notices/370d3d0ecd600731cb6b225e4a037d18d9ab48fac6a463563f088227c2fd0964.txt",
+          "sha256": "370d3d0ecd600731cb6b225e4a037d18d9ab48fac6a463563f088227c2fd0964",
+          "bytes": 467,
+          "sources": [
+            {
+              "path": "src/math/rem_pio2.rs",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/libm-0.2.16/header-notices/3c85590cea896eaab7cb8a8f4474902c6b44fb0d67ee569737cac1942f9933a9.txt",
+          "sha256": "3c85590cea896eaab7cb8a8f4474902c6b44fb0d67ee569737cac1942f9933a9",
+          "bytes": 427,
+          "sources": [
+            {
+              "path": "src/math/tan.rs",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/libm-0.2.16/header-notices/50dc54cee8b36780c535e15a6d30d75226fe2bdb81d450e375118e42bd3bc659.txt",
+          "sha256": "50dc54cee8b36780c535e15a6d30d75226fe2bdb81d450e375118e42bd3bc659",
+          "bytes": 425,
+          "sources": [
+            {
+              "path": "src/math/k_cos.rs",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/libm-0.2.16/header-notices/5a534ed1f9266ed799e9f2e3f830f15411762021829da121b23df5edc498c6b6.txt",
+          "sha256": "5a534ed1f9266ed799e9f2e3f830f15411762021829da121b23df5edc498c6b6",
+          "bytes": 314,
+          "sources": [
+            {
+              "path": "src/math/k_tanf.rs",
+              "line": 2
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/libm-0.2.16/header-notices/74344ebf347f27ca446e00f1c1921f705546f4b20e0fb31c183cd2c8464b1bc5.txt",
+          "sha256": "74344ebf347f27ca446e00f1c1921f705546f4b20e0fb31c183cd2c8464b1bc5",
+          "bytes": 380,
+          "sources": [
+            {
+              "path": "src/math/acos.rs",
+              "line": 2
+            },
+            {
+              "path": "src/math/asin.rs",
+              "line": 2
+            },
+            {
+              "path": "src/math/j0.rs",
+              "line": 2
+            },
+            {
+              "path": "src/math/j1.rs",
+              "line": 2
+            },
+            {
+              "path": "src/math/jn.rs",
+              "line": 2
+            },
+            {
+              "path": "src/math/log.rs",
+              "line": 2
+            },
+            {
+              "path": "src/math/log10.rs",
+              "line": 2
+            },
+            {
+              "path": "src/math/log2.rs",
+              "line": 2
+            },
+            {
+              "path": "src/math/rem_pio2_large.rs",
+              "line": 3
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/libm-0.2.16/header-notices/9b9ce313edd1fd1cdd9e16ec7ffe26e9b4ea644d4da334618edef2ef79d180fd.txt",
+          "sha256": "9b9ce313edd1fd1cdd9e16ec7ffe26e9b4ea644d4da334618edef2ef79d180fd",
+          "bytes": 1419,
+          "sources": [
+            {
+              "path": "src/math/exp2f.rs",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/libm-0.2.16/header-notices/a04bfa8426560b34a6dc330fb3f55ebc8def1092f0cf2faf86093bcd5d7c82aa.txt",
+          "sha256": "a04bfa8426560b34a6dc330fb3f55ebc8def1092f0cf2faf86093bcd5d7c82aa",
+          "bytes": 425,
+          "sources": [
+            {
+              "path": "src/math/k_sin.rs",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/libm-0.2.16/header-notices/a997449a08324894b63f1159f979a44ef52a95bd4a0d2374c76e2e1b87e50963.txt",
+          "sha256": "a997449a08324894b63f1159f979a44ef52a95bd4a0d2374c76e2e1b87e50963",
+          "bytes": 48,
+          "sources": [
+            {
+              "path": "src/math/generic/fmax.rs",
+              "line": 1
+            },
+            {
+              "path": "src/math/generic/fmaximum.rs",
+              "line": 1
+            },
+            {
+              "path": "src/math/generic/fmaximum_num.rs",
+              "line": 1
+            },
+            {
+              "path": "src/math/generic/fmin.rs",
+              "line": 1
+            },
+            {
+              "path": "src/math/generic/fminimum.rs",
+              "line": 1
+            },
+            {
+              "path": "src/math/generic/fminimum_num.rs",
+              "line": 1
+            },
+            {
+              "path": "src/math/generic/fmod.rs",
+              "line": 1
+            },
+            {
+              "path": "src/math/support/int_traits/narrowing_div.rs",
+              "line": 1
+            },
+            {
+              "path": "src/math/support/modular.rs",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/libm-0.2.16/header-notices/aa31720e0a22f01d45849f4f5badc7a75fbabc8073b08df329baa9305cf2c682.txt",
+          "sha256": "aa31720e0a22f01d45849f4f5badc7a75fbabc8073b08df329baa9305cf2c682",
+          "bytes": 427,
+          "sources": [
+            {
+              "path": "src/math/sin.rs",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/libm-0.2.16/header-notices/b1e0b197ab096657b36a818578674de4e4af0030827bf8a6e5b4405fafda000d.txt",
+          "sha256": "b1e0b197ab096657b36a818578674de4e4af0030827bf8a6e5b4405fafda000d",
+          "bytes": 67,
+          "sources": [
+            {
+              "path": "src/math/generic/trunc.rs",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/libm-0.2.16/header-notices/b24dea27b63aa91f44ce04d53d6e84d8b7a76faef78a2224ed2a751a6aa6c0bd.txt",
+          "sha256": "b24dea27b63aa91f44ce04d53d6e84d8b7a76faef78a2224ed2a751a6aa6c0bd",
+          "bytes": 1421,
+          "sources": [
+            {
+              "path": "src/math/exp2.rs",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/libm-0.2.16/header-notices/cc7ddd4aec15d176fc40570979991b6bbe00d3ec3d9bbf7c5dd8bfe0e04278b9.txt",
+          "sha256": "cc7ddd4aec15d176fc40570979991b6bbe00d3ec3d9bbf7c5dd8bfe0e04278b9",
+          "bytes": 67,
+          "sources": [
+            {
+              "path": "src/math/generic/floor.rs",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/libm-0.2.16/header-notices/f53a3c97c9531345379adbe79db501062242feefd51de57162178585ea62788f.txt",
+          "sha256": "f53a3c97c9531345379adbe79db501062242feefd51de57162178585ea62788f",
+          "bytes": 427,
+          "sources": [
+            {
+              "path": "src/math/cos.rs",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/libm-0.2.16/header-notices/f73e293daa12abe52dd73882816fe4002b4f6e69065892abd57881180fb26bf2.txt",
+          "sha256": "f73e293daa12abe52dd73882816fe4002b4f6e69065892abd57881180fb26bf2",
+          "bytes": 34,
+          "sources": [
+            {
+              "path": "src/math/cbrt.rs",
+              "line": 1
+            },
+            {
+              "path": "src/math/fma.rs",
+              "line": 1
+            },
+            {
+              "path": "src/math/generic/ceil.rs",
+              "line": 1
+            },
+            {
+              "path": "src/math/generic/fma.rs",
+              "line": 1
+            },
+            {
+              "path": "src/math/generic/rint.rs",
+              "line": 1
+            },
+            {
+              "path": "src/math/generic/sqrt.rs",
+              "line": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "log",
+      "version": "0.4.34",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "f9f8bd3e56ce4dfc153cf470fffbfa98c7620958b312ca5c3a4b8d5181fd13c6",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/rust-lang/log",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/log-0.4.34/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/log-0.4.34/LICENSE-MIT",
+          "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+          "bytes": 1071
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "matchers",
+      "version": "0.2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "d1525a2a28c7f4fa0fc98bb91ae755d1e2d1505079e05539e35bc876b5d65ae9",
+      "declared_license": "MIT",
+      "selected_license": "MIT",
+      "repository": "https://github.com/hawkw/matchers",
+      "notice_files": [
+        {
+          "source_path": "LICENSE",
+          "path": "licenses/cargo/matchers-0.2.0/LICENSE",
+          "sha256": "a47129d738752a6ae52247fea645b42cb320d19e9327f1eb2d1a7f99d9455ad3",
+          "bytes": 1057
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "memchr",
+      "version": "2.8.3",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98",
+      "declared_license": "Unlicense OR MIT",
+      "selected_license": "MIT",
+      "repository": "https://github.com/BurntSushi/memchr",
+      "notice_files": [
+        {
+          "source_path": "COPYING",
+          "path": "licenses/cargo/memchr-2.8.3/COPYING",
+          "sha256": "01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f",
+          "bytes": 126
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/memchr-2.8.3/LICENSE-MIT",
+          "sha256": "0f96a83840e146e43c0ec96a22ec1f392e0680e6c1226e6f3ba87e0740af850f",
+          "bytes": 1081
+        },
+        {
+          "source_path": "UNLICENSE",
+          "path": "licenses/cargo/memchr-2.8.3/UNLICENSE",
+          "sha256": "7e12e5df4bae12cb21581ba157ced20e1986a0508dd10d0e8a4ab9a4cf94e85c",
+          "bytes": 1211
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "miniz_oxide",
+      "version": "0.9.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "b63fbc4a50860e98e7b2aa7804ded1db5cbc3aff9193adaff57a6931bf7c4b4c",
+      "declared_license": "MIT OR Zlib OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/Frommi/miniz_oxide/tree/master/miniz_oxide",
+      "notice_files": [
+        {
+          "source_path": "LICENSE",
+          "path": "licenses/cargo/miniz_oxide-0.9.1/LICENSE",
+          "sha256": "4108245a1f2df9d4e94df8abed5b4ba0759bb2f9b40a6b939f1be141077ae50b",
+          "bytes": 1213
+        },
+        {
+          "source_path": "LICENSE-APACHE.md",
+          "path": "licenses/cargo/miniz_oxide-0.9.1/LICENSE-APACHE.md",
+          "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+          "bytes": 10174
+        },
+        {
+          "source_path": "LICENSE-MIT.md",
+          "path": "licenses/cargo/miniz_oxide-0.9.1/LICENSE-MIT.md",
+          "sha256": "799e9ca9d179295ef372f25d3769cdda7d25bb2668add6a6a1e22d1e4c678b8d",
+          "bytes": 1212
+        },
+        {
+          "source_path": "LICENSE-ZLIB.md",
+          "path": "licenses/cargo/miniz_oxide-0.9.1/LICENSE-ZLIB.md",
+          "sha256": "0a54e647fe54104658b5e563c04c6f9edf251710e47bce692e0bd990a4ddaa39",
+          "bytes": 984
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "nonmax",
+      "version": "0.5.5",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "610a5acd306ec67f907abe5567859a3c693fb9886eb1f012ab8f2a47bef3db51",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/LPGhatguy/nonmax",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/nonmax-0.5.5/LICENSE-APACHE",
+          "sha256": "c8b25bb75fd899b6f16794dc8173400f3221a204afb79cd39c3659c955029381",
+          "bytes": 11358
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/nonmax-0.5.5/LICENSE-MIT",
+          "sha256": "a7a9cf0c93716fc4861165716257701f7363402abfe748bdac1a802cfcd2fa49",
+          "bytes": 1060
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "nu-ansi-term",
+      "version": "0.50.3",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "7957b9740744892f114936ab4a57b3f487491bbeafaf8083688b16841a4240e5",
+      "declared_license": "MIT",
+      "selected_license": "MIT",
+      "repository": "https://github.com/nushell/nu-ansi-term",
+      "notice_files": [
+        {
+          "source_path": "LICENSE",
+          "path": "licenses/cargo/nu-ansi-term-0.50.3/LICENSE",
+          "sha256": "284465860407420254e39be4e1bdcaaf2e7f2d18e06f9bab75bc75341a5d8501",
+          "bytes": 1157
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "once_cell",
+      "version": "1.21.4",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/matklad/once_cell",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/once_cell-1.21.4/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/once_cell-1.21.4/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "parking",
+      "version": "2.2.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "f38d5652c16fde515bb1ecef450ab0f6a219d619a7274976324d5e377f7dceba",
+      "declared_license": "Apache-2.0 OR MIT",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/smol-rs/parking",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/parking-2.2.1/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/parking-2.2.1/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        },
+        {
+          "source_path": "LICENSE-THIRD-PARTY",
+          "path": "licenses/cargo/parking-2.2.1/LICENSE-THIRD-PARTY",
+          "sha256": "9a6d7a3c1b8edcc706c4b6c37f8dae9a77f02c7f9051df603f975db136b55419",
+          "bytes": 451
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "pin-project-lite",
+      "version": "0.2.17",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd",
+      "declared_license": "Apache-2.0 OR MIT",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/taiki-e/pin-project-lite",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/pin-project-lite-0.2.17/LICENSE-APACHE",
+          "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+          "bytes": 10174
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/pin-project-lite-0.2.17/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "pkg-config",
+      "version": "0.3.34",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "f6b464fbc74e149a392436b17d523f769e057cb6877f6a5c4618bc6f11800548",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/rust-lang/pkg-config-rs",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/pkg-config-0.3.34/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/pkg-config-0.3.34/LICENSE-MIT",
+          "sha256": "378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397",
+          "bytes": 1057
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "proc-macro2",
+      "version": "1.0.107",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "985e7ec9bb745e6ce6535b544d84d6cd6f7ad8bd711c398938ae983b91a766d9",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/dtolnay/proc-macro2",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/proc-macro2-1.0.107/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "bytes": 9723
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/proc-macro2-1.0.107/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "quote",
+      "version": "1.0.47",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "1fbf4db142a473a8d80c26bbf18454ed458bf8d26c8219c331daecfdbd079001",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/dtolnay/quote",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/quote-1.0.47/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "bytes": 9723
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/quote-1.0.47/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "regex-automata",
+      "version": "0.4.18",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "ad8553b9b26413251cbf30e620595c7a41b3887f03da04579c0e6b0d6a06b4b2",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/rust-lang/regex",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/regex-automata-0.4.18/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/regex-automata-0.4.18/LICENSE-MIT",
+          "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+          "bytes": 1071
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "regex-syntax",
+      "version": "0.8.11",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "d6f6ff9a378485b298a5286656da665ba74413d36db0979633275d2e708145d4",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/rust-lang/regex",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/regex-syntax-0.8.11/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/regex-syntax-0.8.11/LICENSE-MIT",
+          "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+          "bytes": 1071
+        },
+        {
+          "source_path": "src/unicode_tables/LICENSE-UNICODE",
+          "path": "licenses/cargo/regex-syntax-0.8.11/src/unicode_tables/LICENSE-UNICODE",
+          "sha256": "74db5baf44a41b1000312c673544b3374e4198af5605c7f9080a402cec42cfa3",
+          "bytes": 2847
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "rustc_version",
+      "version": "0.4.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "cfcb3a22ef46e85b45de6ee7e79d063319ebb6594faafcf1c225ea92ab6e9b92",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/djc/rustc-version-rs",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/rustc_version-0.4.1/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/rustc_version-0.4.1/LICENSE-MIT",
+          "sha256": "c9a75f18b9ab2927829a208fc6aa2cf4e63b8420887ba29cdb265d6619ae82d5",
+          "bytes": 1071
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "semver",
+      "version": "1.0.28",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "8a7852d02fc848982e0c167ef163aaff9cd91dc640ba85e263cb1ce46fae51cd",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/dtolnay/semver",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/semver-1.0.28/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "bytes": 9723
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/semver-1.0.28/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "serde",
+      "version": "1.0.229",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "4148590afebada386688f18773da617792bf2ef03ffc1e4cbd2b1d45b023e0ba",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/serde-rs/serde",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/serde-1.0.229/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "bytes": 9723
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/serde-1.0.229/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "serde_core",
+      "version": "1.0.229",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "67dca2c9c51e58a4791a4b1ed58308b39c64224d349a935ab5039aa360942a48",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/serde-rs/serde",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/serde_core-1.0.229/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "bytes": 9723
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/serde_core-1.0.229/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "serde_derive",
+      "version": "1.0.229",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "e7a5d71263a5a7d47b41f6b3f06ba276f10cc18b0931f1799f710578e2309348",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/serde-rs/serde",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/serde_derive-1.0.229/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "bytes": 9723
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/serde_derive-1.0.229/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "serde_json",
+      "version": "1.0.151",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "c841b55ecdae098c80dcae9cf767f6f8a0c2cdb3416bbef72181df4d0fe73f14",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/serde-rs/json",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/serde_json-1.0.151/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "bytes": 9723
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/serde_json-1.0.151/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "sha2",
+      "version": "0.11.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "446ba717509524cb3f22f17ecc096f10f4822d76ab5c0b9822c5f9c284e825f4",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/RustCrypto/hashes",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/sha2-0.11.0/LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5",
+          "bytes": 10849
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/sha2-0.11.0/LICENSE-MIT",
+          "sha256": "831e0f43ad0bf014c1c4fec5767aae470434c1d66d6e671be2d823e729063e25",
+          "bytes": 1196
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "sharded-slab",
+      "version": "0.1.7",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "f40ca3c46823713e0d4209592e8d6e826aa57e928f09752619fc696c499637f6",
+      "declared_license": "MIT",
+      "selected_license": "MIT",
+      "repository": "https://github.com/hawkw/sharded-slab",
+      "notice_files": [
+        {
+          "source_path": "LICENSE",
+          "path": "licenses/cargo/sharded-slab-0.1.7/LICENSE",
+          "sha256": "eafbfa606bc005ed7fd2f623d65af17ffe4ef7c017221ac14405bf4140771ea9",
+          "bytes": 1057
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "shlex",
+      "version": "2.0.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "f8fadd59c855ef2080decdef8ff161eb6661b86933c9d82e5ba29dc602a55aba",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/comex/rust-shlex",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/shlex-2.0.1/LICENSE-APACHE",
+          "sha256": "553fffcd9b1cb158bc3e9edc35da85ca5c3b3d7d2e61c883ebcfa8a65814b583",
+          "bytes": 566
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/shlex-2.0.1/LICENSE-MIT",
+          "sha256": "4455bf75a91154108304cb283e0fea9948c14f13e20d60887cf2552449dea3b1",
+          "bytes": 1092
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "simd-adler32",
+      "version": "0.3.10",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "3a219298ac11a56ea9a6d2120044824d6f01aeb034955e7af7bc16858527deea",
+      "declared_license": "MIT",
+      "selected_license": "MIT",
+      "repository": "https://github.com/mcountryman/simd-adler32",
+      "notice_files": [
+        {
+          "source_path": "LICENSE.md",
+          "path": "licenses/cargo/simd-adler32-0.3.10/LICENSE.md",
+          "sha256": "42a35170233e83e18856792e748de4c1ce4a63b2afce9a370c89ef3fe23f9f2d",
+          "bytes": 1078
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "slab",
+      "version": "0.4.12",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "0c790de23124f9ab44544d7ac05d60440adc586479ce501c1d6d7da3cd8c9cf5",
+      "declared_license": "MIT",
+      "selected_license": "MIT",
+      "repository": "https://github.com/tokio-rs/slab",
+      "notice_files": [
+        {
+          "source_path": "LICENSE",
+          "path": "licenses/cargo/slab-0.4.12/LICENSE",
+          "sha256": "8ce0830173fdac609dfb4ea603fdc002c2f4af0dc9b1a005653f5da9cf534b18",
+          "bytes": 1055
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "slotmap",
+      "version": "1.1.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "bdd58c3c93c3d278ca835519292445cb4b0d4dc59ccfdf7ceadaab3f8aeb4038",
+      "declared_license": "Zlib",
+      "selected_license": "Zlib",
+      "repository": "https://github.com/orlp/slotmap",
+      "notice_files": [
+        {
+          "source_path": "LICENSE",
+          "path": "licenses/cargo/slotmap-1.1.1/LICENSE",
+          "sha256": "6cec81441b2ab2b5090954c1fb5d0bcca81b86487b5849061fa8952d20ef67d4",
+          "bytes": 884
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "smallvec",
+      "version": "1.16.2",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "f9395f0f0eee849a9b707b2f06bb92a6a422090e2123bb2ef8e87a0e61892a8e",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/servo/rust-smallvec",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/smallvec-1.16.2/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/smallvec-1.16.2/LICENSE-MIT",
+          "sha256": "0b28172679e0009b655da42797c03fd163a3379d5cfa67ba1f1655e974a2a1a9",
+          "bytes": 1072
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "socket2",
+      "version": "0.6.5",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "c3d1e2c7f27f8d4cb10542a02c49005dbd6e93095799d6f3be745fae9f8fedd4",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/rust-lang/socket2",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/socket2-0.6.5/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/socket2-0.6.5/LICENSE-MIT",
+          "sha256": "378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397",
+          "bytes": 1057
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "spin",
+      "version": "0.10.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "023a211cb3138dbc438680b32560ad89f699977624c9f8dbb95a47d5b4c07dd3",
+      "declared_license": "MIT",
+      "selected_license": "MIT",
+      "repository": "https://github.com/mvdnes/spin-rs.git",
+      "notice_files": [
+        {
+          "source_path": "LICENSE",
+          "path": "licenses/cargo/spin-0.10.1/LICENSE",
+          "sha256": "6ac8711fb340c62ce0a4ecd463342d3fa0e8e70de697c863a2e1c0c53006003c",
+          "bytes": 1084
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "syn",
+      "version": "2.0.119",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "872831b642d1a07999a962a351ed35b955ea2cfc8f3862091e2a240a84f17297",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/dtolnay/syn",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/syn-2.0.119/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "bytes": 9723
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/syn-2.0.119/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "syn",
+      "version": "3.0.6",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "8593e8e72159ed2257d083c7a454a85cbf854f37a0966d8d483aff8c8a3ebcee",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/dtolnay/syn",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/syn-3.0.6/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "bytes": 9723
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/syn-3.0.6/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "thiserror",
+      "version": "2.0.21",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "09e52cb86a36cede5cb101bf8908837b3e4c6e5e59fe7fd85c23fb56200d189e",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/dtolnay/thiserror",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/thiserror-2.0.21/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "bytes": 9723
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/thiserror-2.0.21/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "thiserror-impl",
+      "version": "2.0.21",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "fe5197923287db20a58125f0bc85c062f7f2c892de97b18c356f9efb14b28524",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/dtolnay/thiserror",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/thiserror-impl-2.0.21/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "bytes": 9723
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/thiserror-impl-2.0.21/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "thread_local",
+      "version": "1.1.10",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "1ad99c4c6d32803332c548b1af0540b357b3f5fc0be8f6c6bfe8b2e6ae784070",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/Amanieu/thread_local-rs",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/thread_local-1.1.10/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/thread_local-1.1.10/LICENSE-MIT",
+          "sha256": "c9a75f18b9ab2927829a208fc6aa2cf4e63b8420887ba29cdb265d6619ae82d5",
+          "bytes": 1071
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "toml_datetime",
+      "version": "1.1.1+spec-1.1.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "3165f65f62e28e0115a00b2ebdd37eb6f3b641855f9d636d3cd4103767159ad7",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/toml-rs/toml",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/toml_datetime-1.1.1+spec-1.1.0/LICENSE-APACHE",
+          "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08",
+          "bytes": 11358
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/toml_datetime-1.1.1+spec-1.1.0/LICENSE-MIT",
+          "sha256": "6efb0476a1cc085077ed49357026d8c173bf33017278ef440f222fb9cbcb66e6",
+          "bytes": 1062
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "toml_edit",
+      "version": "0.25.15+spec-1.1.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "1340ea94a5856333492c9064b02c778b191dd2c853778d9609debdcdfea3a614",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/toml-rs/toml",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/toml_edit-0.25.15+spec-1.1.0/LICENSE-APACHE",
+          "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08",
+          "bytes": 11358
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/toml_edit-0.25.15+spec-1.1.0/LICENSE-MIT",
+          "sha256": "6efb0476a1cc085077ed49357026d8c173bf33017278ef440f222fb9cbcb66e6",
+          "bytes": 1062
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "toml_parser",
+      "version": "1.1.3+spec-1.1.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "1d38ac1cf9b95face32296c0a3ede1fdc270627c9d9c02a7274dd6d960dc4d56",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/toml-rs/toml",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/toml_parser-1.1.3+spec-1.1.0/LICENSE-APACHE",
+          "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08",
+          "bytes": 11358
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/toml_parser-1.1.3+spec-1.1.0/LICENSE-MIT",
+          "sha256": "6efb0476a1cc085077ed49357026d8c173bf33017278ef440f222fb9cbcb66e6",
+          "bytes": 1062
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "tracing",
+      "version": "0.1.44",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "63e71662fa4b2a2c3a26f570f037eb95bb1f85397f3cd8076caed2f026a6d100",
+      "declared_license": "MIT",
+      "selected_license": "MIT",
+      "repository": "https://github.com/tokio-rs/tracing",
+      "notice_files": [
+        {
+          "source_path": "LICENSE",
+          "path": "licenses/cargo/tracing-0.1.44/LICENSE",
+          "sha256": "898b1ae9821e98daf8964c8d6c7f61641f5f5aa78ad500020771c0939ee0dea1",
+          "bytes": 1062
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "tracing-core",
+      "version": "0.1.36",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "db97caf9d906fbde555dd62fa95ddba9eecfd14cb388e4f491a66d74cd5fb79a",
+      "declared_license": "MIT",
+      "selected_license": "MIT",
+      "repository": "https://github.com/tokio-rs/tracing",
+      "notice_files": [
+        {
+          "source_path": "LICENSE",
+          "path": "licenses/cargo/tracing-core-0.1.36/LICENSE",
+          "sha256": "898b1ae9821e98daf8964c8d6c7f61641f5f5aa78ad500020771c0939ee0dea1",
+          "bytes": 1062
+        },
+        {
+          "source_path": "src/spin/LICENSE",
+          "path": "licenses/cargo/tracing-core-0.1.36/src/spin/LICENSE",
+          "sha256": "58545fed1565e42d687aecec6897d35c6d37ccb71479a137c0deb2203e125c79",
+          "bytes": 1085
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "tracing-log",
+      "version": "0.2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "ee855f1f400bd0e5c02d150ae5de3840039a3f54b025156404e34c23c03f47c3",
+      "declared_license": "MIT",
+      "selected_license": "MIT",
+      "repository": "https://github.com/tokio-rs/tracing",
+      "notice_files": [
+        {
+          "source_path": "LICENSE",
+          "path": "licenses/cargo/tracing-log-0.2.0/LICENSE",
+          "sha256": "898b1ae9821e98daf8964c8d6c7f61641f5f5aa78ad500020771c0939ee0dea1",
+          "bytes": 1062
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "tracing-subscriber",
+      "version": "0.3.23",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "cb7f578e5945fb242538965c2d0b04418d38ec25c79d160cd279bf0731c8d319",
+      "declared_license": "MIT",
+      "selected_license": "MIT",
+      "repository": "https://github.com/tokio-rs/tracing",
+      "notice_files": [
+        {
+          "source_path": "LICENSE",
+          "path": "licenses/cargo/tracing-subscriber-0.3.23/LICENSE",
+          "sha256": "898b1ae9821e98daf8964c8d6c7f61641f5f5aa78ad500020771c0939ee0dea1",
+          "bytes": 1062
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "typeid",
+      "version": "1.0.3",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "bc7d623258602320d5c55d1bc22793b57daff0ec7efc270ea7d55ce1d5f5471c",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/dtolnay/typeid",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/typeid-1.0.3/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "bytes": 9723
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/typeid-1.0.3/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "typenum",
+      "version": "1.20.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "b6f5e870be6c3b371b77fe0ee0bafb859fa4964b4404c27de1d380043c4dda20",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/paholg/typenum",
+      "notice_files": [
+        {
+          "source_path": "LICENSE",
+          "path": "licenses/cargo/typenum-1.20.1/LICENSE",
+          "sha256": "db11fec9946737df39ca3898d9cd8c10ec6f6c3a884a6802b0ad0b81b4e8f23a",
+          "bytes": 17
+        },
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/typenum-1.20.1/LICENSE-APACHE",
+          "sha256": "516b24e051bf5630880ebbd55c40a25ce9552ebaf8970a53e8976eb70e522406",
+          "bytes": 10835
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/typenum-1.20.1/LICENSE-MIT",
+          "sha256": "a825bd853ab71619a4923d7b4311221427848070ff44d990da39b0b274c1683f",
+          "bytes": 1083
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "unicode-ident",
+      "version": "1.0.26",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "d245f478577f809a851594d02313b640fb437e0bb33866753cff937863096954",
+      "declared_license": "(MIT OR Apache-2.0) AND Unicode-3.0",
+      "selected_license": "Apache-2.0 AND Unicode-3.0",
+      "repository": "https://github.com/dtolnay/unicode-ident",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/unicode-ident-1.0.26/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "bytes": 9723
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/unicode-ident-1.0.26/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        },
+        {
+          "source_path": "LICENSE-UNICODE",
+          "path": "licenses/cargo/unicode-ident-1.0.26/LICENSE-UNICODE",
+          "sha256": "f7db81051789b729fea528a63ec4c938fdcb93d9d61d97dc8cc2e9df6d47f2a1",
+          "bytes": 1995
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "unicode-segmentation",
+      "version": "1.13.3",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "c6f5d3c3b1bf09027a88a6bc961fc00497d651009560b5463668dc81b0fa87a8",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/unicode-rs/unicode-segmentation",
+      "notice_files": [
+        {
+          "source_path": "COPYRIGHT",
+          "path": "licenses/cargo/unicode-segmentation-1.13.3/COPYRIGHT",
+          "sha256": "23860c2a7b5d96b21569afedf033469bab9fe14a1b24a35068b8641c578ce24d",
+          "bytes": 321
+        },
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/unicode-segmentation-1.13.3/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/unicode-segmentation-1.13.3/LICENSE-MIT",
+          "sha256": "7b63ecd5f1902af1b63729947373683c32745c16a10e8e6292e2e2dcd7e90ae0",
+          "bytes": 1071
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "unicode-xid",
+      "version": "0.2.6",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "ebc1c04c71510c7f702b52b7c350734c9ff1295c464a03335b00bb84fc54f853",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/unicode-rs/unicode-xid",
+      "notice_files": [
+        {
+          "source_path": "COPYRIGHT",
+          "path": "licenses/cargo/unicode-xid-0.2.6/COPYRIGHT",
+          "sha256": "23860c2a7b5d96b21569afedf033469bab9fe14a1b24a35068b8641c578ce24d",
+          "bytes": 321
+        },
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/unicode-xid-0.2.6/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/unicode-xid-0.2.6/LICENSE-MIT",
+          "sha256": "7b63ecd5f1902af1b63729947373683c32745c16a10e8e6292e2e2dcd7e90ae0",
+          "bytes": 1071
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "variadics_please",
+      "version": "1.1.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "41b6d82be61465f97d42bd1d15bf20f3b0a3a0905018f38f9d6f6962055b0b5c",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/bevyengine/variadics_please",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/variadics_please-1.1.0/LICENSE-APACHE",
+          "sha256": "6d1d968fb225eca367cb7f0b8831ab012a35d92b547e945e17ef8e7b05c3e5cc",
+          "bytes": 10349
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/variadics_please-1.1.0/LICENSE-MIT",
+          "sha256": "9eb6f69d48a1dd764e8a33f14a584f460d3cec653477c136a95dd6df9c249211",
+          "bytes": 1055
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "version_check",
+      "version": "0.9.5",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a",
+      "declared_license": "MIT/Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/SergioBenitez/version_check",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/version_check-0.9.5/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "bytes": 10847
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/version_check-0.9.5/LICENSE-MIT",
+          "sha256": "b7e650f3fce5c53249d1cdc608b54df156a97edd636cf9d23498d0cfe7aec63e",
+          "bytes": 1085
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "windows-link",
+      "version": "0.2.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "f0805222e57f7521d6a62e36fa9163bc891acd422f971defe97d64e70d0a4fe5",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/microsoft/windows-rs",
+      "notice_files": [
+        {
+          "source_path": "license-apache-2.0",
+          "path": "licenses/cargo/windows-link-0.2.1/license-apache-2.0",
+          "sha256": "c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b",
+          "bytes": 11351
+        },
+        {
+          "source_path": "license-mit",
+          "path": "licenses/cargo/windows-link-0.2.1/license-mit",
+          "sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383",
+          "bytes": 1141
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "windows-sys",
+      "version": "0.61.2",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "ae137229bcbd6cdf0f7b80a31df61766145077ddf49416a728b02cb3921ff3fc",
+      "declared_license": "MIT OR Apache-2.0",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/microsoft/windows-rs",
+      "notice_files": [
+        {
+          "source_path": "license-apache-2.0",
+          "path": "licenses/cargo/windows-sys-0.61.2/license-apache-2.0",
+          "sha256": "c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b",
+          "bytes": 11351
+        },
+        {
+          "source_path": "license-mit",
+          "path": "licenses/cargo/windows-sys-0.61.2/license-mit",
+          "sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383",
+          "bytes": 1141
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "winnow",
+      "version": "1.0.4",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "23b97319f7b8343df12cc98938e5c3eb436064524c8d2b4e30a1d3a36eecdf81",
+      "declared_license": "MIT",
+      "selected_license": "MIT",
+      "repository": "https://github.com/winnow-rs/winnow",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/winnow-1.0.4/LICENSE-MIT",
+          "sha256": "cb5aedb296c5246d1f22e9099f925a65146f9f0d6b4eebba97fd27a6cdbbab2d",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "zerocopy",
+      "version": "0.8.59",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "6df92bf3d9227be3d53173901ddbffac2babc27ae50f397776ffd6dc33f800cb",
+      "declared_license": "BSD-2-Clause OR Apache-2.0 OR MIT",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/google/zerocopy",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/zerocopy-0.8.59/LICENSE-APACHE",
+          "sha256": "9d185ac6703c4b0453974c0d85e9eee43e6941009296bb1f5eb0b54e2329e9f3",
+          "bytes": 11350
+        },
+        {
+          "source_path": "LICENSE-BSD",
+          "path": "licenses/cargo/zerocopy-0.8.59/LICENSE-BSD",
+          "sha256": "83c1763356e822adde0a2cae748d938a73fdc263849ccff6b27776dff213bd32",
+          "bytes": 1275
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/zerocopy-0.8.59/LICENSE-MIT",
+          "sha256": "1a2f5c12ddc934d58956aa5dbdd3255fe55fd957633ab7d0d39e4f0daa73f7df",
+          "bytes": 1060
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "zerocopy-derive",
+      "version": "0.8.59",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "ac4f328cf2f05d084e496c3e9c3f33ed0a183656a16e1fcec4d464d8373aec82",
+      "declared_license": "BSD-2-Clause OR Apache-2.0 OR MIT",
+      "selected_license": "Apache-2.0",
+      "repository": "https://github.com/google/zerocopy",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-APACHE",
+          "path": "licenses/cargo/zerocopy-derive-0.8.59/LICENSE-APACHE",
+          "sha256": "9d185ac6703c4b0453974c0d85e9eee43e6941009296bb1f5eb0b54e2329e9f3",
+          "bytes": 11350
+        },
+        {
+          "source_path": "LICENSE-BSD",
+          "path": "licenses/cargo/zerocopy-derive-0.8.59/LICENSE-BSD",
+          "sha256": "83c1763356e822adde0a2cae748d938a73fdc263849ccff6b27776dff213bd32",
+          "bytes": 1275
+        },
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/zerocopy-derive-0.8.59/LICENSE-MIT",
+          "sha256": "1a2f5c12ddc934d58956aa5dbdd3255fe55fd957633ab7d0d39e4f0daa73f7df",
+          "bytes": 1060
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "zmij",
+      "version": "1.0.23",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "29666d0abbfad1e3dc4dcf6144730dd3a3ab225bbbdac83319345b1b44ccfc1b",
+      "declared_license": "MIT",
+      "selected_license": "MIT",
+      "repository": "https://github.com/dtolnay/zmij",
+      "notice_files": [
+        {
+          "source_path": "LICENSE-MIT",
+          "path": "licenses/cargo/zmij-1.0.23/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "bytes": 1023
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "zstd",
+      "version": "0.13.3",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "e91ee311a569c327171651566e07972200e76fcfe2242a4fa446149a3881c08a",
+      "declared_license": "MIT",
+      "selected_license": "MIT",
+      "repository": "https://github.com/gyscos/zstd-rs",
+      "notice_files": [
+        {
+          "source_path": "LICENSE",
+          "path": "licenses/cargo/zstd-0.13.3/LICENSE",
+          "sha256": "129e8edef29e9abcd2ebabe252f4ef1b1289cdca356bf0040284a2fbccfb96c8",
+          "bytes": 1080
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "zstd-safe",
+      "version": "7.3.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "64d80649ab6db9d9f6f9c80a40becd948eda4714a0a5ac8c4d157a32231c7882",
+      "declared_license": "BSD-3-Clause",
+      "selected_license": "BSD-3-Clause",
+      "repository": "https://github.com/gyscos/zstd-rs",
+      "notice_files": [
+        {
+          "source_path": "LICENSE",
+          "path": "licenses/cargo/zstd-safe-7.3.0/LICENSE",
+          "sha256": "ce4868c8e4ebe47a7d4b3c93dbf6b802033e5ae2fa7638098173f80836daac60",
+          "bytes": 1501
+        }
+      ],
+      "embedded_notice_comments": []
+    },
+    {
+      "name": "zstd-sys",
+      "version": "2.1.0+zstd.1.5.7",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "crate_checksum_sha256": "0ef0a8027ec3ee71300ab3bcbcd0393f434aa72b91ca6d635a39941deae8eea0",
+      "declared_license": "BSD-3-Clause",
+      "selected_license": "BSD-3-Clause",
+      "repository": "https://github.com/gyscos/zstd-rs",
+      "notice_files": [
+        {
+          "source_path": "LICENSE",
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/LICENSE",
+          "sha256": "ce4868c8e4ebe47a7d4b3c93dbf6b802033e5ae2fa7638098173f80836daac60",
+          "bytes": 1501
+        },
+        {
+          "source_path": "LICENSE.BSD-3-Clause",
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/LICENSE.BSD-3-Clause",
+          "sha256": "bf7017a73a95ea63bf3716b13ec2bcd79c92942356e3408c6fb66332bad6d977",
+          "bytes": 1614
+        },
+        {
+          "source_path": "zstd/COPYING",
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/zstd/COPYING",
+          "sha256": "f9c375a1be4a41f7b70301dd83c91cb89e41567478859b77eef375a52d782505",
+          "bytes": 18091
+        },
+        {
+          "source_path": "zstd/LICENSE",
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/zstd/LICENSE",
+          "sha256": "7055266497633c9025b777c78eb7235af13922117480ed5c674677adc381c9d8",
+          "bytes": 1549
+        }
+      ],
+      "embedded_notice_comments": [
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/02915ca5e22065776a1d27175b8d58e3674ffe5f4e070dd9e182d4376442588d.txt",
+          "sha256": "02915ca5e22065776a1d27175b8d58e3674ffe5f4e070dd9e182d4376442588d",
+          "bytes": 1809,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v04.c",
+              "line": 1378
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/04e0df31cf493dc76fa42e22065d0d88cda498b50a2033cdddf221d227fb0b84.txt",
+          "sha256": "04e0df31cf493dc76fa42e22065d0d88cda498b50a2033cdddf221d227fb0b84",
+          "bytes": 1731,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v06.c",
+              "line": 1153
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v07.c",
+              "line": 1095
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/082c13ae92bd7078c9202daf5f8f535bdedbc20f43aba2ed1dae74971ec03639.txt",
+          "sha256": "082c13ae92bd7078c9202daf5f8f535bdedbc20f43aba2ed1dae74971ec03639",
+          "bytes": 1590,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v06.c",
+              "line": 354
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v07.c",
+              "line": 2590
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/08c05dadb9b4172ab407784328e04944d32da8e1579ae89fd47a336672e61ed2.txt",
+          "sha256": "08c05dadb9b4172ab407784328e04944d32da8e1579ae89fd47a336672e61ed2",
+          "bytes": 1736,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v06.c",
+              "line": 1621
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v07.c",
+              "line": 921
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/0f7b8a9c738f7594aa9ae6b68d0306ff16b329620d0429ebc0532bf0bc769ead.txt",
+          "sha256": "0f7b8a9c738f7594aa9ae6b68d0306ff16b329620d0429ebc0532bf0bc769ead",
+          "bytes": 1756,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v02.c",
+              "line": 448
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v03.c",
+              "line": 449
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/1154aba262013c12cdea8f90f523c1d54a24af35acaccec3205a4adeaf3ce7bd.txt",
+          "sha256": "1154aba262013c12cdea8f90f523c1d54a24af35acaccec3205a4adeaf3ce7bd",
+          "bytes": 1834,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v02.c",
+              "line": 690
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v03.c",
+              "line": 691
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v04.c",
+              "line": 1456
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/16a15a5818ef10149bdb8dac42203d47d8066f5b9041ce36ff0ca1548ee9f115.txt",
+          "sha256": "16a15a5818ef10149bdb8dac42203d47d8066f5b9041ce36ff0ca1548ee9f115",
+          "bytes": 1784,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v05.c",
+              "line": 17
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/19f51c00d310b3236f1006b9f50946f1e94cb9073e89482a90b2cee34e7ecf97.txt",
+          "sha256": "19f51c00d310b3236f1006b9f50946f1e94cb9073e89482a90b2cee34e7ecf97",
+          "bytes": 1662,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v02.c",
+              "line": 759
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v03.c",
+              "line": 759
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/1c537f1129a99a417d7bb5c2282c4b45448a68147a3fcc849e576282d02d4151.txt",
+          "sha256": "1c537f1129a99a417d7bb5c2282c4b45448a68147a3fcc849e576282d02d4151",
+          "bytes": 743,
+          "sources": [
+            {
+              "path": "zstd/lib/compress/hist.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/compress/hist.h",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/2e76f9452a11a30bf9d1ae4fc797634e27f29a427d879deef05346dc9743d087.txt",
+          "sha256": "2e76f9452a11a30bf9d1ae4fc797634e27f29a427d879deef05346dc9743d087",
+          "bytes": 1760,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v06.c",
+              "line": 1691
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/37a44d5c5210df22cd8eac096fdb9e104addb8f45c8a57c6f69a5c61d7113c55.txt",
+          "sha256": "37a44d5c5210df22cd8eac096fdb9e104addb8f45c8a57c6f69a5c61d7113c55",
+          "bytes": 637,
+          "sources": [
+            {
+              "path": "zstd/lib/common/bitstream.h",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/3e46c9b940c9fd620972c2faf72287287a73ceca47fbd7ee90124df885976948.txt",
+          "sha256": "3e46c9b940c9fd620972c2faf72287287a73ceca47fbd7ee90124df885976948",
+          "bytes": 736,
+          "sources": [
+            {
+              "path": "zstd/lib/compress/huf_compress.c",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/3e8fb02ce441956810f5b4b4609bd69e097017f76e7bf3d3e434f9c257b1b356.txt",
+          "sha256": "3e8fb02ce441956810f5b4b4609bd69e097017f76e7bf3d3e434f9c257b1b356",
+          "bytes": 1805,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v02.c",
+              "line": 546
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v03.c",
+              "line": 547
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v04.c",
+              "line": 723
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v06.c",
+              "line": 944
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/4c726b696797bcb4999e0010a2bec4befd11f32efd6cf69f9bd2b8661ba3170b.txt",
+          "sha256": "4c726b696797bcb4999e0010a2bec4befd11f32efd6cf69f9bd2b8661ba3170b",
+          "bytes": 1781,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v02.c",
+              "line": 27
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v03.c",
+              "line": 28
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v06.c",
+              "line": 22
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v07.c",
+              "line": 183
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/4da6945dbed4ab85cc527f5d34b0eba9498be90240dd94fbcb7b3ca323416ee8.txt",
+          "sha256": "4da6945dbed4ab85cc527f5d34b0eba9498be90240dd94fbcb7b3ca323416ee8",
+          "bytes": 1731,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v05.c",
+              "line": 617
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/526cea592be341a260baf3c0a77a710cefe35f02983dcb0f3db642ace13ccbeb.txt",
+          "sha256": "526cea592be341a260baf3c0a77a710cefe35f02983dcb0f3db642ace13ccbeb",
+          "bytes": 1646,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v01.c",
+              "line": 1151
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v02.c",
+              "line": 2547
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v03.c",
+              "line": 2185
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/5803168d9d24e20201beb38a13e9d323fb5af8d7d1d9205f1025380ae7ce7dcf.txt",
+          "sha256": "5803168d9d24e20201beb38a13e9d323fb5af8d7d1d9205f1025380ae7ce7dcf",
+          "bytes": 1774,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v06.c",
+              "line": 1298
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v07.c",
+              "line": 1319
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/58d13ad0eabc87b382213b4c6f3aacc05627d35668288836a320f3b606fdd652.txt",
+          "sha256": "58d13ad0eabc87b382213b4c6f3aacc05627d35668288836a320f3b606fdd652",
+          "bytes": 1741,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v04.c",
+              "line": 1544
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/5cdc1c71208abf5b919f92adb70caf4ff852931c29198498164ca7d7f4bce96e.txt",
+          "sha256": "5cdc1c71208abf5b919f92adb70caf4ff852931c29198498164ca7d7f4bce96e",
+          "bytes": 731,
+          "sources": [
+            {
+              "path": "zstd/lib/common/entropy_common.c",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/5d126bd4cb5e5c688dd13d28e2e693ccfdb06d1e6ffaa264fefb63c4a3d3f1c2.txt",
+          "sha256": "5d126bd4cb5e5c688dd13d28e2e693ccfdb06d1e6ffaa264fefb63c4a3d3f1c2",
+          "bytes": 1650,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v04.c",
+              "line": 3233
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/5dca160bd552e1410f8e67238a0c59d83463d1046008d6aeafd50baec065898c.txt",
+          "sha256": "5dca160bd552e1410f8e67238a0c59d83463d1046008d6aeafd50baec065898c",
+          "bytes": 395,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v01.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v01.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v02.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v02.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v03.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v03.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v04.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v04.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v05.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v05.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v06.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v06.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v07.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v07.h",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/682a0650da253615744cc8374442b37da94edc281e8c5af01b421b16d99dbc1c.txt",
+          "sha256": "682a0650da253615744cc8374442b37da94edc281e8c5af01b421b16d99dbc1c",
+          "bytes": 1810,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v05.c",
+              "line": 1649
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/6921ef4965e10f5544dfffad527ee06b4d78b00ecfa64094e5d1ac4f2c182f8f.txt",
+          "sha256": "6921ef4965e10f5544dfffad527ee06b4d78b00ecfa64094e5d1ac4f2c182f8f",
+          "bytes": 1804,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v02.c",
+              "line": 205
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v03.c",
+              "line": 206
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v04.c",
+              "line": 483
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/71f50cb1c6cd3bf6a7af685583f10034aa161ad776a98eaa2e3aa5210332e224.txt",
+          "sha256": "71f50cb1c6cd3bf6a7af685583f10034aa161ad776a98eaa2e3aa5210332e224",
+          "bytes": 467,
+          "sources": [
+            {
+              "path": "zstd/lib/common/threading.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/common/threading.h",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/7828bb3b4f846fe516868301a62e6f9bd6b3f4879954c6b87e7947b9a2730862.txt",
+          "sha256": "7828bb3b4f846fe516868301a62e6f9bd6b3f4879954c6b87e7947b9a2730862",
+          "bytes": 670,
+          "sources": [
+            {
+              "path": "zstd/lib/common/fse.h",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/7991f7474fdc1d1b54aa333c7017578aaf0d5b0fcfa229c07c32603b8e9b4995.txt",
+          "sha256": "7991f7474fdc1d1b54aa333c7017578aaf0d5b0fcfa229c07c32603b8e9b4995",
+          "bytes": 1660,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v04.c",
+              "line": 2344
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/7a69692d6a8ba3a2d2343ede75a2e71ea48a4e118cf421060563db24814e733e.txt",
+          "sha256": "7a69692d6a8ba3a2d2343ede75a2e71ea48a4e118cf421060563db24814e733e",
+          "bytes": 1799,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v06.c",
+              "line": 1874
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v07.c",
+              "line": 1643
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/81151664e984ef4a2f5439cb7c651d9b332dfacc27688980b21484a7e7201d82.txt",
+          "sha256": "81151664e984ef4a2f5439cb7c651d9b332dfacc27688980b21484a7e7201d82",
+          "bytes": 1728,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v06.c",
+              "line": 708
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v07.c",
+              "line": 381
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/8c282ba559c5d6fb47e132456b9feb47761f401922b11cfce0e284310ef72c25.txt",
+          "sha256": "8c282ba559c5d6fb47e132456b9feb47761f401922b11cfce0e284310ef72c25",
+          "bytes": 1686,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v02.c",
+              "line": 819
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v03.c",
+              "line": 819
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/8cc44f8ebfe09728c48f0b8d18a9ea91373e70252b3d20325cd7f9b79ee1a5be.txt",
+          "sha256": "8cc44f8ebfe09728c48f0b8d18a9ea91373e70252b3d20325cd7f9b79ee1a5be",
+          "bytes": 1575,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v06.c",
+              "line": 2619
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v07.c",
+              "line": 2521
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/8ccd5a910b20cd9be87bcb9d6f7773c677ca633eebdecfc23debbb0a67ac6a52.txt",
+          "sha256": "8ccd5a910b20cd9be87bcb9d6f7773c677ca633eebdecfc23debbb0a67ac6a52",
+          "bytes": 1667,
+          "sources": [
+            {
+              "path": "src/bindings_zdict.rs",
+              "line": 1
+            },
+            {
+              "path": "src/bindings_zdict_experimental.rs",
+              "line": 1
+            },
+            {
+              "path": "src/bindings_zdict_std_experimental.rs",
+              "line": 1
+            },
+            {
+              "path": "src/bindings_zstd.rs",
+              "line": 1
+            },
+            {
+              "path": "src/bindings_zstd_experimental.rs",
+              "line": 1
+            },
+            {
+              "path": "src/bindings_zstd_seekable.rs",
+              "line": 1
+            },
+            {
+              "path": "src/bindings_zstd_std_experimental.rs",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/8d3f9d3f68604d0b588db61aea7a7c5baf7ed4e93a7ca63042bd5b4d0a086cb5.txt",
+          "sha256": "8d3f9d3f68604d0b588db61aea7a7c5baf7ed4e93a7ca63042bd5b4d0a086cb5",
+          "bytes": 382,
+          "sources": [
+            {
+              "path": "zstd/contrib/seekable_format/zstdseek_decompress.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/common/allocations.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/common/bits.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/common/compiler.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/common/cpu.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/common/error_private.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/common/error_private.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/common/mem.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/common/pool.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/common/pool.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/common/portability_macros.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/common/zstd_common.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/common/zstd_deps.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/common/zstd_internal.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/common/zstd_trace.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/compress/clevels.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/compress/zstd_compress.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/compress/zstd_compress_internal.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/compress/zstd_compress_literals.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/compress/zstd_compress_literals.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/compress/zstd_compress_sequences.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/compress/zstd_compress_sequences.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/compress/zstd_compress_superblock.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/compress/zstd_compress_superblock.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/compress/zstd_cwksp.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/compress/zstd_double_fast.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/compress/zstd_double_fast.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/compress/zstd_fast.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/compress/zstd_fast.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/compress/zstd_lazy.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/compress/zstd_lazy.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/compress/zstd_ldm.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/compress/zstd_ldm.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/compress/zstd_ldm_geartab.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/compress/zstd_opt.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/compress/zstd_opt.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/compress/zstd_preSplit.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/compress/zstd_preSplit.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/compress/zstdmt_compress.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/compress/zstdmt_compress.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/decompress/huf_decompress_amd64.S",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/decompress/zstd_ddict.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/decompress/zstd_ddict.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/decompress/zstd_decompress.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/decompress/zstd_decompress_block.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/decompress/zstd_decompress_block.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/decompress/zstd_decompress_internal.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/deprecated/zbuff.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/deprecated/zbuff_common.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/deprecated/zbuff_compress.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/deprecated/zbuff_decompress.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/dictBuilder/cover.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/dictBuilder/cover.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/dictBuilder/fastcover.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/dictBuilder/zdict.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_legacy.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/zdict.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/zstd.h",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/zstd_errors.h",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/8ded3e31541ef135065a75ea33838b1a5caea4d215abb804f3bd17eaec5ca094.txt",
+          "sha256": "8ded3e31541ef135065a75ea33838b1a5caea4d215abb804f3bd17eaec5ca094",
+          "bytes": 633,
+          "sources": [
+            {
+              "path": "zstd/lib/common/debug.c",
+              "line": 1
+            },
+            {
+              "path": "zstd/lib/common/debug.h",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/8fed9cb9ea00b6fb99c251ac30340bde169cf363a20c64c715bb627cc7600563.txt",
+          "sha256": "8fed9cb9ea00b6fb99c251ac30340bde169cf363a20c64c715bb627cc7600563",
+          "bytes": 1772,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v02.c",
+              "line": 884
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v03.c",
+              "line": 884
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v04.c",
+              "line": 873
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/9700d559f516bbf63d6d5aabab9e9d2d8bea79b944545b371b582824e15c279f.txt",
+          "sha256": "9700d559f516bbf63d6d5aabab9e9d2d8bea79b944545b371b582824e15c279f",
+          "bytes": 397,
+          "sources": [
+            {
+              "path": "zstd/lib/common/xxhash.c",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/9909d5b36911e8907f1853635c5c09fffcf42e93f1095ca66648473f1073a354.txt",
+          "sha256": "9909d5b36911e8907f1853635c5c09fffcf42e93f1095ca66648473f1073a354",
+          "bytes": 1768,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v05.c",
+              "line": 1556
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/993169ecc77b66cba6dd5351161ac4cab6ca0b9357c87d2d50bb54ce854da785.txt",
+          "sha256": "993169ecc77b66cba6dd5351161ac4cab6ca0b9357c87d2d50bb54ce854da785",
+          "bytes": 1808,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v05.c",
+              "line": 847
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/9a2524fe80eef9fb40246f870ee6fe8e3285c51434f36c5277ed6c170f7bc3dc.txt",
+          "sha256": "9a2524fe80eef9fb40246f870ee6fe8e3285c51434f36c5277ed6c170f7bc3dc",
+          "bytes": 313,
+          "sources": [
+            {
+              "path": "zstd/contrib/seekable_format/zstdseek_compress.c",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/9b50616ffbf7562161d2dcf646e0c8acba893df19e6fcae0500efa3799ae5823.txt",
+          "sha256": "9b50616ffbf7562161d2dcf646e0c8acba893df19e6fcae0500efa3799ae5823",
+          "bytes": 711,
+          "sources": [
+            {
+              "path": "zstd/lib/common/fse_decompress.c",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/a8eec054d30d31d8c148a47ca8a7c4af3530e66a46313fdb62c218564bd3378d.txt",
+          "sha256": "a8eec054d30d31d8c148a47ca8a7c4af3530e66a46313fdb62c218564bd3378d",
+          "bytes": 1187,
+          "sources": [
+            {
+              "path": "zstd/lib/dictBuilder/divsufsort.h",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/a96b842651cb981285934b3db286920dcc3908342c3becceebf025001bfa5c27.txt",
+          "sha256": "a96b842651cb981285934b3db286920dcc3908342c3becceebf025001bfa5c27",
+          "bytes": 1778,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v05.c",
+              "line": 998
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/ac2eeb74eb9433f1be1d19e7da49b7c0778ead3d760d5aa7aba980647316e9c5.txt",
+          "sha256": "ac2eeb74eb9433f1be1d19e7da49b7c0778ead3d760d5aa7aba980647316e9c5",
+          "bytes": 1187,
+          "sources": [
+            {
+              "path": "zstd/lib/dictBuilder/divsufsort.c",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/ae42a0b45a01aced57a6767403bb109e386c4c3fcd8c64a4aa1e54510d966280.txt",
+          "sha256": "ae42a0b45a01aced57a6767403bb109e386c4c3fcd8c64a4aa1e54510d966280",
+          "bytes": 1565,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v06.c",
+              "line": 2673
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v07.c",
+              "line": 2798
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/b01ac6969c8d3246bd5fc0e69d3a1ec818fee3ebb21bf1a215e20b3f5dce183b.txt",
+          "sha256": "b01ac6969c8d3246bd5fc0e69d3a1ec818fee3ebb21bf1a215e20b3f5dce183b",
+          "bytes": 1605,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v05.c",
+              "line": 208
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v06.c",
+              "line": 223
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/b7a306cb274a6ebcacfad0eaba13054871f5228ce867d6298f27316382004c8e.txt",
+          "sha256": "b7a306cb274a6ebcacfad0eaba13054871f5228ce867d6298f27316382004c8e",
+          "bytes": 1655,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v05.c",
+              "line": 3700
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/bd7a846cf5bd4ffd025842d331a3ad80d873b27b91de328aeacb56e701496bdf.txt",
+          "sha256": "bd7a846cf5bd4ffd025842d331a3ad80d873b27b91de328aeacb56e701496bdf",
+          "bytes": 1575,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v06.c",
+              "line": 3839
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v07.c",
+              "line": 4200
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/c2840bd10d1cd7a5f5fcff83b1317f18ce45f6f6df243d575a27048ee3aaf190.txt",
+          "sha256": "c2840bd10d1cd7a5f5fcff83b1317f18ce45f6f6df243d575a27048ee3aaf190",
+          "bytes": 412,
+          "sources": [
+            {
+              "path": "zstd/lib/common/xxhash.h",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/d11c45884ac492e9ee9f96dada2afef5a88425ba109023d69587f01c8fec5fb3.txt",
+          "sha256": "d11c45884ac492e9ee9f96dada2afef5a88425ba109023d69587f01c8fec5fb3",
+          "bytes": 711,
+          "sources": [
+            {
+              "path": "zstd/lib/compress/fse_compress.c",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/d26df767c6197d24f23ebee4e665fd78576fae03620d434d4146f3e41719cade.txt",
+          "sha256": "d26df767c6197d24f23ebee4e665fd78576fae03620d434d4146f3e41719cade",
+          "bytes": 1611,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v05.c",
+              "line": 344
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/d5f033621f8cb2fdd9cebce8b76d3469672eaf601f5af000bb0012b8f504ba91.txt",
+          "sha256": "d5f033621f8cb2fdd9cebce8b76d3469672eaf601f5af000bb0012b8f504ba91",
+          "bytes": 677,
+          "sources": [
+            {
+              "path": "zstd/lib/decompress/huf_decompress.c",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/d8de7d7d1ebfb5d3fb9a3155ce289cf6e67083229529221d73dc9545e72bc630.txt",
+          "sha256": "d8de7d7d1ebfb5d3fb9a3155ce289cf6e67083229529221d73dc9545e72bc630",
+          "bytes": 1575,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v05.c",
+              "line": 2494
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/daae672829f8e8a553d715c24a365da88cb58da2b70e0fefc3c0b41faf0e2f66.txt",
+          "sha256": "daae672829f8e8a553d715c24a365da88cb58da2b70e0fefc3c0b41faf0e2f66",
+          "bytes": 1783,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v05.c",
+              "line": 499
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/db3fd8afc40a1a19c6c93f30231ec17289fbaf1411a3c1abcc5522b7de4d471b.txt",
+          "sha256": "db3fd8afc40a1a19c6c93f30231ec17289fbaf1411a3c1abcc5522b7de4d471b",
+          "bytes": 1733,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v06.c",
+              "line": 561
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v07.c",
+              "line": 613
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/fa6132fa2812bb89dff3e06fe36bdab46700c52ab4ae23c85ad4703ec9a7b229.txt",
+          "sha256": "fa6132fa2812bb89dff3e06fe36bdab46700c52ab4ae23c85ad4703ec9a7b229",
+          "bytes": 665,
+          "sources": [
+            {
+              "path": "zstd/lib/common/huf.h",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/fd520848947f707be596946061fb2366c507a031112701dc3b812e126fac661d.txt",
+          "sha256": "fd520848947f707be596946061fb2366c507a031112701dc3b812e126fac661d",
+          "bytes": 1807,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v02.c",
+              "line": 1388
+            },
+            {
+              "path": "zstd/lib/legacy/zstd_v03.c",
+              "line": 1388
+            }
+          ]
+        },
+        {
+          "path": "licenses/cargo/zstd-sys-2.1.0+zstd.1.5.7/header-notices/fe2bbba92ee03878fcd013dad3973d8003f0237a2458e5d7a68489a6857cefa4.txt",
+          "sha256": "fe2bbba92ee03878fcd013dad3973d8003f0237a2458e5d7a68489a6857cefa4",
+          "bytes": 1744,
+          "sources": [
+            {
+              "path": "zstd/lib/legacy/zstd_v05.c",
+              "line": 1483
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "missing_notice_texts": [],
+  "native_header_notices": {
+    "method": "Exact copyright/license comment blocks extracted from checksum-verified crate archives; no implementation code copied.",
+    "audited_packages": [
+      "blake3",
+      "libm",
+      "miniz_oxide",
+      "zstd-sys"
+    ],
+    "zstd_embedded_license_selection": "BSD-3-Clause (including bundled xxHash, FSE and Huffman implementations; GPLv2 alternative notice retained without selecting it)",
+    "blake3_header_result": "Packaged C and assembly have no additional license-bearing comment blocks; crate Apache-2.0 text retained.",
+    "unique_comment_blocks": 75
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "status": "Candidate17 remapped binary verified in isolated native tests; live host acceptance pending",
+  "assets_included": false,
+  "published": false,
+  "native_files": [
+    {
+      "path": "dragonwilds-skate-worker/src/main.rs",
+      "sha256": "ce00a4341aad140555ee774beeb3cec0bc9c11b2ff685d97a72ac156a7ddaded",
+      "candidate16_sha256": "aaf9b64b5c5a2e7b3db4fe8b772fb911b2a399e34f2874d1ab03dea0e4926f15"
+    },
+    {
+      "path": "dragonwilds-skate-worker/src/world_runtime.rs",
+      "sha256": "70b82e646c0a01efe8b8866d3f897ba7880a64617b0ab79a751df5d1d500fa24",
+      "candidate16_sha256": "5ea7a861443a8bbfa6abead6fdfc3d5a141a0fda600bcd39a4f6482e5a63358d"
+    },
+    {
+      "path": "dragonwilds-skate-worker/src/compact_world.rs",
+      "sha256": "159d354ed49d5b2dc128bfe857d1a8f6aecd2ef9449d5de9f442cf370a44958b",
+      "candidate16_sha256": "f4eea27f1193eacfd365febac5e5680bc5dfbcd3eb97c28bdaf3d7f7224513e9"
+    },
+    {
+      "path": "dragonwilds-skate-worker/tests/compact_world_reader.rs",
+      "sha256": "735c6320e36e0ba749047982931d0898f564e69719f4e2aa0732749e30ee974e",
+      "candidate16_sha256": "0254b20e4ec73dace65b91c3ce7eed838c09565f1aa7f80fa842131b90f8e0ca"
+    },
+    {
+      "path": "dragonwilds-skate-worker/tests/compact_rails.rs",
+      "sha256": "a8b3c87fe6f22029af776877a19f9e4ef4b5a1ce56c66b48f0582b1cf480824f",
+      "candidate16_sha256": "db7c4e6300972b2da9d2f1db4fd97cee01c0bdce3a0c8ef7cf283a0befbe431d"
+    }
+  ],
+  "patch": "patches/dragonwilds-instance-delta.patch",
+  "patch_sha256": "85dbf37426e9f8a370e2ad86a41d59d283653470b7eb02a6b97a2c1385c3a854",
+  "baseline_source_archive_sha256": "01ecc6aa401a6a5e90dfa219d9fd647fb86ff56c0908bc74feaeb9aadd836f80",
+  "scope": "Exact ordered static-instance differences and validated cache-only scene initialization; original skating physics, animation and grind predicates unchanged",
+  "artifact_sha256": "266d61fb2e46cad32c28ccc1b3410d37d032565e89755b27b995d4a9b02e2f31",
+  "artifact_bytes": 6770176,
+  "compiled_source_sha256": "43d2873532453b8f750a83176f5386ad38c6f8c68d933911eb46cd31f2d04d9f",
+  "compiled_source_records": 1233,
+  "compiled_source_hash_algorithm": {
+    "selection": "Every SOURCE-PROVENANCE.json files entry whose relative POSIX path ends .rs or has basename Cargo.toml or Cargo.lock",
+    "records": "Objects containing only path and lowercase sha256, sorted lexicographically by path",
+    "encoding": "UTF-8 of Python json.dumps(records, sort_keys=True, separators=(',', ':'), ensure_ascii=True)",
+    "digest": "SHA256"
+  },
+  "build": {
+    "toolchain": "rustc 1.96.0 (ac68faa20 2026-05-25)",
+    "target": "x86_64-pc-windows-msvc",
+    "profile": "optimized debug, symbols disabled",
+    "offline": true,
+    "locked": true,
+    "jobs": 4,
+    "incremental": false,
+    "source_verified_before_build": true,
+    "test_before_build": true,
+    "source_remap": "/source/dragonwilds-skate",
+    "cargo_registry_remap": "/cargo/registry",
+    "ascii_and_utf16_private_path_audit_passed": true,
+    "build_log_sha256": "303c67aa1d28c6926ba68a2046cec622f2bcc956af6fd46d14213d7078a6043d"
+  },
+  "checks": {
+    "worker_tests": {
+      "passed": 58,
+      "failed": 0,
+      "ignored_owned_data_cases": 7
+    },
+    "fixture_changes": "Same-package movement, insertion, deletion, duplicate records and reordering; complete fresh-bake eligible lip records match incremental delta",
+    "recorded_scene_delta": {
+      "old_package_bounds": 5132,
+      "new_instance_bounds": 8,
+      "old_reprobed_triangles": 8466193,
+      "new_reprobed_triangles": 307,
+      "instance_difference_ms": 335.051,
+      "report_sha256": "98058aa8d0d38525d5535d0b23f007c9e7cefd5e2815735065b7d34c1db7c2be"
+    },
+    "recorded_rail_update": {
+      "old_reprobe_ms": 240585,
+      "new_reprobe_ms": 356,
+      "instance_delta_and_update_ms": 697.106,
+      "original_global_merge_ms": 9041.169,
+      "candidate_count": 48730605,
+      "lip_count": 3247872,
+      "report_sha256": "c813be29c7ea06ca5582c96f950a66e592e4ddd94f14360045ffa57e82268333"
+    },
+    "warm_current_integration": {
+      "current_surface_and_30_frames_match_cold": true,
+      "no_physics_steps_before_current_install": true,
+      "warm_snapshot_never_published_ready": true,
+      "cases": [
+        {
+          "phase": "cold_seed",
+          "seconds": 0.7729470999911427
+        },
+        {
+          "phase": "warm_and_current_update",
+          "seconds": 0.5831613999907859
+        }
+      ],
+      "report_sha256": "7aad1eab7f3b919581fea9a4dffb284fd862490bbf3f97c034187062b5b6bd91"
+    }
+  },
+  "identity_rules": [
+    "Every surviving static record must keep exact mesh bytes, transform bits, package, provenance and occurrence position.",
+    "Relative reordering of matching records retains the conservative existing package invalidation.",
+    "Terrain comes from the exact same validated immutable base.",
+    "Required-cache initialization rejects missing/corrupt/mismatched scene caches before creating a Session, and never rebakes an old seed.",
+    "The caller validates save/base/worker identity and must install the fresh captured collision before exposing readiness."
+  ],
+  "limits": [
+    "Moving objects remain in collision; changes are not ignored or frozen.",
+    "Original complete rail merge/index rebuilding remains for a changed scene.",
+    "Original HashMap rail representative selection can differ between uncached merges; persistence keeps the first exact stored ordered result.",
+    "No game input or live installed replacement was used by these native checks.",
+    "Private snapshots and owned game assets are not included."
+  ]
+}

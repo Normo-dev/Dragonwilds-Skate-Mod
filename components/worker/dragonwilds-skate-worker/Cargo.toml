@@ -1,0 +1,30 @@
+[package]
+name = "dragonwilds-skate-worker"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+skate-host = { path = "../skate3-mashup/skate/crates/skate-host" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+bevy = { version = "0.19", default-features = false, features = ["std"] }
+blake3 = "1"
+sha2 = "0.11"
+skate-core = { path = "../skate3-mashup/skate/crates/skate-core" }
+skate-data = { path = "../skate3-mashup/skate/crates/skate-data" }
+
+[dev-dependencies]
+skate-data = { path = "../skate3-mashup/skate/crates/skate-data" }
+
+[profile.dev]
+debug = 0
+opt-level = 1
+
+[profile.dev.package.skate-host]
+opt-level = 3
+[profile.dev.package.skate-core]
+opt-level = 3
+[profile.dev.package.dragonwilds-skate-worker]
+opt-level = 3
+

@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "rustc_verbose": [
+    "rustc 1.96.0 (ac68faa20 2026-05-25)",
+    "binary: rustc",
+    "commit-hash: ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96",
+    "commit-date: 2026-05-25",
+    "host: x86_64-pc-windows-msvc",
+    "release: 1.96.0",
+    "LLVM version: 22.1.2"
+  ],
+  "files": [
+    {
+      "path": "licenses/rust-1.96.0/COPYRIGHT-library.html",
+      "sha256": "78c163fcec50e64bfd85fedb850c273595602fafa2b41f30f75d4e410b80ee83",
+      "bytes": 425651,
+      "toolchain_relative_source": "share/doc/rust/COPYRIGHT-library.html"
+    },
+    {
+      "path": "licenses/rust-1.96.0/licenses/Apache-2.0.txt",
+      "sha256": "074e6e32c86a4c0ef8b3ed25b721ca23aca83df277cd88106ef7177c354615ff",
+      "bytes": 10280,
+      "toolchain_relative_source": "share/doc/rust/licenses/Apache-2.0.txt"
+    },
+    {
+      "path": "licenses/rust-1.96.0/licenses/BSD-2-Clause.txt",
+      "sha256": "f32fb3b417a194167cfad068223fc975ba96c5960513a10f66a3c28720aec1df",
+      "bytes": 1267,
+      "toolchain_relative_source": "share/doc/rust/licenses/BSD-2-Clause.txt"
+    },
+    {
+      "path": "licenses/rust-1.96.0/licenses/CC-BY-SA-4.0.txt",
+      "sha256": "23ee78c8bae49cf08ea2f0c84945c66b987ebe4520881fb51b3dad4fb43d07c2",
+      "bytes": 20137,
+      "toolchain_relative_source": "share/doc/rust/licenses/CC-BY-SA-4.0.txt"
+    },
+    {
+      "path": "licenses/rust-1.96.0/licenses/GCC-exception-3.1.txt",
+      "sha256": "a3966c9410ef94a1efbfa9ec04e9c1994026a70623fbf0885ce36737bfba3b54",
+      "bytes": 3320,
+      "toolchain_relative_source": "share/doc/rust/licenses/GCC-exception-3.1.txt"
+    },
+    {
+      "path": "licenses/rust-1.96.0/licenses/GPL-2.0-only.txt",
+      "sha256": "54b212ba1f97f6948fa5486239ab505dd820b02e50cbfd296b4062c8609a70af",
+      "bytes": 17642,
+      "toolchain_relative_source": "share/doc/rust/licenses/GPL-2.0-only.txt"
+    },
+    {
+      "path": "licenses/rust-1.96.0/licenses/GPL-3.0-or-later.txt",
+      "sha256": "05315fce6c35f79b8a35454828995fa26336f235895ac64557abc028f4ffcea2",
+      "bytes": 34795,
+      "toolchain_relative_source": "share/doc/rust/licenses/GPL-3.0-or-later.txt"
+    },
+    {
+      "path": "licenses/rust-1.96.0/licenses/ISC.txt",
+      "sha256": "0ff61769b238634e042ab759dddfd104a8e69d091e3600ae3410e401a6164381",
+      "bytes": 730,
+      "toolchain_relative_source": "share/doc/rust/licenses/ISC.txt"
+    },
+    {
+      "path": "licenses/rust-1.96.0/licenses/LLVM-exception.txt",
+      "sha256": "e34c58338bd89d43e709e226610d8f32b3e3c47f4ad9a99a8dc1d4ac7842488e",
+      "bytes": 919,
+      "toolchain_relative_source": "share/doc/rust/licenses/LLVM-exception.txt"
+    },
+    {
+      "path": "licenses/rust-1.96.0/licenses/MIT.txt",
+      "sha256": "b85dcd3e453d05982552c52b5fc9e0bdd6d23c6f8e844b984a88af32570b0cc0",
+      "bytes": 1078,
+      "toolchain_relative_source": "share/doc/rust/licenses/MIT.txt"
+    },
+    {
+      "path": "licenses/rust-1.96.0/licenses/NCSA.txt",
+      "sha256": "39cb0234065c92b9e6cee3830cbb52b1aa289aa8fe9ba2e66730fec5cf05c630",
+      "bytes": 1676,
+      "toolchain_relative_source": "share/doc/rust/licenses/NCSA.txt"
+    },
+    {
+      "path": "licenses/rust-1.96.0/licenses/OFL-1.1.txt",
+      "sha256": "8eea8287e5876b539670cadb82e99f9a7afddec6f6730811be1daf25d2e9bcfd",
+      "bytes": 4016,
+      "toolchain_relative_source": "share/doc/rust/licenses/OFL-1.1.txt"
+    },
+    {
+      "path": "licenses/rust-1.96.0/licenses/Unicode-3.0.txt",
+      "sha256": "f5062c9a188d81dfe66b56db4182dcf9e4b17c0d9b0d311a8e20b3a1b075c443",
+      "bytes": 1995,
+      "toolchain_relative_source": "share/doc/rust/licenses/Unicode-3.0.txt"
+    }
+  ],
+  "scope": "Exact installed Rust standard-library notice document and original toolchain license texts. Compiler/runtime binaries and sources are not included."
+}

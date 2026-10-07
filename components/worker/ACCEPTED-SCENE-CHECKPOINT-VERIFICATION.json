@@ -1,0 +1,137 @@
+{
+  "schema": 1,
+  "status": "Candidate18 exact incremental checkpoint persistence and reload verified; live host acceptance pending",
+  "assets_included": false,
+  "published": false,
+  "native_files": [
+    {
+      "path": "dragonwilds-skate-worker/src/main.rs",
+      "sha256": "8d13684a8c26502c840c4313a9d3b1f7eb54b8594852e25d1b5f22c857e61fb7",
+      "candidate17_sha256": "ce00a4341aad140555ee774beeb3cec0bc9c11b2ff685d97a72ac156a7ddaded"
+    },
+    {
+      "path": "dragonwilds-skate-worker/src/world_runtime.rs",
+      "sha256": "c6fc9dcb6af29af513035402de29b7bf8ae5d3f65cac849a3a49ebdfc2d9f624",
+      "candidate17_sha256": "70b82e646c0a01efe8b8866d3f897ba7880a64617b0ab79a751df5d1d500fa24"
+    },
+    {
+      "path": "dragonwilds-skate-worker/src/accepted_scene_cache.rs",
+      "sha256": "e58c8d3ae39d4bfe120ff97dfdf10968985ed16ea0c5bcab86a55cba0eeff4df",
+      "candidate17_sha256": null
+    },
+    {
+      "path": "dragonwilds-skate-worker/tests/accepted_scene_cache.rs",
+      "sha256": "856c5769b2058e5b2370675b7ae024828997e9a2700d38022d774bf6bf9229d0",
+      "candidate17_sha256": null
+    }
+  ],
+  "patch": "patches/dragonwilds-accepted-scene-checkpoint.patch",
+  "patch_sha256": "e4e96e3b7a55941746bab5d7008d9c1417ffbdb5ff571479d38d5d7139bdbd6e",
+  "baseline_source_archive_sha256": "05ff14b8538ff9d0fb4c2c51b0b88b250a47af2d71065ab160615eeb71088272",
+  "artifact_sha256": "a0b294e197b4df324589de7ee0507d9126dfdddcc737a82eb7478f7354806265",
+  "artifact_bytes": 7045632,
+  "compiled_source_sha256": "8a65838b2e0256f76a73479e03c0e701ab89e4f7293ae507496428358db4eaf8",
+  "compiled_source_records": 1235,
+  "compiled_source_hash_algorithm": {
+    "selection": "Every SOURCE-PROVENANCE.json files entry whose relative POSIX path ends .rs or has basename Cargo.toml or Cargo.lock",
+    "records": "Objects containing only path and lowercase sha256, sorted lexicographically by path",
+    "encoding": "UTF-8 of Python json.dumps(records, sort_keys=True, separators=(',', ':'), ensure_ascii=True)",
+    "digest": "SHA256"
+  },
+  "scope": "Persist exact accepted incremental lip ordering and original merged rails; preserve original collision, rail ownership/probes/merge, skating physics, animation and controls",
+  "build": {
+    "toolchain": "rustc 1.96.0 (ac68faa20 2026-05-25)",
+    "target": "x86_64-pc-windows-msvc",
+    "profile": "optimized debug, symbols disabled",
+    "offline": true,
+    "locked": true,
+    "jobs": 2,
+    "incremental": false,
+    "source_verified_before_build": true,
+    "test_before_build": true,
+    "source_remap": "/source/dragonwilds-skate",
+    "cargo_registry_remap": "/cargo/registry",
+    "private_path_audit_passed": true,
+    "build_log_sha256": "5604c18969d16936c638089a466d1cbb44b5409f6668749f8775a5b5e5e4a467"
+  },
+  "checks": {
+    "worker_tests": {
+      "passed": 68,
+      "failed": 0,
+      "ignored_owned_data_cases": 7
+    },
+    "unchanged_original_mashup_rust_files": 1207,
+    "proofs": [
+      {
+        "recorded": false,
+        "report_sha256": "af868456c35eb78fcfb0313fd94d097e0641e8e3ff4d637e05c85aca45530113",
+        "old_cached_init_ms": 1520.6653999630362,
+        "incremental_prepare_ms": 103.62889996031299,
+        "checkpoint_resume_ms": 1473.9544999902137,
+        "retained_pose_digest": "2eae1f26e7b69fd509a703601f3a7461fe35c164eb5d67b38555e47cc6b83a9f",
+        "restored_pose_digest": "2eae1f26e7b69fd509a703601f3a7461fe35c164eb5d67b38555e47cc6b83a9f",
+        "surface_queries": 3,
+        "retained_and_restored_surfaces_and_60_frames_identical": true,
+        "resume_avoided_all_lip_probe_and_merge": true,
+        "no_physics_before_current_install": true,
+        "original_biped_profile": {
+          "states": {
+            "BipedAir": 62,
+            "WipeoutGround": 118
+          },
+          "holding_board": {
+            "True": 62,
+            "False": 118
+          },
+          "mean_ms": 3.8258883303367637,
+          "p95_ms": 6.165199971292168,
+          "max_ms": 9.801400010474026
+        }
+      },
+      {
+        "recorded": true,
+        "report_sha256": "275d5735b1a1976794ce6eed927aeb89e21638e739f744a33a71bbd18b47c54e",
+        "old_cached_init_ms": 40943.382899975404,
+        "incremental_prepare_ms": 280198.1556999963,
+        "checkpoint_resume_ms": 21134.448199998587,
+        "retained_pose_digest": "e490e6c017a6edc23451a7ee9dc547a2d4834d667f9ad7b564192f1cb53b39d4",
+        "restored_pose_digest": "e490e6c017a6edc23451a7ee9dc547a2d4834d667f9ad7b564192f1cb53b39d4",
+        "surface_queries": 2,
+        "retained_and_restored_surfaces_and_60_frames_identical": true,
+        "resume_avoided_all_lip_probe_and_merge": true,
+        "no_physics_before_current_install": true,
+        "original_biped_profile": {
+          "states": {
+            "BipedGround": 180
+          },
+          "holding_board": {
+            "True": 180
+          },
+          "mean_ms": 14.513938888881562,
+          "p95_ms": 20.615299989003688,
+          "max_ms": 25.35040001384914
+        }
+      }
+    ],
+    "checkpoint_cases": [
+      "Exact lip float bits/order and merged polyline boundaries/order retained",
+      "Wrong scene/base/algorithm/payload/identity/path and corrupt payload rejected",
+      "Three complete rolling checkpoints retained; unrelated filenames untouched",
+      "Disk failure keeps computed scene usable without claiming durable checkpoint"
+    ]
+  },
+  "identity_rules": [
+    "Incremental history is stored in accepted-scene-cache, never a pristine-base scene key.",
+    "Identity binds base and scene fingerprint, relevant source algorithms, and exact ordered lip payload.",
+    "Original merged rails are keyed by exact lip payload and original algorithm; file header/checksum validates each reload.",
+    "Only background world-scene preparation persists files; tick/surface/summon commands do not write checkpoints.",
+    "Caller promotes a saved checkpoint only after the matching revision is accepted and still validates the current live scene before riding."
+  ],
+  "limits": [
+    "Initial Session physics/animation and grind index loading remains each process.",
+    "New or altered collision still re-probes affected geometry and rebuilds the original global merged grind index.",
+    "Only newest three history checkpoints are retained; old pointers can fall back to valid pristine-scene caches.",
+    "Benchmarks use isolated standard-input workers and owned local assets; no live gameplay acceptance or device polling.",
+    "No owned map or game assets are included."
+  ]
+}

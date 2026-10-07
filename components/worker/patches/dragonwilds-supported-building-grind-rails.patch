@@ -1,0 +1,1141 @@
+--- a/dragonwilds-skate-worker/src/main.rs
++++ b/dragonwilds-skate-worker/src/main.rs
+@@ -14,6 +14,7 @@
+ mod world_runtime;
+ mod merged_rail_cache;
+ mod accepted_scene_cache;
++mod building_rail_conditioner;
+ 
+ // Dense host windows can exceed the old one-million-triangle ceiling. Sixteen
+ // million bounds the binary payload at 576 MB. Allocation still uses only the
+--- a/dragonwilds-skate-worker/src/world_runtime.rs
++++ b/dragonwilds-skate-worker/src/world_runtime.rs
+@@ -2,6 +2,7 @@
+ use skate_host::bridge::{Session,CollisionBuilder,PreparedCollision};
+ use std::{path::{Path,PathBuf},sync::Arc,time::Instant};
+ use serde_json::{Value,json};
++use sha2::{Digest,Sha256};
+ 
+ #[derive(Clone)]
+ pub struct WorldRuntime {
+@@ -11,6 +12,21 @@
+ fn source(base:&Arc<CompactWorld>,scene:Option<&Path>)->Result<Arc<CompactGeometry>,String> {
+     let world=match scene {Some(path)=>Arc::new(CompactWorld::with_overlay(base,path)?),None=>base.clone()};
+     Ok(Arc::new(CompactGeometry::new(world,[0.;3])?))
++}
++/// Derived scene rails are conditioned only after the immutable original cache
++/// has been loaded/prepared. The physical source and original cache stay intact.
++fn condition_rails(source:&CompactGeometry,scene:Option<&Path>,rails:Vec<Vec<[f32;3]>>)
++    ->Result<(Vec<Vec<[f32;3]>>,Value),String> {
++    let Some(scene)=scene else{return Ok((rails,Value::Null));};
++    let fingerprint=source.world.scene_fingerprint.as_deref().ok_or("Conditioning scene identity missing")?;
++    let started=Instant::now();
++    let (rails,report)=crate::building_rail_conditioner::condition(scene,fingerprint,rails,|lo,hi| {
++        source.world.candidate_triangles(lo,hi).into_iter().map(|id|source.world.raw_triangle(id)).collect()
++    })?;
++    let status=json!({"algorithm_sha256":Sha256::digest(include_bytes!("building_rail_conditioner.rs")).iter().map(|b|format!("{b:02x}")).collect::<String>(),
++        "physical_geometry_changed":false,"raw_cache_changed":false,"report":report});
++    eprintln!("WORLD_BUILDING_RAIL_CONDITIONING elapsed_ms={} {}",started.elapsed().as_millis(),status);
++    Ok((rails,status))
+ }
+ fn base_bake(manifest:&Path,rail_file:Option<&Path>)->Result<(Arc<CompactWorld>,LipBake,PathBuf),String> {
+     let base=Arc::new(CompactWorld::load(manifest)?);
+@@ -67,9 +83,11 @@
+         }else{bake});
+         let rails=crate::merged_rail_cache::prepare(manifest,&bake)?.rails;
+         (bake,rails,None)};
++        let(rails,conditioning)=condition_rails(&source,scene,rails)?;
+         let rail_count=rails.len();let session=Session::new_with_source(assets,source.clone(),rails,spawn,heading)?;
+         eprintln!("WORLD_SESSION_READY triangles={} rails={} elapsed_ms={}",source.world.triangle_count(),rail_count,started.elapsed().as_millis());
+         let mut status=Self::describe(&base,&source,rail_count);
++        if !conditioning.is_null(){status["rail_conditioning"]=conditioning;}
+         if let Some(checkpoint)=checkpoint{status["scene_checkpoint"]=checkpoint;}
+         Ok((session,Self{base,bake,source,rail_count,status}))
+     }
+@@ -85,11 +103,13 @@
+         let difference=source.world.difference_bounds(&self.source.world)?;
+         eprintln!("WORLD_SCENE_DIFFERENCE bounds={}",difference.len());
+         let bake=Arc::new(compact_rails::update(&self.bake,&self.source,&source,difference)?);
+-        let(rails,checkpoint)=crate::accepted_scene_cache::prepare(path,&source,&bake)?;let rail_count=rails.len();
++        let(rails,checkpoint)=crate::accepted_scene_cache::prepare(path,&source,&bake)?;
++        let(rails,conditioning)=condition_rails(&source,Some(path),rails)?;let rail_count=rails.len();
+         let collision=builder.build_source(source.clone(),rails)?;
+         eprintln!("WORLD_SCENE_READY active_triangles={} rails={} elapsed_ms={}",
+             source.world.counts.static_triangles+source.world.counts.terrain_triangles,rail_count,started.elapsed().as_millis());
+         let mut status=Self::describe(&self.base,&source,rail_count);
++        status["rail_conditioning"]=conditioning;
+         if let Some(checkpoint)=checkpoint{status["scene_checkpoint"]=checkpoint;}
+         Ok((Some(collision),Self{base:self.base.clone(),bake,source,rail_count,status}))
+     }
+--- a/skate3-mashup/skate/crates/skate-host/src/physics/offboard/contact_toolkit/world.rs
++++ b/skate3-mashup/skate/crates/skate-host/src/physics/offboard/contact_toolkit/world.rs
+@@ -167,23 +167,23 @@
+         let bounds = self
+             .world
+             .line_candidate_bounds(start, vec3(probe.end), probe.radius);
+-        let candidates: Vec<_> = self
+-            .world
+-            .line_candidates(start, vec3(probe.end), probe.radius)
+-            .map(|(index, _)| index)
+-            .collect();
+-        for mesh_index in self.world.candidate_mesh_indices(bounds)? {
++        // Reject empty/nonmatching pools before materializing source triangles.
++        // Candidate meshes and retained triangles keep their canonical ordering;
++        // the recovered narrow-phase and strict nearest-hit tie rule are unchanged.
++        let mut meshes = self.world.candidate_mesh_indices(bounds)?;
++        meshes.retain(|&index| {
++            let mesh = &self.metadata.meshes[index];
++            mesh.pool == pool && matches(group, mesh.matching_group)
++                && mesh.rejection_flags & reject == 0
++        });
++        if meshes.is_empty() { return Ok(None); }
++        let candidates: Vec<_> = self.world
++            .line_candidates(start, vec3(probe.end), probe.radius).collect();
++        for mesh_index in meshes {
+             let mesh = &self.metadata.meshes[mesh_index];
+-            if mesh.pool != pool
+-                || !matches(group, mesh.matching_group)
+-                || mesh.rejection_flags & reject != 0
+-            {
+-                continue;
+-            }
+-            let first = candidates.partition_point(|&i| i < mesh.triangle_range.start);
+-            let last = candidates.partition_point(|&i| i < mesh.triangle_range.end);
+-            for &index in &candidates[first..last] {
+-                let Some(triangle) = self.world.triangle(index) else { continue; };
++            let first = candidates.partition_point(|(i, _)| *i < mesh.triangle_range.start);
++            let last = candidates.partition_point(|(i, _)| *i < mesh.triangle_range.end);
++            for &(index, triangle) in &candidates[first..last] {
+                 let vertices = triangle.triangle.vertices;
+                 let mut hit = TriangleLineHit {
+                     position: Vector3::ZERO,
+@@ -233,20 +233,19 @@
+         let bounds = self
+             .world
+             .line_candidate_bounds(vec3(center), vec3(center), radius);
+-        let candidates: Vec<_> = self
+-            .world
+-            .line_candidates(vec3(center), vec3(center), radius)
+-            .map(|(index, _)| index)
+-            .collect();
+-        for mesh_index in self.world.candidate_mesh_indices(bounds)? {
++        let mut meshes = self.world.candidate_mesh_indices(bounds)?;
++        meshes.retain(|&index| {
++            let mesh = &self.metadata.meshes[index];
++            mesh.pool == pool && matches(group, mesh.matching_group)
++        });
++        if meshes.is_empty() { return Ok(output); }
++        let candidates: Vec<_> = self.world
++            .line_candidates(vec3(center), vec3(center), radius).collect();
++        for mesh_index in meshes {
+             let mesh = &self.metadata.meshes[mesh_index];
+-            if mesh.pool != pool || !matches(group, mesh.matching_group) {
+-                continue;
+-            }
+-            let first = candidates.partition_point(|&i| i < mesh.triangle_range.start);
+-            let last = candidates.partition_point(|&i| i < mesh.triangle_range.end);
+-            for &index in &candidates[first..last] {
+-                let Some(triangle) = self.world.triangle(index) else { continue; };
++            let first = candidates.partition_point(|(i, _)| *i < mesh.triangle_range.start);
++            let last = candidates.partition_point(|(i, _)| *i < mesh.triangle_range.end);
++            for &(_, triangle) in &candidates[first..last] {
+                 let vertices = triangle.triangle.vertices.map(lanes);
+                 if triangle_box(vertices, center, radius) {
+                     output.push(vertices);
+--- a/skate3-mashup/skate/crates/skate-host/src/physics/player_state/selection.rs
++++ b/skate3-mashup/skate/crates/skate-host/src/physics/player_state/selection.rs
+@@ -1,58 +1,95 @@
+-//! CalcSuggestedState82D8ADE8 gets actual contacts, line distances and pose.
+-use super::*;
+-use skate_core::player::selector::{
+-    ProcessedStateInput, StateSelectionInput,
+-    conditions::{BoardBodyState, SkeletonAnimationState},
+-};
+-pub(super) fn advance(
+-    physics: &mut GamePhysics,
+-    skater: &mut SkaterRuntime,
+-    snapshot: skate_core::player::input_phase::ProcessedPhysicsSnapshot,
+-) -> Result<(), String> {
+-    debug_assert_eq!(snapshot.tick, physics.ticks);
+-    let p = &snapshot.input;
+-    let input = StateSelectionInput {
+-        processed: ProcessedStateInput {
+-            grind_type_1248: p.grind.family_1248,
+-            grind_candidate_1488: p.grind.valid_1488,
+-            grind_investigation_flags_1516: p.grind.flags_1516,
+-            field_1776: p.external_physics_1616.flags as i32,
+-            flags_2468: p.flags_2468,
+-            flags_2472: p.flags_2472,
+-            flags_2476: p.flags_2476,
+-            flags_2480: p.flags_2480,
+-            flags_2484: p.flags_2484,
+-            flags_2488: p.flags_2488,
+-            category_2512: p.category_2512,
+-            wheel_contact_count_2556: p.wheel_count_2556 as i32,
+-            field_2572: skater.player_state.post.state_frames,
+-            state_timer_2664: p.state_timer_2664,
+-            field_2732: skater.animation_input.fields.slide,
+-            field_2744: skater.animation_input.extra.revert_direction,
+-            trajectory_collision_time_2772: p.air_scalar_2772,
+-        },
+-        skateboard_contact_count_869: physics.riding.ground.wheel_contact_count,
+-        board_body: BoardBodyState {
+-            field_856: physics.riding.wheel_lines.minimum_distance,
+-            field_7692: physics.riding.ground.time_without_wheel_contact,
+-        },
+-        skeleton: SkeletonAnimationState {
+-            mode_16420: skater.skeleton_input.force_mode,
+-            back_chain_lane_12656: skater.skeleton_input.drive_frames[0][2][1],
+-            threshold_800: skater.player_state.animated_board_threshold,
+-        },
+-        normal_off_ground: skater.player_state.normal_off_ground,
+-        skitching_off_ground: skater.player_state.skitching_off_ground,
+-    };
+-    let current = skater.player_state.current();
+-    let requested = skater.player_state.selector.calculate(current, &input);
+-    skater.player_state.requested_state = requested;
+-    if requested != current {
+-        //82DB5FF4 restores the actual counter also used by ground-history.
+-        skater.player_input.player.ground_history_frames_1304 = 100;
+-        super::transition::set(physics, skater, requested)?;
+-    }
+-    //SystemLogic82DB6000 clears the per-frame Wipeout request accumulator.
+-    skater.wipeout.state.clear_after_selection();
+-    Ok(())
+-}
++//! CalcSuggestedState82D8ADE8 gets actual contacts, line distances and pose.
++use super::*;
++use skate_core::player::selector::{
++    ProcessedStateInput, StateSelectionInput,
++    conditions::{BoardBodyState, SkeletonAnimationState},
++};
++pub(super) fn advance(
++    physics: &mut GamePhysics,
++    skater: &mut SkaterRuntime,
++    snapshot: skate_core::player::input_phase::ProcessedPhysicsSnapshot,
++) -> Result<(), String> {
++    debug_assert_eq!(snapshot.tick, physics.ticks);
++    let p = &snapshot.input;
++    let input = StateSelectionInput {
++        processed: ProcessedStateInput {
++            grind_type_1248: p.grind.family_1248,
++            grind_candidate_1488: p.grind.valid_1488,
++            grind_investigation_flags_1516: p.grind.flags_1516,
++            field_1776: p.external_physics_1616.flags as i32,
++            flags_2468: p.flags_2468,
++            flags_2472: p.flags_2472,
++            flags_2476: p.flags_2476,
++            flags_2480: p.flags_2480,
++            flags_2484: p.flags_2484,
++            flags_2488: p.flags_2488,
++            category_2512: p.category_2512,
++            wheel_contact_count_2556: p.wheel_count_2556 as i32,
++            field_2572: skater.player_state.post.state_frames,
++            state_timer_2664: p.state_timer_2664,
++            field_2732: skater.animation_input.fields.slide,
++            field_2744: skater.animation_input.extra.revert_direction,
++            trajectory_collision_time_2772: p.air_scalar_2772,
++        },
++        skateboard_contact_count_869: physics.riding.ground.wheel_contact_count,
++        board_body: BoardBodyState {
++            field_856: physics.riding.wheel_lines.minimum_distance,
++            field_7692: physics.riding.ground.time_without_wheel_contact,
++        },
++        skeleton: SkeletonAnimationState {
++            mode_16420: skater.skeleton_input.force_mode,
++            back_chain_lane_12656: skater.skeleton_input.drive_frames[0][2][1],
++            threshold_800: skater.player_state.animated_board_threshold,
++        },
++        normal_off_ground: skater.player_state.normal_off_ground,
++        skitching_off_ground: skater.player_state.skitching_off_ground,
++    };
++    let current = skater.player_state.current();
++    let requested = skater.player_state.selector.calculate(current, &input);
++    // Observational adapter diagnostic: never changes source selection or queries.
++    if grind_transition_trace_enabled()
++        && current != requested && (current.is_grind() || requested.is_grind())
++    {
++        use std::sync::atomic::{AtomicU32, Ordering};
++        static EVENTS: AtomicU32 = AtomicU32::new(0);
++        if EVENTS.fetch_add(1, Ordering::Relaxed) < 512 {
++            let g = &p.grind;
++            let reasons: Vec<_> = skater.wipeout.state.reasons.iter().enumerate()
++                .filter_map(|(i, &set)| set.then_some((i, skater.wipeout.state.values[i])))
++                .collect();
++            eprintln!("DRAGONWILDS_GRIND_TRANSITION {}", serde_json::json!({
++                "tick": physics.ticks, "from": format!("{current:?}"), "to": format!("{requested:?}"),
++                "wipeout_reasons": reasons, "wipeout_request_count": skater.wipeout.state.count,
++                "candidate_valid": g.valid_1488, "family": g.family_1248,
++                "geometry_kind": g.geometry_kind_1464, "geometry_flags": g.geometry_flags_1476,
++                "investigation_flags": g.flags_1516, "owner": g.owner_1296,
++                "primitive_start": g.primitive_start_1264.map(f32::from_bits),
++                "primitive_end": g.primitive_end_1280.map(f32::from_bits),
++                "point": g.point_1120.map(f32::from_bits),
++                "direction": g.direction_1136.map(f32::from_bits),
++                "normal": g.normal_1152.map(f32::from_bits),
++                "surface_normal": g.upmost_normal_1408.map(f32::from_bits),
++                "impact_speed": g.impact_speed_1492, "exit_lean": g.exit_lean_1500,
++                "speed": p.scalar_2652, "velocity": p.vectors_400_416[0].map(f32::from_bits),
++                "balance": skater.animation_input.fields.balance,
++                "wheel_count": p.wheel_count_2556,
++                "input_flags": [p.flags_2468,p.flags_2472,p.flags_2476,p.flags_2480,p.flags_2484,p.flags_2488]
++            }));
++        }
++    }
++    skater.player_state.requested_state = requested;
++    if requested != current {
++        //82DB5FF4 restores the actual counter also used by ground-history.
++        skater.player_input.player.ground_history_frames_1304 = 100;
++        super::transition::set(physics, skater, requested)?;
++    }
++    //SystemLogic82DB6000 clears the per-frame Wipeout request accumulator.
++    skater.wipeout.state.clear_after_selection();
++    Ok(())
++}
++
++/// Read once per process; ordinary play does not format or write diagnostics.
++fn grind_transition_trace_enabled() -> bool {
++    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
++    *ENABLED.get_or_init(|| std::env::var_os("DWS_GRIND_DIAGNOSTICS").as_deref() == Some(std::ffi::OsStr::new("1")))
++}
+--- /dev/null
++++ b/dragonwilds-skate-worker/src/building_rail_conditioner.rs
+@@ -0,0 +1,190 @@
++//! Conservative, scene-only rail authoring for verified Castle double frames.
++//! Physical triangles, original lip/merge caches and Skate simulation are never
++//! changed. Existing straight rails are raised in place only over proven support.
++use serde::{Deserialize,Serialize};
++use sha2::{Digest,Sha256};
++use std::{collections::HashSet,fs,path::{Component,Path}};
++
++pub type Triangle=[[f64;3];3];
++pub type Rails=Vec<Vec<[f32;3]>>;
++pub const TARGET:&str="/Game/Art/Env/Base_Building/BuildingKit/Tier3/SM_BB_T3_Wall_Doorframe_Double.SM_BB_T3_Wall_Doorframe_Double";
++const MAX_RISE:f64=3.2;
++#[derive(Clone,Copy,Debug,PartialEq)]
++struct Box3 {lo:[f64;3],hi:[f64;3]}
++#[derive(Clone,Debug,PartialEq)]
++struct Model {boxes:[Box3;3],bounds:Box3,top:f64,lower:f64}
++#[derive(Clone)]
++struct Frame {model:Model,translation:[f64;3],bounds:Box3,identity:bool}
++#[derive(Default,Debug,Serialize)]
++pub struct Report {
++ pub target_instances:usize,pub eligible_instances:usize,pub considered_rails:usize,
++ pub raised_rails:usize,pub rejected_layout:usize,pub rejected_support:usize,
++ pub rejected_obstacles:usize,pub maximum_rise_cm:f64,
++}
++#[derive(Deserialize)]struct File {path:String,bytes:usize,sha256:String}
++#[derive(Deserialize)]struct Geometry {path:String,offset:usize,count:usize,unsupported:usize}
++#[derive(Deserialize)]struct Complete {complete:bool}
++#[derive(Deserialize)]struct Manifest {
++ magic:String,schema:u32,source_fingerprint:String,geometry_base_count:usize,
++ geometry:Vec<Geometry>,geometry_file:File,instance_file:File,instance_count:usize,
++ instance_stride:usize,instance_packages:Vec<String>,packages:Vec<String>,completeness:Complete,
++}
++fn read(root:&Path,file:&File)->Result<Vec<u8>,String>{
++ if file.path.is_empty()||Path::new(&file.path).components().any(|p|!matches!(p,Component::Normal(_))){return Err("Invalid conditioning input path".into());}
++ let path=root.join(&file.path);let canonical=path.canonicalize().map_err(|e|e.to_string())?;
++ if !canonical.starts_with(root){return Err("Conditioning input escapes scene".into());}
++ let bytes=fs::read(canonical).map_err(|e|e.to_string())?;
++ if bytes.len()!=file.bytes||Sha256::digest(&bytes).iter().map(|b|format!("{b:02x}")).collect::<String>()!=file.sha256.to_lowercase(){return Err("Conditioning input hash/size mismatch".into());}
++ Ok(bytes)
++}
++fn number(bytes:&[u8],at:usize)->f64 {f64::from_le_bytes(bytes[at..at+8].try_into().unwrap())}
++fn vector(bytes:&[u8],at:usize)->[f64;3] {std::array::from_fn(|i|number(bytes,at+i*8))}
++fn bounds(tris:&[Triangle])->Box3 {Box3{
++ lo:std::array::from_fn(|a|tris.iter().flatten().map(|p|p[a]).fold(f64::INFINITY,f64::min)),
++ hi:std::array::from_fn(|a|tris.iter().flatten().map(|p|p[a]).fold(f64::NEG_INFINITY,f64::max))}}
++fn sub(a:[f64;3],b:[f64;3])->[f64;3]{std::array::from_fn(|i|a[i]-b[i])}
++fn dot(a:[f64;3],b:[f64;3])->f64{(0..3).map(|i|a[i]*b[i]).sum()}
++fn cross(a:[f64;3],b:[f64;3])->[f64;3]{[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]]}
++fn closed_box(tris:&[Triangle])->Option<Box3>{
++ if tris.len()!=12||!tris.iter().flatten().flatten().all(|v|v.is_finite()){return None;}
++ let b=bounds(tris);if (0..3).any(|a|b.hi[a]<=b.lo[a]){return None;}
++ let mut faces:Vec<Vec<[u8;3]>>=vec![vec![];6];
++ for t in tris {
++  let mut corners=[0u8;3];
++  for i in 0..3 {for a in 0..3 {
++   if t[i][a]==b.hi[a]{corners[i]|=1<<a;}else if t[i][a]!=b.lo[a]{return None;}
++  }}
++  let a=(0..3).find(|&a|t[0][a]==t[1][a]&&t[1][a]==t[2][a])?;
++  let high=t[0][a]==b.hi[a];let normal=cross(sub(t[1],t[0]),sub(t[2],t[0]));
++  let area=(0..3).filter(|&v|v!=a).map(|v|b.hi[v]-b.lo[v]).product::<f64>();
++  if (normal[a]-(if high{area}else{-area})).abs()>area*1e-12{return None;}
++  faces[a*2+usize::from(high)].push(corners);
++ }
++ for (face,triangles) in faces.iter().enumerate(){
++  if triangles.len()!=2{return None;}
++  let all:HashSet<_>=triangles.iter().flatten().copied().collect();
++  let common:Vec<_>=triangles[0].iter().copied().filter(|v|triangles[1].contains(v)).collect();
++  if all.len()!=4||common.len()!=2||(common[0]^common[1])!=(7^(1<<(face/2))){return None;}
++ }
++ Some(b)
++}
++fn model(tris:&[Triangle])->Option<Model>{
++ if tris.len()!=36{return None;}
++ let mut boxes=[closed_box(&tris[..12])?,closed_box(&tris[12..24])?,closed_box(&tris[24..])?];
++ boxes.sort_by(|a,b|a.lo[2].total_cmp(&b.lo[2]).then(a.lo[0].total_cmp(&b.lo[0])));
++ let [left,right,beam]=boxes;
++ if left.lo[2]!=right.lo[2]||left.hi[2]!=right.hi[2]||beam.lo[2]<=left.lo[2]
++  ||beam.hi[2]>=left.hi[2]||left.hi[2]-beam.hi[2]>MAX_RISE
++  ||boxes.iter().any(|b|b.lo[1]!=left.lo[1]||b.hi[1]!=left.hi[1])
++  ||left.hi[1]-left.lo[1]<=18.||beam.hi[0]-beam.lo[0]<60.96
++  ||left.lo[0]>=beam.lo[0]||left.hi[0]<beam.lo[0]
++  ||right.hi[0]<=beam.hi[0]||right.lo[0]>beam.hi[0]
++  ||left.hi[0]>=right.lo[0]{return None;}
++ Some(Model{boxes,bounds:bounds(tris),top:left.hi[2],lower:beam.hi[2]})
++}
++fn load(scene:&Path,expected:&str)->Result<Vec<Frame>,String>{
++ let root=scene.parent().ok_or("Scene directory missing")?.canonicalize().map_err(|e|e.to_string())?;
++ let raw=fs::read(scene).map_err(|e|e.to_string())?;if raw.len()>32*1024*1024{return Err("Conditioning manifest too large".into());}
++ let m:Manifest=serde_json::from_slice(&raw).map_err(|e|e.to_string())?;
++ if m.magic!="S3O1"||m.schema!=1||m.source_fingerprint!=expected||!m.completeness.complete||m.instance_stride!=152{
++  return Err("Conditioning requires the validated complete scene identity".into());}
++ let selected:Vec<_>=m.geometry.iter().enumerate().filter(|(_,g)|g.path==TARGET&&g.unsupported==0).collect();
++ if selected.is_empty(){return Ok(vec![]);}
++ let geometry=read(&root,&m.geometry_file)?;let bytes=read(&root,&m.instance_file)?;
++ if m.instance_count.checked_mul(152)!=Some(bytes.len())||geometry.len()%72!=0{return Err("Invalid conditioning scene layout".into());}
++ let mut models=Vec::new();
++ for (i,g) in selected {
++  let start=g.offset.checked_mul(72).ok_or("Geometry offset overflow")?;
++  let end=g.offset.checked_add(g.count).and_then(|n|n.checked_mul(72)).filter(|&n|n<=geometry.len()).ok_or("Geometry range overflow")?;
++  let tris:Vec<Triangle>=geometry[start..end].chunks_exact(72).map(|t|std::array::from_fn(|p|vector(t,p*24))).collect();
++  if let Some(shape)=model(&tris){models.push((m.geometry_base_count+i,shape));}
++ }
++ let mut frames=Vec::new();
++ for row in bytes.chunks_exact(152){
++  let index=u32::from_le_bytes(row[..4].try_into().unwrap())as usize;
++  let Some((_,model))=models.iter().find(|(i,_)|*i==index)else{continue};
++  let package=u32::from_le_bytes(row[4..8].try_into().unwrap())as usize;
++  let Some(package)=m.instance_packages.get(package)else{return Err("Invalid conditioning package index".into());};
++  if !package.starts_with("/SkateRuntime/Buildings/")||!m.packages.contains(package){continue;}
++  let r:[[f64;3];3]=std::array::from_fn(|i|vector(row,8+i*24));let v=vector(row,80);
++  let b=Box3{lo:vector(row,104),hi:vector(row,128)};
++  if !r.iter().flatten().chain(v.iter()).chain(b.lo.iter()).chain(b.hi.iter()).all(|v|v.is_finite())||(0..3).any(|a|b.lo[a]>b.hi[a]){return Err("Non-finite conditioning transform".into());}
++  let identity=(0..3).all(|i|(0..3).all(|j|r[i][j]==if i==j{1.}else{0.}));
++  frames.push(Frame{model:model.clone(),translation:v,bounds:b,identity});
++ }
++ Ok(frames)
++}
++fn overlap(a:Box3,b:Box3)->bool{(0..3).all(|i|a.lo[i]<=b.hi[i]&&b.lo[i]<=a.hi[i])}
++// Exact triangle/AABB SAT. The raised probe's box encloses its tiny capsule;
++// rejecting extra corner contacts is conservative, never a missed obstruction.
++fn intersects(tri:Triangle,b:Box3)->bool{
++ if !overlap(bounds(&[tri]),b){return false;}
++ let center=std::array::from_fn(|i|(b.lo[i]+b.hi[i])*0.5);
++ let half:[f64;3]=std::array::from_fn(|i|(b.hi[i]-b.lo[i])*0.5);
++ let t=tri.map(|p|sub(p,center));let axes=[[1.,0.,0.],[0.,1.,0.],[0.,0.,1.]];
++ let edges=[sub(t[1],t[0]),sub(t[2],t[1]),sub(t[0],t[2])];
++ let separated=|axis:[f64;3]|{let p=t.map(|v|dot(v,axis));let radius=(0..3).map(|i|half[i]*axis[i].abs()).sum::<f64>();
++  p.into_iter().fold(f64::INFINITY,f64::min)>radius||p.into_iter().fold(f64::NEG_INFINITY,f64::max)< -radius};
++ if separated(cross(edges[0],edges[1])){return false;}
++ for edge in edges{for axis in axes{if separated(cross(edge,axis)){return false;}}}
++ true
++}
++fn covered(mut spans:Vec<(f64,f64)>,start:f64,end:f64)->bool{
++ spans.sort_by(|a,b|a.0.total_cmp(&b.0));let mut to=start;
++ for (lo,hi)in spans{if hi<to{continue;}if lo>to{return false;}to=to.max(hi);if to>=end{return true;}}
++ false
++}
++fn unreal(p:[f32;3])->[f64;3]{[f64::from(p[0])*100.,-f64::from(p[2])*100.,f64::from(p[1])*100.]}
++
++/// Call only after the original raw rails have been loaded/merged. `query`
++/// returns real physical triangles from the same already validated scene view.
++/// No caller may run stock merge/chain again on the returned rails.
++pub fn condition(scene:&Path,expected_fingerprint:&str,mut rails:Rails,
++ mut query:impl FnMut([f64;3],[f64;3])->Vec<Triangle>)->Result<(Rails,Report),String>{
++ let frames=load(scene,expected_fingerprint)?;
++ let mut report=Report{target_instances:frames.len(),eligible_instances:frames.iter().filter(|f|f.identity).count(),..Default::default()};
++ if frames.is_empty(){return Ok((rails,report));}
++ for rail in &mut rails{
++  if rail.len()<2||!rail.iter().flatten().all(|v|v.is_finite()){continue;}
++  let a=unreal(rail[0]);let z=unreal(*rail.last().unwrap());let (start,end)=(a[0].min(z[0]),a[0].max(z[0]));
++  if end-start<60.96||rail.iter().any(|p|p[1]!=rail[0][1]||p[2]!=rail[0][2])
++   ||rail.windows(2).any(|p|(p[1][0]-p[0][0])*(rail.last().unwrap()[0]-rail[0][0])<=0.){continue;}
++  // Only account for actual f32 world-coordinate conversion, not centimetres
++  // of geometric smoothing, in the identity matching of an outer edge.
++  let epsilon=a.into_iter().chain(z).map(f64::abs).fold(1.,f64::max)*f64::from(f32::EPSILON)*4.+1e-6;
++  let mut choice=None;
++  for f in &frames{if !f.identity{continue;}
++   if f.model.bounds.hi[0]+f.translation[0]<start||f.model.bounds.lo[0]+f.translation[0]>end{continue;}
++   for side in [0usize,1]{let y=if side==0{f.model.bounds.lo[1]}else{f.model.bounds.hi[1]}+f.translation[1];
++    if (y-a[1]).abs()<=epsilon&&(f.model.lower+f.translation[2]-a[2]).abs()<=epsilon{choice=Some((f,side));break;}}
++   if choice.is_some(){break;}
++  }
++  let Some((first,side))=choice else{continue;};report.considered_rails+=1;
++  let top=first.model.top+first.translation[2];let rise=top-a[2];
++  if rise<=epsilon||rise>MAX_RISE {report.rejected_layout+=1;continue;}
++  let inward=if side==0{1.}else{-1.};let inside=a[1]+inward*9.;let outside=a[1]-inward*9.;
++  let mut spans=Vec::new();let mut bad_layout=false;
++  for f in &frames{
++   if f.bounds.hi[0]<start||f.bounds.lo[0]>end||f.bounds.hi[1]<a[1]-9.||f.bounds.lo[1]>a[1]+9.{continue;}
++   if !f.identity||f.model!=first.model||f.translation[1]!=first.translation[1]||f.translation[2]!=first.translation[2]{bad_layout=true;break;}
++   for b in f.model.boxes{
++    let height=b.hi[2]+f.translation[2];
++    if inside>=b.lo[1]+f.translation[1]&&inside<=b.hi[1]+f.translation[1]&&height<=top&&top-height<=MAX_RISE{
++     spans.push((b.lo[0]+f.translation[0],b.hi[0]+f.translation[0]));
++    }
++   }
++  }
++  if bad_layout{report.rejected_layout+=1;continue;}
++  if !covered(spans,start,end){report.rejected_support+=1;continue;}
++  // The installed rail and original probe offsets are f32. Enclose their
++  // rounding in every axis, including line ends and the converted top height.
++  let padded=|b:Box3|Box3{lo:b.lo.map(|v|v-epsilon),hi:b.hi.map(|v|v+epsilon)};
++  let outside_probe=padded(Box3{lo:[start,outside-1e-6,top-4.],hi:[end,outside+1e-6,top+4.]});
++  let raised=padded(Box3{lo:[start-0.1,a[1]-9.1,top+8.9],hi:[end+0.1,a[1]+9.1,top+9.1]});
++  if [outside_probe,raised].into_iter().any(|b|query(b.lo,b.hi).into_iter().any(|t|intersects(t,b))){report.rejected_obstacles+=1;continue;}
++  let height=(top*0.01)as f32;
++  for point in rail{point[1]=height;}
++  report.raised_rails+=1;report.maximum_rise_cm=report.maximum_rise_cm.max(rise);
++ }
++ Ok((rails,report))
++}
+--- /dev/null
++++ b/dragonwilds-skate-worker/tests/building_rail_conditioner.rs
+@@ -0,0 +1,152 @@
++#[path="../src/building_rail_conditioner.rs"]mod conditioner;
++use conditioner::{Rails,Triangle,TARGET};
++use serde_json::{Value,json};
++use sha2::{Digest,Sha256};
++use std::{fs,path::PathBuf,sync::atomic::{AtomicUsize,Ordering},time::{SystemTime,UNIX_EPOCH}};
++static COUNT:AtomicUsize=AtomicUsize::new(0);
++struct Fixture{root:PathBuf,tris:Vec<Triangle>,translations:Vec<[f64;3]>,matrices:Vec<[[f64;3];3]>,package:String}
++fn box_triangles(lo:[f64;3],hi:[f64;3])->Vec<Triangle>{
++ let p:Vec<[f64;3]>=(0..8).map(|n|std::array::from_fn(|a|if n&(1<<a)==0{lo[a]}else{hi[a]})).collect();
++ [[0,4,6],[0,6,2],[1,3,7],[1,7,5],[0,1,5],[0,5,4],[2,6,7],[2,7,3],[0,2,3],[0,3,1],[4,5,7],[4,7,6]].into_iter().map(|t|t.map(|i|p[i])).collect()
++}
++fn generic_geometry()->Vec<Triangle>{
++ [([-150.,-24.,245.],[150.,26.,297.]),([-154.,-24.,0.],[-126.,26.,300.]),([126.,-24.,0.],[154.,26.,300.])]
++ .into_iter().flat_map(|(a,b)|box_triangles(a,b)).collect()
++}
++impl Fixture{
++ fn new(tris:Vec<Triangle>,translations:Vec<[f64;3]>)->Self{
++  let id=SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
++  let root=std::env::temp_dir().join(format!("skate-conditioner-{}-{id}-{}",std::process::id(),COUNT.fetch_add(1,Ordering::SeqCst)));
++  fs::create_dir(&root).unwrap();let matrices=vec![[[1.,0.,0.],[0.,1.,0.],[0.,0.,1.]];translations.len()];
++  Self{root,tris,translations,matrices,package:"/SkateRuntime/Buildings/fixture/Lightweight.Lightweight".into()}
++ }
++ fn generic()->Self{Self::new(generic_geometry(),(0..6).map(|i|[16000.+i as f64*300.,184000.,-3400.]).collect())}
++ fn transformed(&self,index:usize)->Vec<Triangle>{self.tris.iter().map(|t|t.map(|p|std::array::from_fn(|i|self.translations[index][i]+(0..3).map(|j|self.matrices[index][i][j]*p[j]).sum::<f64>()))).collect()}
++ fn world(&self)->Vec<Triangle>{(0..self.translations.len()).flat_map(|i|self.transformed(i)).collect()}
++ fn write(&self)->PathBuf{
++  let geometry:Vec<u8>=self.tris.iter().flatten().flatten().flat_map(|v|v.to_le_bytes()).collect();let mut instances=vec![];
++  for i in 0..self.translations.len(){instances.extend(0u32.to_le_bytes());instances.extend(0u32.to_le_bytes());
++   instances.extend(self.matrices[i].iter().flatten().chain(self.translations[i].iter()).flat_map(|v|v.to_le_bytes()));
++   let t=self.transformed(i);for bound in [false,true]{for a in 0..3{
++    let v=if bound{t.iter().flatten().map(|p|p[a]).fold(f64::NEG_INFINITY,f64::max)}else{t.iter().flatten().map(|p|p[a]).fold(f64::INFINITY,f64::min)};
++    instances.extend(v.to_le_bytes());
++   }}
++  }
++  let file=|name:&str,b:&[u8]|{fs::write(self.root.join(name),b).unwrap();json!({"path":name,"bytes":b.len(),"sha256":Sha256::digest(b).iter().map(|b|format!("{b:02x}")).collect::<String>()})};
++  let m=json!({"magic":"S3O1","schema":1,"source_fingerprint":"fixture","geometry_base_count":0,
++   "geometry":[{"path":TARGET,"offset":0,"count":self.tris.len(),"unsupported":0}],"geometry_file":file("geometry.f64",&geometry),
++   "instance_file":file("instances.bin",&instances),"instance_count":self.translations.len(),"instance_stride":152,
++   "instance_packages":[self.package],"packages":[self.package],"completeness":{"complete":true}});
++  let path=self.root.join("manifest.json");fs::write(&path,serde_json::to_vec(&m).unwrap()).unwrap();path
++ }
++ fn rails(&self)->Rails{
++  let first=self.translations[0];let last=*self.translations.last().unwrap();
++  [-24.,26.].into_iter().map(|side|vec![[(first[0]-150.)as f32/100.,(first[2]+297.)as f32/100.,-((first[1]+side)as f32/100.)],
++   [(last[0]+150.)as f32/100.,(first[2]+297.)as f32/100.,-((first[1]+side)as f32/100.)]]).collect()
++ }
++ fn condition(&self,rails:Rails,extra:&[Triangle])->(Rails,conditioner::Report){
++  let path=self.write();let mut world=self.world();world.extend_from_slice(extra);
++  conditioner::condition(&path,"fixture",rails,|_,_|world.clone()).unwrap()
++ }
++}
++impl Drop for Fixture{fn drop(&mut self){
++ let parent=std::env::temp_dir().canonicalize().unwrap();
++ if let Ok(root)=self.root.canonicalize(){assert_eq!(root.parent(),Some(parent.as_path()));assert!(root.file_name().unwrap().to_str().unwrap().starts_with("skate-conditioner-"));fs::remove_dir_all(root).unwrap();}
++}}
++#[test]fn supported_straight_rails_raised_in_place_and_physics_unchanged(){
++ let f=Fixture::generic();let rails=f.rails();let path=f.write();let physics=fs::read(path.with_file_name("geometry.f64")).unwrap();let world=f.world();
++ let (got,r)=conditioner::condition(&path,"fixture",rails.clone(),|_,_|world.clone()).unwrap();assert_eq!(r.raised_rails,2);assert_eq!(got.len(),rails.len());
++ for (a,b)in got.iter().zip(&rails){for (a,b)in a.iter().zip(b){assert_eq!((a[0],a[2]),(b[0],b[2]));assert_eq!(a[1],-31.);}}
++ assert_eq!(physics,fs::read(path.with_file_name("geometry.f64")).unwrap());assert_eq!(world,f.world());
++ let (again,r)=f.condition(got.clone(),&[]);assert_eq!(again,got);assert_eq!(r.raised_rails,0);
++}
++#[test]fn true_support_gap_is_not_bridged(){
++ let mut f=Fixture::generic();let rails=f.rails();f.translations[3][0]+=10.;let (got,r)=f.condition(rails.clone(),&[]);
++ assert_eq!(got,rails);assert_eq!(r.raised_rails,0);assert_eq!(r.rejected_support,2);
++}
++#[test]fn rotated_scaled_stacked_and_corner_layouts_rejected(){
++ for mode in 0..4{let mut f=Fixture::generic();let rails=f.rails();match mode{
++  0=>f.matrices[2]=[[0.,-1.,0.],[1.,0.,0.],[0.,0.,1.]],
++  1=>f.matrices[2][0][0]=1.01,
++  2=>{f.translations.push([16600.,184000.,-3100.]);f.matrices.push(f.matrices[0]);},
++  _=>f.translations[2][1]+=5.,
++ }let (got,r)=f.condition(rails.clone(),&[]);assert_eq!(got,rails,"case{mode}");assert_eq!(r.raised_rails,0);}
++ let f=Fixture::generic();let mut rails=f.rails();let p=*rails[0].last().unwrap();rails[0].push([p[0],p[1],p[2]+1.]);
++ let (got,r)=f.condition(rails.clone(),&[]);assert_eq!(got[0],rails[0]);assert_eq!(r.raised_rails,1);
++}
++#[test]fn full_span_clearance_catches_small_unsampled_obstructions(){
++ let f=Fixture::generic();let rails=f.rails();let y=f.translations[0][1]-24.;let z=f.translations[0][2]+300.;
++ for extra in [box_triangles([16432.,y-9.01,z-0.5],[16432.1,y-8.99,z+0.5]),
++  box_triangles([16732.,y-0.2,z+8.99],[16732.1,y+0.2,z+9.01])]{
++  let (got,r)=f.condition(rails.clone(),&extra);assert_eq!(got[0],rails[0]);assert_eq!(r.rejected_obstacles,1);assert_eq!(r.raised_rails,1);
++ }
++}
++#[test]fn unrelated_scope_geometry_and_rails_preserved(){
++ let mut f=Fixture::generic();let rails=f.rails();f.package="/Game/World.World".into();assert_eq!(f.condition(rails.clone(),&[]).0,rails);
++ f.package="/SkateRuntime/Buildings/fixture/Lightweight.Lightweight".into();f.tris[0][0][0]+=0.1;assert_eq!(f.condition(rails.clone(),&[]).0,rails);
++ let f=Fixture::generic();let rails=vec![vec![[0.,0.,0.],[20.,0.,0.]]];let (got,r)=f.condition(rails.clone(),&[]);assert_eq!(got,rails);assert_eq!(r.raised_rails,0);
++ let mut f=Fixture::generic();for t in &mut f.tris[..12]{for p in t{if p[2]==297.{p[2]=296.7;}}}let rails=f.rails();assert_eq!(f.condition(rails.clone(),&[]).0,rails);
++}
++#[test]fn f32_probe_boundary_rounding_is_conservatively_enclosed(){
++ let f=Fixture::generic();let rails=f.rails();let y=f.translations[0][1]-24.;let z=f.translations[0][2]+300.;
++ // Entire obstacle is above the old exact-f64 raised box's z+9.1 limit,
++ // but lies inside the f32 coordinate/offset uncertainty envelope.
++ let obstacle=box_triangles([16432.,y-0.02,z+9.14],[16432.1,y+0.02,z+9.16]);
++ assert!(obstacle.iter().flatten().all(|p|p[2]>z+9.1));
++ let (got,r)=f.condition(rails.clone(),&obstacle);
++ assert_eq!(got[0],rails[0]);assert_eq!(r.rejected_obstacles,1);assert_eq!(r.raised_rails,1);
++}
++#[test]fn altered_inputs_and_wrong_identity_rejected(){
++ let f=Fixture::generic();let path=f.write();assert!(conditioner::condition(&path,"wrong",f.rails(),|_,_|vec![]).is_err());
++ let file=path.with_file_name("geometry.f64");let mut bytes=fs::read(&file).unwrap();bytes[0]^=1;fs::write(file,bytes).unwrap();
++ assert!(conditioner::condition(&path,"fixture",f.rails(),|_,_|vec![]).is_err());
++}
++
++fn ray_hit(start:[f32;4],end:[f32;4],tris:&[Triangle])->Option<skate_core::air::trajectory::grind_surface::ProbeHit>{
++ use skate_core::air::trajectory::grind_surface::ProbeHit;
++ let start3=[start[0]as f64,start[1]as f64,start[2]as f64];let delta=[(end[0]-start[0])as f64,(end[1]-start[1])as f64,(end[2]-start[2])as f64];
++ let sub=|a:[f64;3],b:[f64;3]|std::array::from_fn(|i|a[i]-b[i]);
++ let cross=|a:[f64;3],b:[f64;3]|[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
++ let dot=|a:[f64;3],b:[f64;3]|(0..3).map(|i|a[i]*b[i]).sum::<f64>();let mut best=None;let mut limit=1.;
++ for t in tris{let t=t.map(|p|[p[0]*0.01,p[2]*0.01,-p[1]*0.01]);let e1=sub(t[1],t[0]);let e2=sub(t[2],t[0]);let p=cross(delta,e2);let det=dot(e1,p);if det.abs()<1e-15{continue;}
++  let s=sub(start3,t[0]);let u=dot(s,p)/det;let q=cross(s,e1);let v=dot(delta,q)/det;let fraction=dot(e2,q)/det;
++  if u>=0.&&v>=0.&&u+v<=1.&&fraction>=0.&&fraction<=limit{limit=fraction;let n=cross(e1,e2);let len=dot(n,n).sqrt();
++   best=Some(ProbeHit{fraction:fraction as f32,position:[(start3[0]+delta[0]*fraction)as f32,(start3[1]+delta[1]*fraction)as f32,(start3[2]+delta[2]*fraction)as f32,0.],normal:[(n[0]/len)as f32,(n[1]/len)as f32,(n[2]/len)as f32,0.],packed_surface:128});
++  }
++ }best
++}
++#[test]fn original_native_probes_accept_raw_and_raised_synthetic_run(){
++ use skate_core::air::trajectory::grind_surface::{self,InvestigationInput,GeometryType};
++ let f=Fixture::generic();let raw=f.rails();let (raised,r)=f.condition(raw.clone(),&[]);assert_eq!(r.raised_rails,2);let world=f.world();
++ for rails in [raw,raised]{for rail in rails{
++  let a=rail[0];let b=*rail.last().unwrap();let v4=|p:[f32;3]|[p[0],p[1],p[2],0.];
++  for station in 0..=120{let t=station as f32/120.;let reference=std::array::from_fn(|i|a[i]+(b[i]-a[i])*t);
++   let input=InvestigationInput{start:v4(a),end:v4(b),reference:v4(reference),optional_probe:None,deck_center_to_truck:0.2};
++   let result=grind_surface::investigate::<()>(input,|_,p|Ok(ray_hit(p.start,p.end,&world))).unwrap();
++   assert_eq!(result.kind,GeometryType::Ledge,"station{station}");assert_eq!(result.flags&grind_surface::GrindSurface::BLOCKED_CROSS_SECTION,0);
++  }
++ }}
++}
++#[test]
++#[ignore="requires user's private recorded doorway fixture; no game data is bundled"]
++fn recorded_six_doorframes_and_original_probe_acceptance(){
++ let file=std::env::var("SKATE_DOORFRAME_FIXTURE").expect("Provide private recorded fixture path");let v:Value=serde_json::from_slice(&fs::read(file).unwrap()).unwrap();
++ let tris:Vec<Triangle>=serde_json::from_value(v["triangles_cm"].clone()).unwrap();
++ let translations=v["frames"].as_array().unwrap().iter().map(|f|{let t=&f["transform"]["Translation"];[t["X"].as_f64().unwrap(),t["Y"].as_f64().unwrap(),t["Z"].as_f64().unwrap()]}).collect();
++ let f=Fixture::new(tris,translations);let rails:Rails=v["nearby_rails"].as_array().unwrap().iter().map(|r|serde_json::from_value(r["points"].clone()).unwrap()).collect();
++ let (got,report)=f.condition(rails.clone(),&[]);assert_eq!(report.raised_rails,2);assert_eq!(got.len(),rails.len());let world=f.world();
++ use skate_core::air::trajectory::grind_surface::{self,InvestigationInput,GeometryType};
++ let mut stations=0;
++ for (rail,old)in got.iter().zip(&rails){if rail==old{continue;}
++  assert!(report.maximum_rise_cm>3.15&&report.maximum_rise_cm<3.16);
++  let a=rail[0];let b=*rail.last().unwrap();let v4=|p:[f32;3]|[p[0],p[1],p[2],0.];
++  let mut samples:Vec<f32>=(0..=360).map(|i|i as f32/360.).collect();
++  for join in 1..6{for offset in [-0.00001,0.,0.00001]{samples.push(join as f32/6.+offset);}}
++  for t in samples{let reference=std::array::from_fn(|i|a[i]+(b[i]-a[i])*t);
++   let input=InvestigationInput{start:v4(a),end:v4(b),reference:v4(reference),optional_probe:None,deck_center_to_truck:0.2};
++   let result=grind_surface::investigate::<()>(input,|_,p|Ok(ray_hit(p.start,p.end,&world))).unwrap();
++   assert_eq!(result.kind,GeometryType::Ledge,"station{t}");assert_eq!(result.flags&grind_surface::GrindSurface::BLOCKED_CROSS_SECTION,0);stations+=1;
++  }
++ }
++ eprintln!("RECORDED_CONDITIONING raised={} source_probe_stations={stations} maximum_rise_cm={}",report.raised_rails,report.maximum_rise_cm);
++}
+--- /dev/null
++++ b/dragonwilds-skate-worker/tests/offboard_query_equivalence.rs
+@@ -0,0 +1,92 @@
++//! Exact host-adapter regression: original query arithmetic/order remains imported.
++#[allow(dead_code)]
++#[path="../../skate3-mashup/skate/crates/skate-host/src/physics/offboard/contact_toolkit/world.rs"]
++mod optimized;
++#[allow(dead_code)]
++#[path="support/offboard_world_reference.rs"]
++mod reference;
++use skate_core::{math::Vector3,physics::{board_world::{BoardWorld,WorldTriangle,
++    geometry_source::WorldGeometry,query_metadata::{Bounds,QueryMesh,QueryMetadata,QueryPool}},
++    contact::RetailContactMaterial,drive_frames::RetailAffineTransform},
++    player::offboard::{contact_toolkit::{Input,ProbeLayout,QueryResults,Scene},ground_query::{Line,LineHit}}};
++use std::{ops::Range,sync::{Arc,atomic::{AtomicUsize,Ordering}}};
++use serde_json::{Value,json};
++fn material()->RetailContactMaterial {RetailContactMaterial{static_friction:0.7,dynamic_friction:0.4,restitution:0.2}}
++struct Source {triangles:Vec<WorldTriangle>,metadata:QueryMetadata,prepares:AtomicUsize,ranges:AtomicUsize}
++impl Source {fn reset(&self){self.prepares.store(0,Ordering::Relaxed);self.ranges.store(0,Ordering::Relaxed);}fn count(&self)->(usize,usize){(self.prepares.load(Ordering::Relaxed),self.ranges.load(Ordering::Relaxed))}}
++impl WorldGeometry for Source {
++ fn validate(&self)->Result<(),&'static str>{Ok(())}
++ fn triangle_count(&self)->usize{self.triangles.len()}
++ fn metadata(&self)->&QueryMetadata{&self.metadata}
++ fn triangle(&self,i:usize,_:RetailContactMaterial)->Option<WorldTriangle>{self.prepares.fetch_add(1,Ordering::Relaxed);self.triangles.get(i).copied()}
++ fn triangle_bounds(&self,i:usize)->Bounds{Bounds::from_points(self.triangles[i].triangle.vertices).unwrap()}
++ fn packed_surface(&self,i:usize)->u16{self.metadata.packed_surfaces[i]}
++ fn candidate_ranges(&self,b:Option<Bounds>)->Vec<Range<usize>>{self.ranges.fetch_add(1,Ordering::Relaxed);self.metadata.meshes.iter().filter(|m|b.is_none_or(|b|m.local_bounds.overlaps(b))).map(|m|m.triangle_range.clone()).collect()}
++ fn candidate_mesh_indices(&self,b:Option<Bounds>)->Vec<usize>{self.metadata.meshes.iter().enumerate().filter(|(_,m)|b.is_none_or(|b|m.local_bounds.overlaps(b))).map(|(i,_)|i).collect()}
++ fn maximum_fatness(&self)->f32{0.}
++ fn maximum_triangle_margin(&self)->f32{0.001}
++}
++fn fixture(spec:&[(QueryPool,i32,u32)],flags:u32,sloped:bool)->(BoardWorld,Arc<Source>){
++ let triangles:Vec<_>=spec.iter().enumerate().map(|(i,_)|{let slope=if sloped{(i%5)as f32*0.025}else{0.};
++  WorldTriangle::from_vertices([Vector3::new(-4.,-4.*slope,-4.),Vector3::new(-4.,-4.*slope,4.),Vector3::new(4.,4.*slope,0.)],material(),i as u32,0xe0,[1.;3],0.).unwrap()}).collect();
++ let meshes=spec.iter().enumerate().map(|(i,&(pool,group,reject))|QueryMesh{triangle_range:i..i+1,
++  local_to_world:RetailAffineTransform::IDENTITY,world_to_local:RetailAffineTransform::IDENTITY,
++  local_bounds:Bounds::from_points(triangles[i].triangle.vertices).unwrap(),matching_group:group,
++  rejection_flags:reject,geometry:1000+i as u32,pool}).collect();
++ let source=Arc::new(Source{triangles,metadata:QueryMetadata{packed_surfaces:(0..spec.len()).map(|i|(0x400+i)as u16).collect(),meshes,static_edges:vec![],island_flags:flags},prepares:AtomicUsize::new(0),ranges:AtomicUsize::new(0)});
++ (BoardWorld::from_source(source.clone(),material()).unwrap(),source)
++}
++fn vbits(v:Vector3)->[u32;3]{[v.x.to_bits(),v.y.to_bits(),v.z.to_bits()]}
++fn line_bits(hits:Vec<Option<LineHit>>)->Value {json!(hits.into_iter().map(|h|h.map(|h|(vbits(h.position),vbits(h.face_normal),h.fraction.to_bits(),h.packed_surface))).collect::<Vec<_>>())}
++fn result_bits(r:QueryResults)->Value {json!({
++ "trajectories":r.trajectories.map(|q|json!([q.contact_position.map(f32::to_bits),q.contact_normal.map(f32::to_bits),q.landing_normal.map(f32::to_bits),q.contact_time.to_bits(),q.contact_transform.map(|v|v.map(f32::to_bits)),q.contact_frame,q.surface,q.geometry])),
++ "lines":r.lines.into_iter().map(|h|h.map(|h|json!([h.position.map(f32::to_bits),h.normal.map(f32::to_bits),h.fraction.to_bits(),h.surface,h.geometry,h.mesh_frame.map(|v|v.map(f32::to_bits))]))).collect::<Vec<_>>(),
++ "edges":r.edges.into_iter().map(|e|e.map(|v|v.map(f32::to_bits))).collect::<Vec<_>>()})}
++fn input(x:f32,yaw:f32)->Input {let(s,c)=yaw.sin_cos();Input{position:[x,0.,0.,0.],forward:[s,0.,c,0.],up:[0.,1.,0.,0.],right:[c,0.,-s,0.],velocity:[s,0.,c,0.],animation_up:[0.,1.,0.,0.],animation_right:[c,0.,-s,0.]}}
++#[test]
++fn empty_island_and_filtered_pools_do_not_prepare_triangles(){
++ let(w,s)=fixture(&[(QueryPool::Ground,7,0)],0,false);
++ let line=Line{start:Vector3::new(0.,1.,0.),end:Vector3::new(0.,-1.,0.),radius:0.};
++ s.reset();let expected=reference::StaticScene::new(&w).unwrap().lines(&[line],7).unwrap();let old=s.count();
++ s.reset();let actual=optimized::StaticScene::new(&w).unwrap().lines(&[line],7).unwrap();let new=s.count();
++ assert_eq!(line_bits(actual),line_bits(expected));
++ // Ground: one preparation retained; Island: no triangle broadphase/preparation.
++ assert_eq!(old,(3,2));assert_eq!(new,(1,1));
++ s.reset();assert!(optimized::StaticScene::new(&w).unwrap().lines(&[line],99).unwrap()[0].is_none());assert_eq!(s.count(),(0,0));
++ let(w,s)=fixture(&[(QueryPool::Ground,7,0x6000)],0,false);
++ let batch=ProbeLayout::stock().prepare(input(0.,0.),7);
++ s.reset();let expected=reference::StaticScene::new(&w).unwrap().execute(&batch).unwrap();assert!(s.count().0>0);
++ s.reset();let actual=optimized::StaticScene::new(&w).unwrap().execute(&batch).unwrap();assert_eq!(s.count(),(0,0));
++ assert_eq!(result_bits(actual),result_bits(expected));
++}
++#[test]
++fn complete_batches_keep_pool_group_rejection_ties_and_nearby_cap_bit_exact(){
++ for flags in [0,3] {for sloped in [false,true] {
++  let spec:Vec<_>=(0..84).map(|i|{let pool=match i%3{0=>QueryPool::Ground,1=>QueryPool::Island,_=>QueryPool::Conditional};
++   (pool,if i%7==0{17}else{-1},if i%11==0{0x6000}else{0})}).collect();
++  let(w,_)=fixture(&spec,flags,sloped);
++  for group in [-1,7,17] {for (x,yaw)in[(0.,0.),(0.2,0.3),(-0.3,-0.7),(10.,0.)] {
++   let batch=ProbeLayout::stock().prepare(input(x,yaw),group);assert_eq!(batch.lines.len(),44);
++   let expected=reference::StaticScene::new(&w).unwrap().execute(&batch).unwrap();
++   let actual=optimized::StaticScene::new(&w).unwrap().execute(&batch).unwrap();
++   assert_eq!(result_bits(actual),result_bits(expected),"flags={flags} sloped={sloped} group={group} x={x} yaw={yaw}");
++  }}
++ }}
++ // More than64 overlapping eligible faces in one pool exercise ordered cap.
++ let(w,_)=fixture(&vec![(QueryPool::Ground,-1,0);84],0,true);
++ let batch=ProbeLayout::stock().prepare(input(0.,0.),-1);
++ assert_eq!(result_bits(optimized::StaticScene::new(&w).unwrap().execute(&batch).unwrap()),result_bits(reference::StaticScene::new(&w).unwrap().execute(&batch).unwrap()));
++ let(w,_)=fixture(&[(QueryPool::Ground,-1,0),(QueryPool::Island,-1,0),(QueryPool::Conditional,-1,0)],3,false);
++ let line=Line{start:Vector3::new(0.,1.,0.),end:Vector3::new(0.,-1.,0.),radius:0.};
++ assert_eq!(optimized::StaticScene::new(&w).unwrap().lines(&[line],-1).unwrap()[0].unwrap().packed_surface,0x400);
++}
++#[test]
++fn invalid_and_zero_length_requests_keep_original_results(){
++ let(w,_)=fixture(&[(QueryPool::Ground,-1,0)],0,false);
++ for (start,end,radius)in[(Vector3::ZERO,Vector3::ZERO,0.),(Vector3::new(f32::NAN,1.,0.),Vector3::ZERO,0.),(Vector3::ZERO,Vector3::new(0.,1.,0.),-1.)] {
++  let line=Line{start,end,radius};
++  let a=optimized::StaticScene::new(&w).unwrap().lines(&[line],-1);
++  let b=reference::StaticScene::new(&w).unwrap().lines(&[line],-1);
++  assert_eq!(a.is_err(),b.is_err());if let(Ok(a),Ok(b))=(a,b){assert_eq!(line_bits(a),line_bits(b));}
++ }
++}
+--- /dev/null
++++ b/dragonwilds-skate-worker/tests/support/offboard_world_reference.rs
+@@ -0,0 +1,395 @@
++// Frozen pre-optimization host adapter; test oracle only. No source physics changes.
++//!82770B40/82771D08 mesh traversal and82770E00/82772028 nearby collection.
++//!This adapter only accepts BoardWorld's authored static-world contract.
++use skate_core::{
++    air::trajectory::{QueryRequest, QueryResult, SurfaceHit, query_trajectory},
++    math::Vector3,
++    physics::{
++        board_world::{
++            BoardWorld,
++            query_metadata::{QueryMetadata, QueryPool},
++        },
++        triangle_query::{TriangleLineHit, triangle_segment},
++    },
++    player::offboard::contact_toolkit::{
++        Batch, LineHit, LineProbe, QueryResults, Scene, Vector, query_sweep,
++    },
++};
++
++pub struct StaticScene<'a> {
++    world: &'a BoardWorld,
++    metadata: &'a QueryMetadata,
++}
++impl<'a> StaticScene<'a> {
++    ///82C20728/82764AB0: caller-sized lines, poolmask7, facing3, no mesh or
++    ///material exclusion. In particular Air submits SIX lines, Ground seven.
++    pub(crate) fn lines(
++        &self,
++        requests: &[skate_core::player::offboard::ground_query::Line],
++        matching_group: i32,
++    ) -> Result<Vec<Option<skate_core::player::offboard::ground_query::LineHit>>, &'static str>
++    {
++        use skate_core::player::offboard::ground_query::LineHit as GroundHit;
++        let mut output: Vec<Option<GroundHit>> = vec![None; requests.len()];
++        for pool in self.pools() {
++            for (request, destination) in requests.iter().zip(&mut output) {
++                let probe = LineProbe {
++                    start: lanes(request.start),
++                    end: lanes(request.end),
++                    radius: request.radius,
++                };
++                if let Some(hit) = self.line(pool, probe, matching_group, 0)? {
++                    if destination
++                        .as_ref()
++                        .is_none_or(|old| hit.fraction < old.fraction)
++                    {
++                        *destination = Some(GroundHit {
++                            position: vec3(hit.position),
++                            face_normal: vec3(hit.normal),
++                            fraction: hit.fraction,
++                            packed_surface: hit.surface,
++                        });
++                    }
++                }
++            }
++        }
++        Ok(output)
++    }
++    /// 82764CF8 pool mask 7; 82770910 walks the actual accelerated trajectory.
++    /// 8276EE88 retains the first pool on equal contact times. Callers supply
++    /// the actor matching group and the original per-request mesh rejection mask.
++    pub(crate) fn trajectory(
++        &self,
++        request: QueryRequest,
++        matching_group: i32,
++        mesh_reject_mask: u32,
++    ) -> Result<QueryResult, &'static str> {
++        let t = request.trajectory;
++        if !t.duration.is_finite()
++            || t.duration <= 0.
++            || !request.radius.is_finite()
++            || request.radius <= 0.
++            || !request.start_error.is_finite()
++            || request.start_error <= 0.
++            || !request.end_error.is_finite()
++            || request.end_error <= 0.
++            || t.position
++                .into_iter()
++                .chain(t.velocity)
++                .chain(t.acceleration)
++                .any(|value| !value.is_finite())
++        {
++            return Err("Invalid offboard accelerated-trajectory request");
++        }
++        let mut nearest = QueryResult::miss();
++        for pool in self.pools() {
++            let result = query_trajectory(
++                request,
++                |start, end, radius| {
++                    self.line(
++                        pool,
++                        LineProbe { start, end, radius },
++                        matching_group,
++                        mesh_reject_mask,
++                    )
++                    .map(|hit| {
++                        hit.map(|h| SurfaceHit {
++                            position: h.position,
++                            normal: h.normal,
++                            transform: h.mesh_frame,
++                            surface: h.surface as u32,
++                            geometry: h.geometry,
++                        })
++                    })
++                },
++                |center, radius| self.nearby(pool, center, radius, matching_group),
++            )?;
++            if result.valid() && (!nearest.valid() || result.contact_time < nearest.contact_time) {
++                nearest = result;
++            }
++        }
++        Ok(nearest)
++    }
++    pub fn new(world: &'a BoardWorld) -> Result<Self, &'static str> {
++        let metadata = world.query_metadata()?;
++        Ok(Self { world, metadata })
++    }
++    fn pools(&self) -> impl Iterator<Item = QueryPool> {
++        [
++            Some(QueryPool::Ground),
++            Some(QueryPool::Island),
++            (self.metadata.island_flags == 3).then_some(QueryPool::Conditional),
++        ]
++        .into_iter()
++        .flatten()
++    }
++    fn line(
++        &self,
++        pool: QueryPool,
++        probe: LineProbe,
++        group: i32,
++        reject: u32,
++    ) -> Result<Option<LineHit>, &'static str> {
++        if !probe.radius.is_finite()
++            || probe.radius < 0.
++            // The native packet has four SIMD lanes, but static collision and
++            // query_sweep's dot3/length contract consume XYZ only. Lane 3 can
++            // carry non-finite intermediate values (e.g. inf - inf) without
++            // making the spatial segment invalid. Never relax XYZ/radius checks.
++            || probe.start[..3].iter().chain(&probe.end[..3]).any(|x| !x.is_finite())
++        {
++            // Temporary audit-only error detail: preserve the rejected producer
++            // packet and caller chain. Invalid spatial values are never substituted.
++            bevy::log::error!(
++                "OFFBOARD_INVALID_SWEEP start={:?} end={:?} radius={} start_bits={:08x?} end_bits={:08x?} radius_bits={:08x} group={} reject={:08x} caller={}",
++                probe.start,
++                probe.end,
++                probe.radius,
++                probe.start.map(f32::to_bits),
++                probe.end.map(f32::to_bits),
++                probe.radius.to_bits(),
++                group,
++                reject,
++                std::backtrace::Backtrace::force_capture(),
++            );
++            return Err("Invalid offboard swept-line request");
++        }
++        let delta = sub(probe.end, probe.start);
++        if !delta[..3]
++            .iter()
++            .any(|x| x.abs() > f32::from_bits(0x37800000))
++        {
++            return Ok(None);
++        }
++        let start = vec3(probe.start);
++        let direction = vec3(delta);
++        let mut nearest = f32::MAX;
++        let mut output = None;
++        let bounds = self
++            .world
++            .line_candidate_bounds(start, vec3(probe.end), probe.radius);
++        let candidates: Vec<_> = self
++            .world
++            .line_candidates(start, vec3(probe.end), probe.radius)
++            .map(|(index, _)| index)
++            .collect();
++        for mesh_index in self.world.candidate_mesh_indices(bounds)? {
++            let mesh = &self.metadata.meshes[mesh_index];
++            if mesh.pool != pool
++                || !matches(group, mesh.matching_group)
++                || mesh.rejection_flags & reject != 0
++            {
++                continue;
++            }
++            let first = candidates.partition_point(|&i| i < mesh.triangle_range.start);
++            let last = candidates.partition_point(|&i| i < mesh.triangle_range.end);
++            for &index in &candidates[first..last] {
++                let Some(triangle) = self.world.triangle(index) else { continue; };
++                let vertices = triangle.triangle.vertices;
++                let mut hit = TriangleLineHit {
++                    position: Vector3::ZERO,
++                    normal: Vector3::ZERO,
++                    fraction: 0.,
++                    volume_parameter: [0.; 3],
++                };
++                if !triangle_segment(&mut hit, start, direction, vertices, probe.radius, 0.) {
++                    continue;
++                }
++                let lower = if -hit.fraction >= 0. {
++                    0.
++                } else {
++                    hit.fraction
++                };
++                let fraction = if 1. - lower >= 0. { lower } else { 1. };
++                if fraction < nearest {
++                    nearest = fraction;
++                    let transform = mesh.local_to_world;
++                    output = Some(LineHit {
++                        position: lanes(hit.position),
++                        normal: face(vertices.map(lanes)),
++                        fraction,
++                        surface: self.world.packed_surface(index)?,
++                        geometry: mesh.geometry,
++                        mesh_frame: [
++                            vector4(transform.basis.columns[0]),
++                            vector4(transform.basis.columns[1]),
++                            vector4(transform.basis.columns[2]),
++                            lanes(transform.translation),
++                        ],
++                    });
++                }
++            }
++        }
++        Ok(output)
++    }
++    fn nearby(
++        &self,
++        pool: QueryPool,
++        center: Vector,
++        radius: f32,
++        group: i32,
++    ) -> Result<Vec<[Vector; 3]>, &'static str> {
++        let mut output = Vec::with_capacity(64);
++        //82770E00 does not apply the trajectory mesh rejection mask here.
++        let bounds = self
++            .world
++            .line_candidate_bounds(vec3(center), vec3(center), radius);
++        let candidates: Vec<_> = self
++            .world
++            .line_candidates(vec3(center), vec3(center), radius)
++            .map(|(index, _)| index)
++            .collect();
++        for mesh_index in self.world.candidate_mesh_indices(bounds)? {
++            let mesh = &self.metadata.meshes[mesh_index];
++            if mesh.pool != pool || !matches(group, mesh.matching_group) {
++                continue;
++            }
++            let first = candidates.partition_point(|&i| i < mesh.triangle_range.start);
++            let last = candidates.partition_point(|&i| i < mesh.triangle_range.end);
++            for &index in &candidates[first..last] {
++                let Some(triangle) = self.world.triangle(index) else { continue; };
++                let vertices = triangle.triangle.vertices.map(lanes);
++                if triangle_box(vertices, center, radius) {
++                    output.push(vertices);
++                    if output.len() == 64 {
++                        return Ok(output);
++                    }
++                }
++            }
++        }
++        Ok(output)
++    }
++}
++impl Scene for StaticScene<'_> {
++    type Error = &'static str;
++    fn execute(&self, batch: &Batch) -> Result<QueryResults, Self::Error> {
++        let mut trajectories = [QueryResult::miss(); 3];
++        let mut lines = vec![None; batch.lines.len()];
++        for pool in self.pools() {
++            //8276EE88 chooses strict smallest nonnegative time, retaining the
++            //first pool on ties. Normal refinement belongs to that same pool.
++            for (request, output) in batch.trajectories.iter().zip(&mut trajectories) {
++                let start = request.trajectory.position;
++                let end = std::array::from_fn(|i| start[i] + request.trajectory.velocity[i]);
++                let result = query_sweep(
++                    LineProbe {
++                        start,
++                        end,
++                        radius: request.radius,
++                    },
++                    |probe| self.line(pool, probe, batch.matching_group, batch.mesh_reject_mask),
++                    |center, radius| self.nearby(pool, center, radius, batch.matching_group),
++                )?;
++                if result.valid() && (!output.valid() || result.contact_time < output.contact_time)
++                {
++                    *output = result;
++                }
++            }
++            for (probe, output) in batch.lines.iter().zip(&mut lines) {
++                if let Some(hit) =
++                    self.line(pool, *probe, batch.matching_group, batch.mesh_reject_mask)?
++                {
++                    if output
++                        .as_ref()
++                        .is_none_or(|old: &LineHit| hit.fraction < old.fraction)
++                    {
++                        *output = Some(hit);
++                    }
++                }
++            }
++        }
++        Ok(QueryResults {
++            trajectories,
++            lines,
++            edges: self.edges(batch),
++        })
++    }
++}
++impl StaticScene<'_> {
++    /// 82D81610 bounds and 82C1EAD8 ordinary static-edge traversal/capacity.
++    fn edges(&self, batch: &Batch) -> Vec<[Vector; 2]> {
++        let input = batch.input;
++        let center: Vector = std::array::from_fn(|i| {
++            input.up[i].mul_add(
++                0.29999998,
++                input.forward[i].mul_add(0.89999998, input.position[i]),
++            )
++        });
++        let extent: Vector = std::array::from_fn(|i| {
++            input.forward[i].abs().mul_add(
++                0.89999998,
++                input.up[i]
++                    .abs()
++                    .mul_add(1.1, input.right[i].abs() * 0.037500001),
++            )
++        });
++        self.metadata
++            .static_edges
++            .iter()
++            .filter(|edge| {
++                let min = lanes(edge.local_bounds.min);
++                let max = lanes(edge.local_bounds.max);
++                (0..3).all(|i| center[i] - extent[i] <= max[i] && min[i] <= center[i] + extent[i])
++            })
++            .take(40)
++            .map(|edge| [lanes(edge.start), lanes(edge.end)])
++            .collect()
++    }
++}
++fn vector4(v: [f32; 3]) -> Vector {
++    [v[0], v[1], v[2], 0.]
++}
++fn matches(a: i32, b: i32) -> bool {
++    a == -1 || b == -1 || a == b
++}
++fn vec3(v: Vector) -> Vector3 {
++    Vector3::new(v[0], v[1], v[2])
++}
++fn lanes(v: Vector3) -> Vector {
++    [v.x, v.y, v.z, 0.]
++}
++fn sub(a: Vector, b: Vector) -> Vector {
++    std::array::from_fn(|i| a[i] - b[i])
++}
++fn dot(a: Vector, b: Vector) -> f32 {
++    a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
++}
++fn cross(a: Vector, b: Vector) -> Vector {
++    [
++        (-a[2]).mul_add(b[1], a[1] * b[2]),
++        (-a[0]).mul_add(b[2], a[2] * b[0]),
++        (-a[1]).mul_add(b[0], a[0] * b[1]),
++        0.,
++    ]
++}
++fn face([a, b, c]: [Vector; 3]) -> Vector {
++    skate_core::player::offboard::contact_toolkit::triangle_normal([a, b, c])
++}
++///82761698: full edge-cross-axis, coordinate-axis, and face-plane separation.
++///AABB overlap alone must not select a face for normal refinement.
++fn triangle_box(vertices: [Vector; 3], center: Vector, radius: f32) -> bool {
++    let v = vertices.map(|p| sub(p, center));
++    let edges = [sub(v[1], v[0]), sub(v[2], v[1]), sub(v[0], v[2])];
++    let axes = [[1., 0., 0., 0.], [0., 1., 0., 0.], [0., 0., 1., 0.]];
++    let separated = |axis: Vector| {
++        let p = v.map(|x| dot(x, axis));
++        let extent = axis[2].abs().mul_add(
++            radius,
++            axis[1].abs().mul_add(radius, axis[0].abs() * radius),
++        );
++        p[0].min(p[1]).min(p[2]) > extent || p[0].max(p[1]).max(p[2]) < -extent
++    };
++    for edge in edges {
++        for axis in axes {
++            if separated(cross(edge, axis)) {
++                return false;
++            }
++        }
++    }
++    for axis in axes {
++        if separated(axis) {
++            return false;
++        }
++    }
++    !separated(cross(edges[0], edges[1]))
++}

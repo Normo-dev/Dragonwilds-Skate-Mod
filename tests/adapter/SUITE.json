@@ -1,0 +1,192 @@
+{
+  "execution": "Run tools/dev.py test adapter-extra in the chosen Python environment; assembly is not test execution",
+  "external_dependencies": [
+    "lupa",
+    "numpy"
+  ],
+  "files": [
+    {
+      "path": "tests/adapter/test_authored_policy.py",
+      "sha256": "3f7893c0b6e56348e5248a09cc62f069e8bca0d125c4085b6aa6f4befdd39a90"
+    },
+    {
+      "path": "tests/adapter/test_building_baseline.py",
+      "sha256": "63952e9f51469cf0a9bae248320bf4c9365f8ad7ae3d06efab13ed74c18a3d23"
+    },
+    {
+      "path": "tests/adapter/test_building_capture_runner.py",
+      "sha256": "28e2bf07df21fb3db6dce70c0cba65541eb5332d6d2f5f143660b3abdc192fc4"
+    },
+    {
+      "path": "tests/adapter/test_building_collision.py",
+      "sha256": "ca127f7cd31cd668b3196e3c969e2f106379c1f0564fd7eb02eaef46fd0ed7c9"
+    },
+    {
+      "path": "tests/adapter/test_building_native_capture.py",
+      "sha256": "79011a438db3ebc35177ea1751b46a248814010f42a9620a63221af8c0a4e7c9"
+    },
+    {
+      "path": "tests/adapter/test_building_packets.py",
+      "sha256": "ff92ebf767ad21b8d3eeaae83df29365899fb88d2d3755f951ae900fbc1df854"
+    },
+    {
+      "path": "tests/adapter/test_building_scene_gate.py",
+      "sha256": "766b10c5efff3f3896db9f470363526ecdb7a2115768d5e4fca6d41c5c822e0d"
+    },
+    {
+      "path": "tests/adapter/test_building_state.py",
+      "sha256": "88f9fa6205d0b7bff226654736bf99feb5f3238246bf994fab55d006bc753845"
+    },
+    {
+      "path": "tests/adapter/test_cache_worker_reports.py",
+      "sha256": "2e55408d8e04c7aae318ad45c182aed8f3903018deff5f50a883678574cb189b"
+    },
+    {
+      "path": "tests/adapter/test_exposed_manifest24_performance.py",
+      "sha256": "cc60748a73278619b82858ef0db04c8f10478f1bfa657a269b90216e461ac9b6"
+    },
+    {
+      "path": "tests/adapter/test_exposed_setup_lifecycle.py",
+      "sha256": "8e7b89ab65a42913251c19e64cc5acc277873e8c56a6978b9d5d5e9fdce020c3"
+    },
+    {
+      "original_source_sha256": "7f1f98fbb887002445ece9fb4615a763d1accf5b5b8fef28d68ae6743efe20e8",
+      "path": "tests/adapter/test_gameplay_input_gate.py",
+      "portability_change": "Replace author-time captured probe/configuration fixtures with synthetic metadata; runtime and test assertions retained",
+      "sha256": "c6953c86ff3d8521ed3c7bcc42dc88b08c83d1fb3d7180c05e4c852f31b684e8"
+    },
+    {
+      "path": "tests/adapter/test_host_appearance.py",
+      "sha256": "c7e7404488b54f93d6ba0a12cb3897260a0dd763bf92f8787bc5a9b021ac80b0"
+    },
+    {
+      "path": "tests/adapter/test_input_fixture.py",
+      "sha256": "8acae3991e914dba8399bb875b8103adb55a9bd138e0d1e9347da30ae58ad826"
+    },
+    {
+      "path": "tests/adapter/test_json_precision.py",
+      "sha256": "7d2920ac21eebfcfe761203b5b7e4bdc3f644791f0b6dc1dc13d5512cb91a0fa"
+    },
+    {
+      "path": "tests/adapter/test_mount_control.py",
+      "sha256": "f0d0e6344d59cb2bcad597a99b53fa86f7c5d2055efa26e23341b2680f3968e8"
+    },
+    {
+      "path": "tests/adapter/test_mount_interaction.py",
+      "sha256": "1fd6d557c8820733a96e075e4c0f07d3b26a70eb7f9182c6d5a2d1562fb8aa3e"
+    },
+    {
+      "path": "tests/adapter/test_relay_entry_floor.py",
+      "sha256": "7c34fa9be313431206684c55cb58da6864bf386333a1ffd5a33af55660cf2788"
+    },
+    {
+      "path": "tests/adapter/test_relay_entry_focus.py",
+      "sha256": "0e3da944ec70e7c597bc17297cd9a200692851eca0af78177a43c66b706bf4be"
+    },
+    {
+      "path": "tests/adapter/test_relay_entry_protocol.py",
+      "sha256": "bd21891f7132bbe14879761ac1ec903a17cde6fea4eacfec4741143c134e8fd2"
+    },
+    {
+      "path": "tests/adapter/test_relay_reload_prewarm.py",
+      "sha256": "160f15c538b0152ab9ef1c38acaed707db654ce3379c8436f49694f655eeb6f1"
+    },
+    {
+      "path": "tests/adapter/test_skate_asset_import.py",
+      "sha256": "cd30251ca3208420d60684b0eab0e8e3b67af6cef79033e17b2a6d7b0247f4ab"
+    },
+    {
+      "path": "tests/adapter/test_skate_building_metadata.py",
+      "sha256": "58908194d7da298196ce1888629976556c7ac0042499434692200966eabf0ff2"
+    },
+    {
+      "path": "tests/adapter/test_skate_building_setup.py",
+      "sha256": "f5cbf5b7ed9f7a8633d87f9c01f08a213968c9c7af8d59e0e579d05cb737dd62"
+    },
+    {
+      "path": "tests/adapter/test_skate_cache_background.py",
+      "sha256": "41cfc40d060e217af06836f1a1ed8816a78921a98102b6167c329fca0fc4cfcd"
+    },
+    {
+      "path": "tests/adapter/test_skate_cache_retention.py",
+      "sha256": "bab44e93c09c8675090b13ed29a0b20ebef27c44c64d0fb2aead4920bc695c77"
+    },
+    {
+      "path": "tests/adapter/test_skate_checkpoint_worker.py",
+      "sha256": "22988b2cac49cd758e81bd78992a1f291e0ed02246cd112ae8c5c6113cffb83c"
+    },
+    {
+      "path": "tests/adapter/test_skate_export_command.py",
+      "sha256": "85c7a76ae95e37ac038dc83aee2d1f259282feb4125a0aef23f1ae582ec4dc1b"
+    },
+    {
+      "path": "tests/adapter/test_skate_exposed_cache.py",
+      "sha256": "2b08004954b4618dc33addba453af991465a59b5d54b7e84adf13cb93a7ee746"
+    },
+    {
+      "path": "tests/adapter/test_skate_grind_cache.py",
+      "sha256": "35581f5aded5ec3db96286c803ec045f3bb16255b3709be4ca7d6dbdf99416a9"
+    },
+    {
+      "path": "tests/adapter/test_skate_launcher.py",
+      "sha256": "546ce45403878fe6a96b0d0ff7028ffba55d5f2eddd06bbce632789449c50e33"
+    },
+    {
+      "path": "tests/adapter/test_skate_loading_progress.py",
+      "sha256": "7493689cc4760a91f480719da0ede80f635040a9b24ad19065485f2f5b951ab6"
+    },
+    {
+      "path": "tests/adapter/test_skate_map_cache.py",
+      "sha256": "9a2797b5629b7e1199180118e109033968f44609f42e120eaa5098b081a963b1"
+    },
+    {
+      "path": "tests/adapter/test_skate_observed_world.py",
+      "sha256": "adf77f94ba0832996af27c3bc72bb00642b4a40a41d11a34369b04d6a28775d4"
+    },
+    {
+      "path": "tests/adapter/test_skate_overlay_reuse.py",
+      "sha256": "3ca7ebf27ef21eee669cd95ef625ebff759848b63f052a941be39dfc8df7c847"
+    },
+    {
+      "path": "tests/adapter/test_skate_preflight.py",
+      "sha256": "75925c3c2f9befb2776975c186969e7436a4531fb65a8556d96f2d3914de8db8"
+    },
+    {
+      "path": "tests/adapter/test_skate_process.py",
+      "sha256": "33b138bb185d94b3159be3e7303a58130f952f0479755ab752ebef2ea86e53a4"
+    },
+    {
+      "path": "tests/adapter/test_skate_progress.py",
+      "sha256": "faa80105b9cabec308a50c1a69e039d492d68016dd3b414611b55f1035d74358"
+    },
+    {
+      "original_source_sha256": "43cbe9429a88d57e5391120a9b9e76063141098d356cd7ce8b44405ccd474097",
+      "path": "tests/adapter/test_skate_setup.py",
+      "portability_change": "Replace author-time captured probe/configuration fixtures with synthetic metadata; runtime and test assertions retained",
+      "sha256": "dc86bf639a2e0ad47c431c4fcb7994fdcb441f2cf99ab738b4661176d8449701"
+    },
+    {
+      "path": "tests/adapter/test_skate_setup_progress.py",
+      "sha256": "839475859975f1e63f79aed1070115d66bff7dcad64fcbaec707e2032b65f8eb"
+    },
+    {
+      "path": "tests/adapter/test_skate_setup_tools.py",
+      "sha256": "a96bb7c044c025baf08c8b765b2471838b6b53e5ee3e3fe37b2c680b28e08f13"
+    },
+    {
+      "path": "tests/adapter/test_skate_world_export.py",
+      "sha256": "5bb6f7138e5acceadb044d903b964690eaabbbb27c4c753899de4895f7a658e0"
+    },
+    {
+      "path": "tests/adapter/test_spell_wheel_block.py",
+      "sha256": "22205549bb4e73f722655d57dc9583777a6909c91e462e7b9fcf43c9de0527cf"
+    },
+    {
+      "path": "tests/adapter/test_warm_world.py",
+      "sha256": "9841c3816efaffb4feebcdd5bb07ce2a29940004d32183529a6b53379747a83d"
+    }
+  ],
+  "layout": "temporary_app_and_host_probe_v1",
+  "release_manifest_sha256": "69ec5ef82d916bc6de3511011def3774ee9b7d99a358794b18facc6760235ae6",
+  "schema": 1
+}

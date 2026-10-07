@@ -1,0 +1,228 @@
+{
+  "schema": 1,
+  "status": "Candidate15 remapped binary verified in isolated native tests; live host entry remains pending human validation",
+  "scope": "Host broadphase query reuse and persistent original-lip preparation; imported core/physics/animation unchanged",
+  "baseline_source_archive_sha256": "c90fe3d21645e269cea0f7983d4e94ffd5d20368a1010bfb4df7d1b9e95a2423",
+  "baseline_artifact_sha256": "2aa87d23958a0701f81cac200477fdac21ebae90f0d030569e2a5062d1af6c61",
+  "native_files": [
+    {
+      "path": "dragonwilds-skate-worker/src/main.rs",
+      "sha256": "e32887af4a27ef75eb29f8c087ff15ac57d62a4dbe16a17e4ad8b2b07f6ec030",
+      "candidate12_sha256": "1a40e53ba56484e98c121bb46093849ca1b5e32b72565fdd702bbb9e3aca6050"
+    },
+    {
+      "path": "dragonwilds-skate-worker/src/compact_rails.rs",
+      "sha256": "4d086947cc8e08234f2b71eea800ed531b5483b03e7fd835cf9f87c753e3ff7c",
+      "candidate12_sha256": "652a67c1322a8f0d3604d418640ff037c4ca3c70471e0562a6e4ef1af7d16d4a"
+    },
+    {
+      "path": "dragonwilds-skate-worker/src/compact_world.rs",
+      "sha256": "f4eea27f1193eacfd365febac5e5680bc5dfbcd3eb97c28bdaf3d7f7224513e9",
+      "candidate12_sha256": "0b0c6c76287988a3e9a80baaa5f3b211c214039163c6d7f565a1c21659686848"
+    },
+    {
+      "path": "dragonwilds-skate-worker/src/world_runtime.rs",
+      "sha256": "9fc8b175adb7264c081419dc3463174d24ec425261e5323d84840bf164452321",
+      "candidate12_sha256": "fc3a781a241258d42679864d298e773bb6a61fb8103a93f6a29fc263a2414a5f"
+    },
+    {
+      "path": "dragonwilds-skate-worker/src/scene_rail_cache.rs",
+      "sha256": "c1df95c90bcf97e28e79bc214f4b6d715a34be8a3ce60f5c45bc95373e863fc8",
+      "candidate12_sha256": null
+    },
+    {
+      "path": "dragonwilds-skate-worker/tests/compact_rails.rs",
+      "sha256": "db7c4e6300972b2da9d2f1db4fd97cee01c0bdce3a0c8ef7cf283a0befbe431d",
+      "candidate12_sha256": "a0d44a6e1752c185bef118f600708f22b3fedea27799d3f156d7055f71c16c27"
+    },
+    {
+      "path": "dragonwilds-skate-worker/tests/compact_world_reader.rs",
+      "sha256": "0254b20e4ec73dace65b91c3ce7eed838c09565f1aa7f80fa842131b90f8e0ca",
+      "candidate12_sha256": "7323ec8b50febaf1ba6eae8425e85030765703225298cfb6b7bebfd6a1c89da9"
+    },
+    {
+      "path": "dragonwilds-skate-worker/tests/scene_rail_cache.rs",
+      "sha256": "16d140cd614c20022bec72b55473728cb3c46567f9024c45bdb1c9b474156e31",
+      "candidate12_sha256": null
+    }
+  ],
+  "patch": "patches/dragonwilds-scene-rail-cache.patch",
+  "checks": {
+    "worker_suite": {
+      "passed": 47,
+      "failed": 0,
+      "ignored_owned_data_cases": 5
+    },
+    "offline_prepare_world": {
+      "passed": 6,
+      "cases": [
+        {
+          "check": "base_cold_no_session",
+          "seconds": 0.49266869999701157,
+          "lips": 645
+        },
+        {
+          "check": "base_warm_reuse",
+          "seconds": 0.10039259999757633
+        },
+        {
+          "check": "damaged_census_rebuilt",
+          "seconds": 0.13597860001027584
+        },
+        {
+          "check": "scene_cold_persisted",
+          "seconds": 0.13447370001813397,
+          "lips": 8
+        },
+        {
+          "check": "scene_warm_reuse",
+          "seconds": 0.14768339996226132
+        },
+        {
+          "check": "invalid_manifest_no_ready",
+          "seconds": 0.0916469999938272
+        }
+      ],
+      "report_sha256": "2846073dfb0ef820a6d275515b8ac231aad11a84640bdcad7d0752018edcbe0d"
+    },
+    "private_path_audit": {
+      "ascii_passed": true,
+      "utf16_passed": true,
+      "report_sha256": "f96602e7ad13c92a4b3b730117dcb65d6552d94112692c2566fc9f7f6224cc65"
+    },
+    "actual_scene_cold": {
+      "passed": true,
+      "init_seconds": 472.88354820001405,
+      "init_memory_bytes": {
+        "peak_working_set": 9830744064,
+        "working_set": 1275072512,
+        "pagefile": 1639280640,
+        "peak_pagefile": 9848197120
+      },
+      "final_memory_bytes": {
+        "peak_working_set": 9830744064,
+        "working_set": 1276694528,
+        "pagefile": 1639624704,
+        "peak_pagefile": 9848197120
+      },
+      "active_triangles": 77012155,
+      "triangle_ordinals": 79247792,
+      "merged_rails": 1844485,
+      "tick_after_recovery": 538,
+      "source_surface_verified": true,
+      "run_count": 2,
+      "run_frames": [
+        124,
+        125
+      ],
+      "final_states": [
+        "PhysicsGround",
+        "PhysicsGround"
+      ],
+      "result_sha256": "11c6e06a9b6b6000731deea5e55332f28c91e7af8e6f6632b1276d8dcfab1bf5",
+      "native_log_sha256": "ab66d4f9320b975555d1973593f848e4857b33a05e86f3247aa4c1968219b06d"
+    },
+    "actual_scene_warm": {
+      "passed": true,
+      "init_seconds": 43.47884980001254,
+      "init_memory_bytes": {
+        "peak_working_set": 1778941952,
+        "working_set": 1271312384,
+        "pagefile": 1588158464,
+        "peak_pagefile": 2112360448
+      },
+      "final_memory_bytes": {
+        "peak_working_set": 1778941952,
+        "working_set": 1273294848,
+        "pagefile": 1588850688,
+        "peak_pagefile": 2112360448
+      },
+      "active_triangles": 77012155,
+      "triangle_ordinals": 79247792,
+      "merged_rails": 1844485,
+      "tick_after_recovery": 538,
+      "source_surface_verified": true,
+      "run_count": 2,
+      "run_frames": [
+        124,
+        125
+      ],
+      "final_states": [
+        "PhysicsGround",
+        "PhysicsGround"
+      ],
+      "result_sha256": "0392bd66cb145cd4d690b22d3671e9b3a8fc8494c233e18109303c47fcffcc1c",
+      "native_log_sha256": "8c3255c675e941e18b72634507d297964f05dfc18841fbd881acac143ba682a9"
+    }
+  },
+  "assets_included": false,
+  "published": false,
+  "patch_sha256": "dc5f70511ea45b0809a2d9e2460f6b27ae9ac561a8b5d57198948fec594c6cc4",
+  "artifact_sha256": "a449f3edfd4a245c72545fe2286bd94d8470d952d660fa5414b83576a511139e",
+  "artifact_bytes": 6604800,
+  "compiled_source_sha256": "49ecec72aaac5348f8cc11c2f2dc44cbc3e64683df15517ea01dcfe36c5515b8",
+  "compiled_source_records": 1231,
+  "compiled_source_hash_algorithm": {
+    "selection": "Every SOURCE-PROVENANCE.json files entry whose relative POSIX path ends .rs or has basename Cargo.toml or Cargo.lock",
+    "records": "Objects containing only path and lowercase sha256, sorted lexicographically by path",
+    "encoding": "UTF-8 of Python json.dumps(records, sort_keys=True, separators=(',', ':'), ensure_ascii=True)",
+    "digest": "SHA256"
+  },
+  "build": {
+    "toolchain": "rustc 1.96.0",
+    "target": "x86_64-pc-windows-msvc",
+    "profile": "debug (dev optimized)",
+    "command": "Build-Worker.ps1 -Mode Build -Offline -Jobs 4 (explicit Cargo, Rustc, Python, Registry and TargetDirectory paths)",
+    "incremental": false,
+    "rustflags": [
+      "--remap-path-prefix=<source root both separator variants>=/source/dragonwilds-skate",
+      "--remap-path-prefix=<Cargo registry both separator variants>=/cargo/registry"
+    ],
+    "checked_rustc_bound": true,
+    "caller_wrappers_cleared_and_restored": true,
+    "source_verified_before_tests_and_build": true,
+    "test_before_build": true,
+    "build_log_sha256": "8357ea5e82ec9d78297d0826d490567615bd1dc0fd86dd2c24b689c9d2200a35"
+  },
+  "scene": {
+    "base_fingerprint": "1420cc46b50c70f92533d76ef0f8d79005f00e20bcfa9e1f0034aa70459ea288",
+    "scene_fingerprint": "ed39f9b26cc1629d1bfac1068e4cc54e370c6c6d272e25468533ecfba31e2b7a",
+    "lip_count": 3248564,
+    "candidate_count": 48734134,
+    "scene_cache_version": 3,
+    "scene_cache_key": "f981d58cee2cb44a9f826be3fd7ce6ed7b3af8e6e720c43ba88bf768cecd5b3e",
+    "cold_overlay_ms": 431984,
+    "warm_cache_read_ms": 1106,
+    "captured_feet_to_verified_floor_cm": 530.7679881717,
+    "test_placement": "Independent exact terrain intersection at captured XY, not the elevated captured pawn feet",
+    "captured_elevation_cause": "Unresolved; mounted or elevated host state has not been proved",
+    "surface_diagnosis_sha256": "280c1d9ef443ca3015ba0b3811dcac877b7e8cb3b0ac563ba32baad20b0b9daf",
+    "terrain_mip_evidence_sha256": "b5ecc539dbcb309e5a89cf8d3dcdf06f30f0cec997e390c8a2ee56e7bcc98703"
+  },
+  "algorithm": [
+    "Batched broadphase returns the same sorted global triangle-ID union as individual finite AABB queries.",
+    "Covered endpoint ownership shortcuts require one original changed box to contain the whole original endpoint query; otherwise the exact global query is retained.",
+    "Canonical owners and original lip predicates are preserved; initial preparation uses four bounded workers and restores input order; live updates remain two workers.",
+    "Scene keys bind exact base and scene identities, ordered base lips and census, algorithm source and Cargo.lock.",
+    "S3L1 version3 verifies the complete header and payload digest, exact lengths/count limits and finite records; temporary output is flushed, synced and atomically published.",
+    "Only permanent base files retain explicitly tested version2 compatibility; scene cache identity requires version3.",
+    "Revision-only identical scene content reuses the cache. Actual changed scene content misses. Interrupted or corrupt scene output cannot report cache readiness."
+  ],
+  "runtime_assertions": [
+    "Original imported mount motion exposes successive finite animated bone poses at both headings",
+    "Original PhysicsGround reached after throw-down",
+    "Held mount input cannot immediately toggle off; release and re-press reaches original dismount",
+    "Source tick advances continuously",
+    "Camera output remains finite and local to root",
+    "Activate recovery cancels pending summon"
+  ],
+  "limits": [
+    "No live game input, production IPC or deployment occurred in these tests.",
+    "No continuous player-driven route across the entire map has been validated.",
+    "The 5.31m captured capsule-to-floor discrepancy still requires trustworthy live host state before entry.",
+    "No collidable live spline was present in this capture; authored spline geometry was included.",
+    "Cold scene preparation still takes about 7.9 minutes and peaks near 9.2GiB working set; warm Session startup takes about 43.5 seconds.",
+    "Original HashMap-based rail merging can vary segment representatives/counts between processes despite identical retained lips.",
+    "The two inherited core unit failures and incomplete optional host test harness remain documented in UNIT-BASELINE-REPORT.json; the 47 passing worker tests are a separate scope."
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "schema": 2,
+  "status": "Candidate21 source-level and bounded owned-fixture gates passed; full-map cold/warm/edit proof and live gameplay acceptance remain separate release gates",
+  "artifact_sha256": "6548829d22043109c4321c7aa3c1b9ec214f22499d335945ce781295cb499ab2",
+  "compiled_source_sha256": "44bcbccbdfc2e01849b30272288f9c4a903cb1b58995b08b24271a27803fbd34",
+  "compiled_source_records": 1252,
+  "compiled_source_hash_algorithm": {
+    "selection": "Every SOURCE-PROVENANCE.json files entry whose relative POSIX path ends .rs or has basename Cargo.toml or Cargo.lock",
+    "records": "Objects containing only path and lowercase sha256, sorted lexicographically by path",
+    "encoding": "UTF-8 of Python json.dumps(records, sort_keys=True, separators=(',', ':'), ensure_ascii=True)",
+    "digest": "SHA256"
+  },
+  "verification": "EXPOSED-EDGE-VERIFICATION.json",
+  "verification_sha256": "d78201ed79187b61fd810988a9772a37949f366bce04d9dd11d6f55a13f38ff6",
+  "previous_verification": "SCENE-CACHE-VERIFICATION-20.json",
+  "previous_verification_sha256": "0df35e7b983cdf0725a7082914fa9d9ca1c8fa54cab32cb6c11eb8997aad08aa",
+  "assets_included": false,
+  "published": false
+}

@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "component": "buildings",
+  "artifact_sha256": "2bd2967d85cd7c89a579a2aa9b817f4b54294f95b6095b77125d3735a6da8cad",
+  "artifact_bytes": 204800,
+  "compiled_source_sha256": "97df9697e0deb5e891b1024d7e912a3cba03c98503f8cbca409b9409e3643558",
+  "compiled_source_hash_algorithm": "SHA256 of sorted {path,sha256} records, JSON sort_keys=true, separators=(comma,colon), ensure_ascii=true, UTF-8",
+  "files": [
+    {
+      "path": "Cargo.lock",
+      "sha256": "6315024652ea1516d3bf3eef2c0a095dc941ea57048da2ace2ec0f97cc31902c"
+    },
+    {
+      "path": "Cargo.toml",
+      "sha256": "c33c0c1ddc4c690ce21604f4039a7e40d019d21a7b50f4f4620bf0d3cadf2afd"
+    },
+    {
+      "path": "src/game_constants.rs",
+      "sha256": "1e772d48b06c5d925e7444d023823b3a6d6e2f7875270cafc9ecfcc125a448e2"
+    },
+    {
+      "path": "src/lib.rs",
+      "sha256": "70982c7e2eff88d27705dddba041e3b6e28cbf3e14a10d39007c1cba6a35dc8d"
+    },
+    {
+      "path": "src/loader_constants.rs",
+      "sha256": "724947af59814d14d8786829ee9f7aabb617f5c2b5a76fe998fbf46efc12b72e"
+    },
+    {
+      "path": "src/mass.rs",
+      "sha256": "3c2e6182d8420cf3b438f2f696fb66d82439edec76d3f50674ae1be6f8f11c97"
+    },
+    {
+      "path": "src/mass/tests.rs",
+      "sha256": "fadd6550f7e3b759ab8bacc584fc6eab8deab29812e1d93da122273afbabdc7d"
+    },
+    {
+      "path": "src/mass_signatures.rs",
+      "sha256": "b98a0aba362052b068b5a0e553b4dec414bf94d7b1e2ca080b5d6c63a18bc489"
+    },
+    {
+      "path": "src/tests.rs",
+      "sha256": "4ffb67ea289fb1a37ef7034771bb334a9e9ed8c9e670520325a5fc9ab31889f4"
+    }
+  ],
+  "build": "Build.ps1: cargo test --locked --offline then cargo build --release --locked --offline; source/target/Cargo/user paths remapped",
+  "toolchain": {
+    "rustc": "1.96.0",
+    "commit": "ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96",
+    "host": "x86_64-pc-windows-msvc",
+    "llvm": "22.1.2"
+  },
+  "native_tests": {
+    "passed": 20,
+    "failed": 0,
+    "ignored": 0
+  },
+  "source_status": "Exact self-contained snapshot of the designated helper source; all compiled inputs byte-identical to the native reader verified by the complete live snapshot",
+  "read_only": true,
+  "original_skate_physics_changed": false,
+  "verification_scope": "Native mock/RPM tests and exact source parity with the previously verified complete live reader. Fresh artifact packaging does not constitute a new game playtest.",
+  "exports": [
+    "skate_building_ids",
+    "skate_building_read",
+    "skate_building_read_bodies"
+  ],
+  "rule_sha256": "fff6781d8b400f733940c983744a06e57a009d0bc06a6781398c1796ef7cb4fe"
+}

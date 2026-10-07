@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "licensed_revision": "4488651c35c44365faa1ba38eed5758b6ebde714",
+  "earlier_revision_for_comparison_only": "cb7968930f14dad38457e98720d1a274e469eec2",
+  "merge_conflicts": 0,
+  "local_core_adaptations": [
+    {
+      "path": "crates/skate-core/src/physics/board_world/broadphase.rs",
+      "classification": "local geometry adaptation",
+      "merge_conflicts": 0,
+      "upstream_changed": false
+    },
+    {
+      "path": "crates/skate-core/src/physics/board_world/geometry_source.rs",
+      "classification": "new local geometry abstraction",
+      "merge_conflicts": 0
+    },
+    {
+      "path": "crates/skate-core/src/physics/board_world/tests.rs",
+      "classification": "local geometry adaptation",
+      "merge_conflicts": 0,
+      "upstream_changed": false
+    },
+    {
+      "path": "crates/skate-core/src/physics/board_world.rs",
+      "classification": "local geometry adaptation",
+      "merge_conflicts": 0,
+      "upstream_changed": true
+    },
+    {
+      "path": "crates/skate-core/src/physics/tests/board_world.rs",
+      "classification": "formatting only; use licensed snapshot unchanged",
+      "merge_conflicts": 0
+    }
+  ],
+  "upstream_additions": [
+    "crates/skate-core/src/camera/manual_cam.rs",
+    "crates/skate-core/src/input/gameplay_gestures.rs",
+    "crates/skate-net/src/prediction.rs",
+    "crates/skate-net/tests/application.rs",
+    "crates/skate-net/tests/high_speed.rs",
+    "crates/skate-net/tests/prediction.rs"
+  ],
+  "upstream_deletions": [
+    "crates/skate-net/tests/mods.rs"
+  ],
+  "host_api_change": {
+    "path": "skate3-mashup/skate/crates/skate-host/src/physics/wipeout_states/update.rs",
+    "change": "Pass ProcessedPhysicsInput p to wipeout control_ground::update"
+  },
+  "behavior_changes_to_regress": [
+    "Optional BoardWorld ExternalQueries hook coexists with local WorldGeometry source",
+    "Board motion finite/subnormal guards and degenerate skeleton-axis fallback",
+    "Attached-body board contact reports and solved reactions",
+    "Wipeout ground axis from processed input",
+    "Offboard scratch vector W-lane sanitization",
+    "Collection lookup indexing and profile overrides",
+    "Network budgets, priorities and rate saturation"
+  ],
+  "scope_notes": [
+    "The licensed snapshot supplies complete core/data/net source, including previously omitted tests/examples",
+    "Four upstream data UI examples require skate-game, which is not bundled; select --lib --tests for the three-crate suite",
+    "The original Apache NOTICE describes its full parent repository; only host and rail finder code is copied here",
+    "Binary and converter redistribution, dependency source/license inventory and final release approval remain separate"
+  ],
+  "compiled": true,
+  "game_assets_included": false,
+  "converter_included": false,
+  "post_audit_host_fix": {
+    "files": [
+      "skate3-mashup/skate/crates/skate-host/src/camera/world_query.rs",
+      "skate3-mashup/skate/crates/skate-host/src/camera/runtime.rs",
+      "dragonwilds-skate-worker/tests/camera_world_query.rs",
+      "dragonwilds-skate-worker/src/compact_geometry.rs"
+    ],
+    "scope": "Reject non-finite camera XYZ/delta before whole-world broadphase; preserve finite rays and unused W semantics",
+    "diagnostics": "Runtime error context and opt-in SKATE_WORLD_QUERY_DIAGNOSTICS logging",
+    "focused_tests_reported_by_native_agent": 3,
+    "independent_read_only_review": "passed",
+    "licensed_candidate_compiled": true
+  },
+  "worker_tests": {
+    "passed": 39,
+    "failed": 0,
+    "ignored": 5
+  }
+}

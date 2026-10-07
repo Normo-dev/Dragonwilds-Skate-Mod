@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "artifact_sha256": "2aa87d23958a0701f81cac200477fdac21ebae90f0d030569e2a5062d1af6c61",
+  "artifact_bytes": 6366720,
+  "baseline_artifact_sha256": "cb6ea866d848bafe536bebdbe56427119189fddac8342e2ce82ef6aedfff180d",
+  "baseline_source_archive_sha256": "7d1a832ec6836383f51dd7727e683245ba3b4ed6d4bef7ddca917f004f4de8f2",
+  "scope": "Host entry lifecycle and JSON command only; no core, collision, grind or source animation changes",
+  "files": [
+    {
+      "path": "skate3-mashup/skate/crates/skate-host/src/physics/bridge.rs",
+      "sha256": "0abcf297f15794a50ec8123c1cb158caeb04878bb4d0b00be6d3190172b8ae25",
+      "previous_sha256": "52cfb5d33556ef3422cadaef78f1c703943be1919a955eb1013197cdae70b7cd"
+    },
+    {
+      "path": "skate3-mashup/skate/crates/skate-host/src/physics/bridge_summon.rs",
+      "sha256": "36a673e6ee313c704a483af0d2a5f4aabcc8f53ceabe28cc51ecbe5b167a6c04",
+      "previous_sha256": null
+    },
+    {
+      "path": "dragonwilds-skate-worker/src/main.rs",
+      "sha256": "1a40e53ba56484e98c121bb46093849ca1b5e32b72565fdd702bbb9e3aca6050",
+      "previous_sha256": "176495eb6e03a6a6194a99ad408351e3ff596c98fce5eb180def700c7ff58552"
+    }
+  ],
+  "reversible_patch": {
+    "path": "patches/dragonwilds-original-summon.patch",
+    "sha256": "be72a7e45a729e08d879e72a7643c119689acc1bf86d2be9097704918f3eac1a",
+    "reverse_apply_check": true
+  },
+  "command": {
+    "op": "summon",
+    "spawn": "[x,y,z] source metres, finite",
+    "heading": "finite source yaw radians"
+  },
+  "response": "summon: phase, error, motion_state, holding_board, supported, locomotion",
+  "phases": [
+    "waiting_ground",
+    "mount_queued",
+    "mounting",
+    "riding",
+    "failed"
+  ],
+  "behavior": [
+    "Prepare the original offboard actor through its manual teleport path",
+    "Wait for supported OffBoard standing and board ownership before one original Y rising edge",
+    "Run original ActionGraph/MotionGraph; FromStand selects owned BR_STAND_0_INTO_MOUNT",
+    "Stream normal original poses throughout the transition",
+    "After mount, suppress held Y until physical release; resume all other controls",
+    "Existing activate remains the immediate recovery path and cancels queued summon"
+  ],
+  "checks": {
+    "flat_fixture": {
+      "passed": true,
+      "results_sha256": "9e0fea2b894117a432d22507852845baf88817b9e3d656d541d8d35c66e2fcdd",
+      "headings": [
+        0,
+        "pi"
+      ]
+    },
+    "complete_world_distant_pad": {
+      "passed": true,
+      "results_sha256": "a6463ef4340d5879f40be824c69f8e965158b4a82255972f6c4a1c4d859eebbb",
+      "headings": [
+        0,
+        "pi"
+      ],
+      "triangles": 76537305,
+      "requires_owned_generated_world": true
+    },
+    "actual_relay_cache_renderer": {
+      "passed": true,
+      "results_sha256": "95eaa4d8a6509677147a61001e231fcf411aa01b2a75e22cf2a6a6963056a8de",
+      "checks": 9,
+      "retargeted_frames": 76,
+      "body_transforms": 84,
+      "board_transforms": 8,
+      "fixture_triangles": 12
+    },
+    "held_y_release_then_original_dismount": true,
+    "activate_cancels_pending_summon": true,
+    "finite_animation_camera_and_continuous_ticks": true
+  },
+  "limits": [
+    "Previous complete 36-heading sweep belongs to the baseline artifact; current patch is separately checked as listed",
+    "No fresh live-scene overlay or end-to-end user-driven route is claimed",
+    "Inherited upstream unit failures and incomplete original host test harness remain documented in UNIT-BASELINE-REPORT.json"
+  ],
+  "build_log_sha256": "76103ed87d4424123ddb737aecb95c3a9d0dca41aff89afa674a435a410fa2d9",
+  "test_source": "tools/check_original_summon.py",
+  "assets_included": false,
+  "published": false
+}

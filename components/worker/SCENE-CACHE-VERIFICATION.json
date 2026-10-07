@@ -1,0 +1,19 @@
+{
+  "schema": 2,
+  "status": "Candidate24 native replay, incremental scene and public regression gates passed. Public/live gameplay acceptance and minimum hardware requirements remain unverified.",
+  "artifact_sha256": "7faa98dc3f96d27354bdd1d848142335d70a884b2dc632c91a8457e4c95309de",
+  "compiled_source_sha256": "42cc0f55ec36caa5fe0485c7f24a70731dbc6623ffd1b87b8c2a68b8c27c8365",
+  "compiled_source_records": 1277,
+  "compiled_source_hash_algorithm": {
+    "selection": "Every SOURCE-PROVENANCE.json files entry whose relative POSIX path ends .rs or has basename Cargo.toml or Cargo.lock",
+    "records": "Objects containing only path and lowercase sha256, sorted lexicographically by path",
+    "encoding": "UTF-8 of Python json.dumps(records, sort_keys=True, separators=(',', ':'), ensure_ascii=True)",
+    "digest": "SHA256"
+  },
+  "verification": "PHYSICS-PERFORMANCE-VERIFICATION-24.json",
+  "verification_sha256": "00f9f8b83d4016b5678574328439a178411eb9b8582c3a3547a3fa3c6b5814dd",
+  "previous_verification": "SCENE-CACHE-VERIFICATION-23.json",
+  "previous_verification_sha256": "b1800ccd760c3d00891562840922d65eb547eb7532e9f73d82d1c046e93d8ace",
+  "assets_included": false,
+  "published": false
+}

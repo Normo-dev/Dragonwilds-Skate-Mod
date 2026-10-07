@@ -1,0 +1,26 @@
+/*
+ * Integer to ascii conversion (ANSI C)
+ *
+ * Description
+ *     The itoa function converts an integer value to a character string in
+ *     decimal and stores the result in the buffer. If value is negative, the
+ *     resulting string is preceded with a minus sign (-).
+ *
+ * Parameters
+ *     val: Value to be converted.
+ *     buf: Buffer that holds the result of the conversion.
+ *
+ * Return Value
+ *     A pointer to the end of resulting string.
+ *
+ * Notice
+ *     The resulting string is not null-terminated.
+ *     The buffer should be large enough to hold any possible result:
+ *         uint32_t: 10 bytes
+ *         uint64_t: 20 bytes
+ *         int32_t: 11 bytes
+ *         int64_t: 20 bytes
+ *
+ * Copyright (c) 2018 YaoYuan <ibireme@gmail.com>.
+ * Released under the MIT license (MIT).
+ */

@@ -1,0 +1,585 @@
+--- a/dragonwilds-skate-worker/src/main.rs
++++ b/dragonwilds-skate-worker/src/main.rs
+@@ -20,6 +20,7 @@
+ mod exposed_rail_cache;
+ mod exposed_query;
+ mod legacy_cache_read;
++mod maintenance;
+ 
+ // Dense host windows can exceed the old one-million-triangle ceiling. Sixteen
+ // million bounds the binary payload at 576 MB. Allocation still uses only the
+@@ -46,6 +47,9 @@
+ #[derive(Deserialize)]
+ #[serde(tag = "op", rename_all = "snake_case", deny_unknown_fields)]
+ enum Command {
++    MaintenanceStatus,
++    MaintenanceBegin { worker_id:String },
++    MaintenanceEnd { worker_id:String,lease_token:String },
+     PrepareWorld { manifest:PathBuf,#[serde(default)] scene_file:Option<PathBuf>,#[serde(default)] assets:Option<PathBuf>,#[serde(default="yes")] exposed_edges:bool },
+     InitWorld { assets:PathBuf,manifest:PathBuf,anchor:[f64;3],#[serde(default)] scene_file:Option<PathBuf>,
+         #[serde(default)] rail_file:Option<PathBuf>,#[serde(default)] scene_cache_required:bool,spawn:[f32;3],heading:f32 },
+@@ -62,6 +66,19 @@
+     QueueCollision { revision:u32, #[serde(default)] triangles: Vec<[[f32; 3]; 3]>, #[serde(default)] collision_file: Option<PathBuf>, rails: Vec<Vec<[f32; 3]>>, #[serde(default)] derive_rails: bool },
+     Pose,
+     Shutdown,
++}
++impl Command {
++    /// Exhaustive by design: a new command must explicitly declare whether it
++    /// accesses cache inputs or may build/write geometry-derived storage.
++    fn cache_access(&self) -> bool {
++        match self {
++            Self::PrepareWorld{..}|Self::InitWorld{..}|Self::WorldScene{..}|
++            Self::Init{..}|Self::Collision{..}|Self::QueueCollision{..} => true,
++            Self::MaintenanceStatus|Self::MaintenanceBegin{..}|Self::MaintenanceEnd{..}|
++            Self::Surface{..}|Self::Camera{..}|Self::Activate{..}|Self::Summon{..}|
++            Self::Tick{..}|Self::Poll{..}|Self::Pose|Self::Shutdown => false,
++        }
++    }
+ }
+ #[derive(Deserialize)]
+ #[serde(rename_all="lowercase")]
+@@ -154,7 +171,23 @@
+ fn execute(command: Command, session: &mut Option<Session>, pad: &mut ControllerTransport,
+            pending:&mut Option<PendingCollision>,revision:&mut u32,
+            collision_error:&mut Option<(u32,String)>,world:&mut Option<world_runtime::WorldRuntime>,
+-           pending_world:&mut Option<PendingWorld>) -> Result<Value, String> {
++           pending_world:&mut Option<PendingWorld>,maintenance:&maintenance::Maintenance) -> Result<Value, String> {
++    match &command {
++        Command::MaintenanceStatus => return Ok(json!({"ok":true,"status":"maintenance_status"})),
++        Command::MaintenanceBegin{worker_id} => {
++            let token=maintenance.begin(worker_id,pending.is_some()||pending_world.is_some())?;
++            return Ok(json!({"ok":true,"status":"maintenance_acquired","lease_token":token}));
++        },
++        Command::MaintenanceEnd{worker_id,lease_token} => {
++            maintenance.end(worker_id,lease_token)?;
++            return Ok(json!({"ok":true,"status":"maintenance_released"}));
++        },
++        _=>{},
++    }
++    // Acquire before any input read or derived-cache write. Synchronous jobs
++    // keep this guard until return; asynchronous jobs move it into the closure.
++    // Existing command-specific pending/reset policies are deliberately intact.
++    let mut cache_job=if command.cache_access(){Some(maintenance.start_job()?)}else{None};
+     if let Command::PrepareWorld{manifest,scene_file,assets,exposed_edges}=command {
+         if session.is_some(){return Err("Offline preparation requires a fresh worker without an active Session".into());}
+         return world_runtime::prepare_offline(&manifest,scene_file.as_deref(),assets.as_deref(),exposed_edges);
+@@ -179,7 +212,11 @@
+             if requested<=*revision||pending.is_some()||pending_world.is_some(){return Err("Invalid or already pending world scene revision".into());}
+             let runtime=world.as_ref().ok_or("Initialize the whole world first")?.clone();
+             let builder=s.collision_builder();
+-            let task=std::thread::Builder::new().name("skate-world-scene".into()).spawn(move||runtime.scene(builder,&scene_file)).map_err(|e|e.to_string())?;
++            let job=cache_job.take().ok_or("Missing world-scene cache permit")?;
++            let task=std::thread::Builder::new().name("skate-world-scene".into()).spawn(move||{
++                let _cache_job=job;
++                runtime.scene(builder,&scene_file)
++            }).map_err(|e|e.to_string())?;
+             *pending_world=Some((requested,task));*collision_error=None;
+             Ok(json!({"ok":true,"status":"collision_queued"}))
+         },
+@@ -233,7 +270,9 @@
+             if world.is_some(){return Err("Use world_scene for a persistent whole-world session".into());}
+             if pending.is_some()||pending_world.is_some() { return Err("Collision build is already pending".into()); }
+             let builder=s.collision_builder();
++            let job=cache_job.take().ok_or("Missing collision-build cache permit")?;
+             let task=std::thread::Builder::new().name("skate-collision-build".into()).spawn(move || {
++                let _cache_job=job;
+                 let start=std::time::Instant::now();
+                 let (triangles,rails)=world_input(triangles,collision_file,rails,derive_rails)?;
+                 let result=builder.build(triangles,rails);
+@@ -249,6 +288,7 @@
+     }
+ }
+ fn run() -> Result<(), String> {
++    let maintenance=maintenance::Maintenance::new()?;
+     let mut session:Option<Session> = None;
+     let mut pad = ControllerTransport::default();
+     let mut pending:Option<PendingCollision>=None;
+@@ -289,8 +329,9 @@
+                 Err(error)=>{eprintln!("WORLD_SCENE_ERROR revision={requested}: {error}");collision_error=Some((requested,error));},
+             }
+         }
+-        let mut response = parsed.map_err(|e| e.to_string()).and_then(|c| execute(c, &mut session, &mut pad,&mut pending,&mut revision,&mut collision_error,&mut world,&mut pending_world))
++        let mut response = parsed.map_err(|e| e.to_string()).and_then(|c| execute(c, &mut session, &mut pad,&mut pending,&mut revision,&mut collision_error,&mut world,&mut pending_world,&maintenance))
+             .unwrap_or_else(|e| json!({"ok":false,"error":e}));
++        response["maintenance"]=maintenance_value(&maintenance,pending.is_some()||pending_world.is_some());
+         response["collision_revision"]=json!(revision);
+         if let Some(session)=&session {
+             response["camera_mode"]=json!(session.camera_mode());
+@@ -309,11 +350,82 @@
+     }
+     Ok(())
+ }
++fn maintenance_value(maintenance:&maintenance::Maintenance,pending_result:bool)->Value {
++    match maintenance.snapshot(pending_result) {
++        Ok(state)=>json!({"schema":1,"worker_id":state.worker_id,"available":true,
++            "active_cache_jobs":state.active_cache_jobs,"lease_active":state.lease_active,
++            "pending_result":state.pending_result,"quiescent":state.quiescent,
++            "retirement_allowed":state.retirement_allowed}),
++        Err(error)=>json!({"schema":1,"worker_id":maintenance.worker_id(),"available":false,
++            "quiescent":false,"retirement_allowed":false,"error":error}),
++    }
++}
+ fn main() {
+     let result = std::thread::Builder::new().name("skate-session".into())
+         .stack_size(32 * 1024 * 1024).spawn(run)
+         .expect("Cannot start simulation worker").join().expect("Simulation worker panicked");
+     if let Err(error) = result { eprintln!("{error}"); std::process::exit(1); }
++}
++
++#[cfg(test)]
++mod maintenance_command_tests {
++    use super::*;
++
++    #[test]
++    fn every_cache_entrypoint_is_blocked_before_io_or_session_validation() {
++        let maintenance=maintenance::Maintenance::new().unwrap();
++        let lease=maintenance.begin(maintenance.worker_id(),false).unwrap();
++        let commands=[
++            json!({"op":"prepare_world","manifest":"must-not-be-opened"}),
++            json!({"op":"init_world","assets":"must-not-be-opened","manifest":"must-not-be-opened","anchor":[0,0,0],"spawn":[0,0,0],"heading":0}),
++            json!({"op":"world_scene","revision":1,"scene_file":"must-not-be-opened"}),
++            json!({"op":"init","assets":"must-not-be-opened","rails":[],"spawn":[0,0,0],"heading":0}),
++            json!({"op":"collision","rails":[],"collision_file":"must-not-be-opened"}),
++            json!({"op":"queue_collision","revision":1,"rails":[],"collision_file":"must-not-be-opened"}),
++        ];
++        let mut session=None;let mut pad=ControllerTransport::default();let mut pending=None;
++        let mut revision=0;let mut error=None;let mut world=None;let mut pending_world=None;
++        for value in commands {
++            let command=serde_json::from_value::<Command>(value).unwrap();
++            assert!(command.cache_access());
++            let blocked=execute(command,&mut session,&mut pad,&mut pending,&mut revision,
++                &mut error,&mut world,&mut pending_world,&maintenance).unwrap_err();
++            assert!(blocked.contains("active maintenance lease"),"{blocked}");
++            let state=maintenance.snapshot(false).unwrap();
++            assert!(state.retirement_allowed);assert_eq!(state.active_cache_jobs,0);
++        }
++        maintenance.end(maintenance.worker_id(),&lease).unwrap();
++    }
++
++    #[test]
++    fn resident_operations_are_explicitly_outside_the_cache_gate() {
++        for value in [json!({"op":"pose"}),json!({"op":"tick"}),json!({"op":"poll"}),
++            json!({"op":"camera","mode":"high"}),json!({"op":"shutdown"}),
++            json!({"op":"surface","point":[0,0,0],"above":1,"below":2}),
++            json!({"op":"activate","spawn":[0,0,0],"heading":0}),
++            json!({"op":"summon","spawn":[0,0,0],"heading":0}),
++            json!({"op":"maintenance_status"}),json!({"op":"maintenance_begin","worker_id":"worker"}),
++            json!({"op":"maintenance_end","worker_id":"worker","lease_token":"lease"})] {
++            assert!(!serde_json::from_value::<Command>(value).unwrap().cache_access());
++        }
++    }
++
++    #[test]
++    fn malformed_release_cannot_reach_the_coordinator_or_clear_lease() {
++        let maintenance=maintenance::Maintenance::new().unwrap();
++        let token=maintenance.begin(maintenance.worker_id(),false).unwrap();
++        for value in [json!({"op":"maintenance_end"}),
++            json!({"op":"maintenance_end","worker_id":maintenance.worker_id(),"lease_token":7}),
++            json!({"op":"maintenance_end","worker_id":maintenance.worker_id(),"lease_token":token,"force":true})] {
++            assert!(serde_json::from_value::<Command>(value).is_err());
++            assert!(maintenance.snapshot(false).unwrap().lease_active);
++        }
++        let published=maintenance_value(&maintenance,false);
++        assert_eq!(published["worker_id"],maintenance.worker_id());
++        assert_eq!(published["retirement_allowed"],true);
++        assert!(published.get("lease_token").is_none());
++        maintenance.end(maintenance.worker_id(),&token).unwrap();
++    }
+ }
+ 
+ #[cfg(test)]
+--- /dev/null
++++ b/dragonwilds-skate-worker/src/maintenance.rs
+@@ -0,0 +1,386 @@
++//! Native cache-maintenance barrier. This module never reads or deletes caches.
++//!
++//! A job permit is acquired before any cache input/build operation and is moved
++//! into its worker closure. Dropping a JoinHandle does not release the permit.
++//! The protocol thread separately supplies whether an uninstalled result still
++//! exists, closing the gap between a finished job and its accepted installation.
++use std::sync::{Arc, Mutex};
++
++#[derive(Clone)]
++pub struct Maintenance {
++    inner: Arc<Inner>,
++}
++
++struct Inner {
++    worker_id: String,
++    state: Mutex<State>,
++}
++
++#[derive(Default)]
++struct State {
++    active_jobs: usize,
++    next_lease: u64,
++    lease: Option<String>,
++}
++
++/// One permit, one drop. It deliberately cannot be cloned or manually cleared.
++pub struct CacheJob {
++    inner: Arc<Inner>,
++}
++
++#[derive(Debug, PartialEq, Eq)]
++pub struct Snapshot {
++    pub worker_id: String,
++    pub active_cache_jobs: usize,
++    pub lease_active: bool,
++    pub pending_result: bool,
++    pub quiescent: bool,
++    pub retirement_allowed: bool,
++}
++
++impl Maintenance {
++    pub fn new() -> Result<Self, String> {
++        let entropy = worker_entropy()?;
++        let id = entropy.iter().map(|v| format!("{v:02x}")).collect();
++        Ok(Self::with_identity(id))
++    }
++
++    fn with_identity(worker_id: String) -> Self {
++        Self {
++            inner: Arc::new(Inner {
++                worker_id,
++                state: Mutex::new(State::default()),
++            }),
++        }
++    }
++
++    pub fn worker_id(&self) -> &str {
++        &self.inner.worker_id
++    }
++
++    fn lock(&self) -> Result<std::sync::MutexGuard<'_, State>, String> {
++        self.inner
++            .state
++            .lock()
++            .map_err(|_| "Native maintenance state is poisoned; restart the worker".into())
++    }
++
++    /// Covers synchronous input I/O too. Existing command-specific reset and
++    /// pending-job policies stay at their call sites. A permitted reset cannot
++    /// erase an older job's permit, even when its JoinHandle is discarded.
++    pub fn start_job(&self) -> Result<CacheJob, String> {
++        let mut state = self.lock()?;
++        if state.lease.is_some() {
++            return Err("Cache access is blocked by the active maintenance lease".into());
++        }
++        state.active_jobs = state
++            .active_jobs
++            .checked_add(1)
++            .ok_or("Cache job counter exhausted")?;
++        Ok(CacheJob {
++            inner: Arc::clone(&self.inner),
++        })
++    }
++
++    pub fn begin(&self, worker_id: &str, pending_result: bool) -> Result<String, String> {
++        if worker_id != self.worker_id() {
++            return Err("Maintenance worker identity does not match".into());
++        }
++        let mut state = self.lock()?;
++        if state.lease.is_some() {
++            return Err("A maintenance lease is already active".into());
++        }
++        if state.active_jobs != 0 || pending_result {
++            return Err("Maintenance requires no active cache job or uninstalled result".into());
++        }
++        let sequence = state
++            .next_lease
++            .checked_add(1)
++            .ok_or("Maintenance lease sequence exhausted")?;
++        let token = format!("{}:{sequence}", self.worker_id());
++        state.next_lease = sequence;
++        state.lease = Some(token.clone());
++        Ok(token)
++    }
++
++    pub fn end(&self, worker_id: &str, lease_token: &str) -> Result<(), String> {
++        if worker_id != self.worker_id() {
++            return Err("Maintenance worker identity does not match".into());
++        }
++        let mut state = self.lock()?;
++        if state.lease.as_deref() != Some(lease_token) {
++            return Err("Maintenance lease token does not match".into());
++        }
++        state.lease = None;
++        Ok(())
++    }
++
++    pub fn snapshot(&self, pending_result: bool) -> Result<Snapshot, String> {
++        let state = self.lock()?;
++        let quiescent = state.active_jobs == 0 && !pending_result;
++        Ok(Snapshot {
++            worker_id: self.worker_id().to_owned(),
++            active_cache_jobs: state.active_jobs,
++            lease_active: state.lease.is_some(),
++            pending_result,
++            quiescent,
++            retirement_allowed: quiescent && state.lease.is_some(),
++        })
++    }
++}
++
++impl Drop for CacheJob {
++    fn drop(&mut self) {
++        // Never panic while unwinding a failed builder. Recovering the guard
++        // here does NOT clear mutex poison; every later operation fails closed.
++        let mut state = self.inner.state.lock().unwrap_or_else(|e| e.into_inner());
++        state.active_jobs = state.active_jobs.saturating_sub(1);
++    }
++}
++
++#[cfg(windows)]
++fn worker_entropy() -> Result<[u8; 16], String> {
++    #[link(name = "bcrypt")]
++    unsafe extern "system" {
++        fn BCryptGenRandom(
++            algorithm: *mut std::ffi::c_void,
++            buffer: *mut u8,
++            len: u32,
++            flags: u32,
++        ) -> i32;
++    }
++    let mut value = [0; 16];
++    // BCRYPT_USE_SYSTEM_PREFERRED_RNG with a null algorithm handle. The OS fills
++    // exactly the supplied writable buffer; no engine pointer is involved.
++    let status = unsafe {
++        BCryptGenRandom(
++            std::ptr::null_mut(),
++            value.as_mut_ptr(),
++            value.len() as u32,
++            2,
++        )
++    };
++    if status < 0 {
++        return Err(format!(
++            "Cannot establish native worker identity: NTSTATUS {status:#x}"
++        ));
++    }
++    Ok(value)
++}
++
++#[cfg(not(windows))]
++fn worker_entropy() -> Result<[u8; 16], String> {
++    use std::io::Read;
++    let mut value = [0; 16];
++    std::fs::File::open("/dev/urandom")
++        .and_then(|mut file| file.read_exact(&mut value))
++        .map_err(|e| format!("Cannot establish native worker identity: {e}"))?;
++    Ok(value)
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    use std::{
++        panic::{AssertUnwindSafe, catch_unwind},
++        sync::mpsc,
++        thread,
++    };
++
++    fn state() -> Maintenance {
++        Maintenance::with_identity("0123456789abcdef0123456789abcdef".into())
++    }
++
++    #[test]
++    fn lease_blocks_cache_jobs_and_wrong_release_never_clears_it() {
++        let state = state();
++        assert!(state.begin("other-worker", false).is_err());
++        let lease = state.begin(state.worker_id(), false).unwrap();
++        assert!(state.snapshot(false).unwrap().retirement_allowed);
++        assert!(state.start_job().is_err());
++        assert!(state.begin(state.worker_id(), false).is_err());
++        for (worker, token) in [
++            ("other-worker", lease.as_str()),
++            (state.worker_id(), ""),
++            (state.worker_id(), "wrong"),
++        ] {
++            assert!(state.end(worker, token).is_err());
++            assert!(state.snapshot(false).unwrap().lease_active);
++        }
++        state.end(state.worker_id(), &lease).unwrap();
++        assert!(state.end(state.worker_id(), &lease).is_err());
++        let later = state.begin(state.worker_id(), false).unwrap();
++        assert_ne!(lease, later);
++        assert!(state.end(state.worker_id(), &lease).is_err());
++        state.end(state.worker_id(), &later).unwrap();
++        let job = state.start_job().unwrap();
++        assert_eq!(state.snapshot(false).unwrap().active_cache_jobs, 1);
++        drop(job);
++        assert_eq!(state.snapshot(false).unwrap().active_cache_jobs, 0);
++    }
++
++    #[test]
++    fn finished_but_uninstalled_result_blocks_begin_only() {
++        let state = state();
++        assert!(state.begin(state.worker_id(), true).is_err());
++        // Existing command guards, not this coordinator, decide whether a
++        // reset may replace a pending result. Starting it remains permitted.
++        let reset = state.start_job().unwrap();
++        drop(reset);
++        let pending = state.snapshot(true).unwrap();
++        assert_eq!(pending.active_cache_jobs, 0);
++        assert!(!pending.quiescent);
++        assert!(!pending.retirement_allowed);
++        let lease = state.begin(state.worker_id(), false).unwrap();
++        state.end(state.worker_id(), &lease).unwrap();
++    }
++
++    #[test]
++    fn detached_job_remains_counted_until_its_closure_finishes() {
++        let state = state();
++        let permit = state.start_job().unwrap();
++        let (release, wait) = mpsc::channel();
++        let (done, ended) = mpsc::channel();
++        let task = thread::spawn(move || {
++            let permit = permit;
++            wait.recv().unwrap();
++            drop(permit);
++            done.send(()).unwrap();
++        });
++        drop(task); // The original failure: losing this handle is not quiescence.
++        assert_eq!(state.snapshot(false).unwrap().active_cache_jobs, 1);
++        assert!(state.begin(state.worker_id(), false).is_err());
++        // A permitted Session reset can complete while this detached builder
++        // is still running. It must not zero or replace the old job count.
++        let reset = state.start_job().unwrap();
++        assert_eq!(state.snapshot(false).unwrap().active_cache_jobs, 2);
++        drop(reset);
++        assert_eq!(state.snapshot(false).unwrap().active_cache_jobs, 1);
++        assert!(state.begin(state.worker_id(), false).is_err());
++        release.send(()).unwrap();
++        ended.recv().unwrap();
++        assert_eq!(state.snapshot(false).unwrap().active_cache_jobs, 0);
++        assert!(state.begin(state.worker_id(), false).is_ok());
++    }
++
++    #[test]
++    fn panic_releases_job_but_not_the_uninstalled_result_gate() {
++        let state = state();
++        let permit = state.start_job().unwrap();
++        let task = thread::spawn(move || {
++            let _permit = permit;
++            panic!("synthetic builder panic");
++        });
++        assert!(task.join().is_err());
++        assert_eq!(state.snapshot(true).unwrap().active_cache_jobs, 0);
++        assert!(state.begin(state.worker_id(), true).is_err());
++        assert!(state.begin(state.worker_id(), false).is_ok());
++    }
++
++    #[test]
++    fn validation_error_and_sync_panic_release_without_resetting_state() {
++        let state = state();
++        let failure = || -> Result<(), String> {
++            let _permit = state.start_job()?;
++            Err("invalid cache input".into())
++        };
++        assert!(failure().is_err());
++        assert_eq!(state.snapshot(false).unwrap().active_cache_jobs, 0);
++        assert!(
++            catch_unwind(AssertUnwindSafe(|| {
++                let _permit = state.start_job().unwrap();
++                panic!("synthetic synchronous builder panic");
++            }))
++            .is_err()
++        );
++        assert!(state.snapshot(false).unwrap().quiescent);
++    }
++
++    #[test]
++    fn permit_outlives_other_owner_clones_and_spawn_failure_drop() {
++        let state = state();
++        let observed = state.clone();
++        let permit = state.start_job().unwrap();
++        drop(state);
++        assert_eq!(observed.snapshot(false).unwrap().active_cache_jobs, 1);
++        // A failed OS spawn destroys its captured closure and hence this guard.
++        let never_spawned = move || drop(permit);
++        drop(never_spawned);
++        assert!(observed.snapshot(false).unwrap().quiescent);
++    }
++
++    #[test]
++    fn poisoned_coordinator_fails_closed_even_after_permit_unwinds() {
++        let state = state();
++        let permit = state.start_job().unwrap();
++        assert!(
++            catch_unwind(AssertUnwindSafe(|| {
++                let _locked = state.inner.state.lock().unwrap();
++                panic!("synthetic internal state failure");
++            }))
++            .is_err()
++        );
++        drop(permit);
++        assert!(state.snapshot(false).is_err());
++        assert!(state.start_job().is_err());
++        assert!(state.begin(state.worker_id(), false).is_err());
++        assert!(state.end(state.worker_id(), "anything").is_err());
++    }
++
++    #[test]
++    fn os_worker_identity_is_unique_and_tokens_cannot_cross_workers() {
++        let first = Maintenance::new().unwrap();
++        let second = Maintenance::new().unwrap();
++        assert_eq!(first.worker_id().len(), 32);
++        assert_ne!(first.worker_id(), second.worker_id());
++        let a = first.begin(first.worker_id(), false).unwrap();
++        let b = second.begin(second.worker_id(), false).unwrap();
++        assert!(second.end(first.worker_id(), &a).is_err());
++        assert!(second.end(second.worker_id(), &a).is_err());
++        assert!(second.snapshot(false).unwrap().lease_active);
++        second.end(second.worker_id(), &b).unwrap();
++    }
++
++    #[test]
++    fn concurrent_job_start_and_lease_acquisition_cannot_both_succeed() {
++        use std::sync::Barrier;
++        for _ in 0..24 {
++            let state = state();
++            let start = Arc::new(Barrier::new(3));
++            let release = Arc::new(Barrier::new(3));
++            let (send, receive) = mpsc::channel();
++            let job_state = state.clone();
++            let job_start = Arc::clone(&start);
++            let job_release = Arc::clone(&release);
++            let job_send = send.clone();
++            let job_thread = thread::spawn(move || {
++                job_start.wait();
++                let permit = job_state.start_job();
++                job_send.send(permit.is_ok()).unwrap();
++                job_release.wait();
++                drop(permit);
++            });
++            let lease_state = state.clone();
++            let lease_start = Arc::clone(&start);
++            let lease_release = Arc::clone(&release);
++            let lease_thread = thread::spawn(move || {
++                lease_start.wait();
++                let lease = lease_state.begin(lease_state.worker_id(), false);
++                send.send(lease.is_ok()).unwrap();
++                lease_release.wait();
++                if let Ok(token) = lease {
++                    lease_state.end(lease_state.worker_id(), &token).unwrap();
++                }
++            });
++            start.wait();
++            let outcomes = [receive.recv().unwrap(), receive.recv().unwrap()];
++            let held = state.snapshot(false).unwrap();
++            release.wait();
++            job_thread.join().unwrap();
++            lease_thread.join().unwrap();
++            assert_ne!(outcomes[0], outcomes[1]);
++            assert_ne!(held.active_cache_jobs != 0, held.lease_active);
++            assert!(state.snapshot(false).unwrap().quiescent);
++        }
++    }
++}
+--- /dev/null
++++ b/dragonwilds-skate-worker/tests/cache_maintenance.rs
+@@ -0,0 +1,3 @@
++//! Pure native maintenance state tests: no Session, cache fixtures or game input.
++#[path = "../src/maintenance.rs"]
++mod maintenance;

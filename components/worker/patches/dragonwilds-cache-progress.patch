@@ -1,0 +1,251 @@
+--- a/dragonwilds-skate-worker/src/main.rs
++++ b/dragonwilds-skate-worker/src/main.rs
+@@ -194,8 +194,10 @@
+     }
+     if let Command::InitWorld{assets,manifest,anchor,scene_file,rail_file,scene_cache_required,spawn,heading}=command {
+         if anchor!=[0.;3]||!valid_point(&spawn)||!heading.is_finite(){return Err("Invalid fixed world origin/spawn".into());}
++        let started=std::time::Instant::now();
+         let (new_session,new_world)=world_runtime::WorldRuntime::init(&assets,&manifest,scene_file.as_deref(),rail_file.as_deref(),scene_cache_required,spawn,heading)?;
+         *session=Some(new_session);*world=Some(new_world);*pending=None;*pending_world=None;*revision=0;*collision_error=None;
++        world_runtime::cache_phase_ready("init",started);
+         return Ok(json!({"ok":true,"status":"ready","period":session.as_ref().unwrap().period()}));
+     }
+     if let Command::Init { assets, triangles, collision_file, rails, spawn, heading, derive_rails } = command {
+@@ -325,7 +327,7 @@
+                     let previous_world=world.replace(new_world);retire(retired,previous_world);revision=requested;Ok(())
+                 });
+             match result {
+-                Ok(())=>{collision_error=None;eprintln!("WORLD_SCENE_INSTALL revision={requested} elapsed_ms={:.3}",started.elapsed().as_secs_f64()*1000.);},
++                Ok(())=>{collision_error=None;eprintln!("WORLD_SCENE_INSTALL revision={requested} elapsed_ms={:.3}",started.elapsed().as_secs_f64()*1000.);world_runtime::cache_phase_ready("scene",started);},
+                 Err(error)=>{eprintln!("WORLD_SCENE_ERROR revision={requested}: {error}");collision_error=Some((requested,error));},
+             }
+         }
+--- a/dragonwilds-skate-worker/src/world_runtime.rs
++++ b/dragonwilds-skate-worker/src/world_runtime.rs
+@@ -3,6 +3,9 @@
+ use std::{path::{Path,PathBuf},sync::Arc,time::Instant};
+ use serde_json::{Value,json};
+ use sha2::{Digest,Sha256};
++#[path="cache_progress.rs"]
++mod cache_progress;
++pub use cache_progress::ready as cache_phase_ready;
+ 
+ #[derive(Clone)]
+ pub struct WorldRuntime {
+@@ -31,22 +34,22 @@
+ }
+ /// Warm startup never repeats the global endpoint graph. Only explicit offline
+ /// preparation or a newly derived scene may construct its exact ordered cache.
+-fn exposed_rails(snapshot:&crate::exposed_edge_cache::Snapshot,allow_build:bool)
++fn exposed_rails(snapshot:&crate::exposed_edge_cache::Snapshot,allow_build:bool,operation:&str)
+     ->Result<(Vec<Vec<[f32;3]>>,Value,Value),String> {
+-    match crate::exposed_rail_cache::load_with_record(snapshot) {
++    match cache_progress::run(operation,"loading_cached_grind_data",||crate::exposed_rail_cache::load_with_record(snapshot)) {
+         Ok(Some((rails,stitch,record))) => return Ok((rails,stitch,serde_json::to_value(record).map_err(|e|e.to_string())?)),
+         Ok(None)=>{},
+         Err(error)=>eprintln!("WORLD_EXPOSED_NATIVE_RAIL_CACHE rejected: {error}"),
+     }
+     if !allow_build { return Err("Prepared native grind index is missing or invalid; run offline setup repair before entering the world".into()); }
+-    let(rails,stitch)=crate::exposed_edge_cache::rails(snapshot)?;
+-    let record=crate::exposed_rail_cache::store(snapshot,&rails,&stitch)?;
++    let(rails,stitch)=cache_progress::run(operation,"joining_grind_paths",||crate::exposed_edge_cache::rails(snapshot))?;
++    let record=cache_progress::run(operation,"saving_grind_data",||crate::exposed_rail_cache::store(snapshot,&rails,&stitch))?;
+     Ok((rails,stitch,serde_json::to_value(record).map_err(|e|e.to_string())?))
+ }
+ fn base_bake(manifest:&Path,rail_file:Option<&Path>)->Result<(Arc<CompactWorld>,LipBake,PathBuf),String> {
+-    let base=Arc::new(CompactWorld::load(manifest)?);
++    let base=cache_progress::run("prepare","collision_load",||CompactWorld::load(manifest).map(Arc::new))?;
+     let rail_path=rail_file.map(Path::to_path_buf).unwrap_or_else(||manifest.with_file_name("world.lips"));
+-    let bake=match compact_rails::load(&rail_path,&base) {
++    let bake=cache_progress::run("prepare","preparing_legacy_grinds",||Ok(match compact_rails::load(&rail_path,&base) {
+         Ok(bake)=>{eprintln!("WORLD_RAIL_CACHE hit lips={}",bake.lips.len());bake},
+         Err(error)=>{
+             if rail_file.is_some(){return Err(format!("Explicit permanent rail file rejected: {error}"));}
+@@ -54,36 +57,37 @@
+             let view=CompactGeometry::new(base.clone(),[0.;3])?;let bake=compact_rails::bake(&view)?;
+             compact_rails::save(&rail_path,&bake)?;bake
+         }
+-    };Ok((base,bake,rail_path))
++    }))?;Ok((base,bake,rail_path))
+ }
+ /// Offline setup entry: owned geometry only, no Session, input or Skate assets.
+ pub fn prepare_offline(manifest:&Path,scene:Option<&Path>,assets:Option<&Path>,exposed_edges:bool)->Result<Value,String> {
+     let parameters=if exposed_edges{Some(crate::exposed_edge_cache::Parameters::load(assets.ok_or("Exposed-edge preparation requires owned assets for the original grind probe dimensions")?)?)}else{None};
+     let started=Instant::now();let(base,bake,rail_path)=base_bake(manifest,None)?;
+-    let base_lips=bake.lips.len();let source=source(&base,scene)?;
++    let base_lips=bake.lips.len();let source=cache_progress::run("prepare","collision_load",||source(&base,scene))?;
+     if let Some(parameters)=parameters{
+         // Preserve the original base fallback once. A current scene uses the
+         // derived base/delta directly and never pays for an unused legacy
+         // scene lip preparation or global scene merge.
+-        let merged=crate::merged_rail_cache::prepare(manifest,&bake)?;
++        let merged=cache_progress::run("prepare","preparing_legacy_grinds",||crate::merged_rail_cache::prepare(manifest,&bake))?;
+         if merged.path.is_none(){return Err("Offline legacy base rails were not persisted".into());}
+-        let snapshot=match crate::exposed_edge_cache::load(manifest,&source.world,&parameters){
+-            Ok(snapshot)=>snapshot,
++        let snapshot=cache_progress::run("prepare","preparing_exposed_cells",||match crate::exposed_edge_cache::load(manifest,&source.world,&parameters){
++            Ok(snapshot)=>Ok(snapshot),
+             Err(_)=>{
+                 if scene.is_some(){
+                     let prior=crate::exposed_edge_cache::prepare(manifest,&base,&parameters,None,&[])?;
+-                    crate::exposed_edge_cache::prepare(manifest,&source.world,&parameters,Some(&prior),&source.world.changed_bounds())?
+-                }else{crate::exposed_edge_cache::prepare(manifest,&source.world,&parameters,None,&[])?}
++                    crate::exposed_edge_cache::prepare(manifest,&source.world,&parameters,Some(&prior),&source.world.changed_bounds())
++                }else{crate::exposed_edge_cache::prepare(manifest,&source.world,&parameters,None,&[])}
+             }
+-        };
+-        let(rails,stitch,rail_cache)=exposed_rails(&snapshot,true)?;
++        })?;
++        let(rails,stitch,rail_cache)=exposed_rails(&snapshot,true,"prepare")?;
+         let mut status=snapshot.status(rails.len());status["stitch"]=stitch;status["rail_cache"]=rail_cache;
++        cache_phase_ready("prepare",started);
+         return Ok(json!({"ok":true,"status":"prepared","session_loaded":false,"scope":"whole_world",
+             "source_fingerprint":base.source_fingerprint,"base_fingerprint":base.source_fingerprint,"scene_fingerprint":source.world.scene_fingerprint,
+             "rail_file":rail_path,"scene_cache":Value::Null,"base_lips":base_lips,"lips":bake.lips.len(),"candidates":bake.candidates,
+             "merged_rails":merged.rails.len(),"merged_rail_cache":merged.path,"exposed_edges":status,"elapsed_ms":started.elapsed().as_millis()}));
+     }
+-    let(cache,bake)=if let Some(scene)=scene {
++    let(cache,bake)=cache_progress::run("prepare","preparing_legacy_grinds",||{Ok(if let Some(scene)=scene {
+         let key=crate::scene_rail_cache::key(&bake,&source)?;
+         let path=crate::scene_rail_cache::path(scene,&key)?;
+         let prepared=crate::scene_rail_cache::prepare(&bake,&source,scene)?;
+@@ -92,27 +96,29 @@
+         compact_rails::load_with_identity(&path,&source.world,&key)
+             .map_err(|e|format!("Offline scene cache was not persisted: {e}"))?;
+         (Some(path),prepared)
+-    }else{(None,bake)};
+-    let merged=crate::merged_rail_cache::prepare(manifest,&bake)?;
++    }else{(None,bake)})})?;
++    let merged=cache_progress::run("prepare","joining_grind_paths",||crate::merged_rail_cache::prepare(manifest,&bake))?;
+     if merged.path.is_none(){return Err("Offline merged rails were not persisted".into());}
+     let mut result=json!({"ok":true,"status":"prepared","session_loaded":false,"scope":"whole_world",
+         "source_fingerprint":base.source_fingerprint,"base_fingerprint":base.source_fingerprint,"scene_fingerprint":source.world.scene_fingerprint,
+         "rail_file":rail_path,"scene_cache":cache,"base_lips":base_lips,"lips":bake.lips.len(),
+         "candidates":bake.candidates,"merged_rails":merged.rails.len(),"merged_rail_cache":merged.path,"elapsed_ms":started.elapsed().as_millis()});
+-    result["elapsed_ms"]=json!(started.elapsed().as_millis());Ok(result)
++    result["elapsed_ms"]=json!(started.elapsed().as_millis());cache_phase_ready("prepare",started);Ok(result)
+ }
+ impl WorldRuntime {
+     pub fn init(assets:&Path,manifest:&Path,scene:Option<&Path>,rail_file:Option<&Path>,scene_cache_required:bool,spawn:[f32;3],heading:f32)
+         ->Result<(Session,Self),String> {
+         if scene_cache_required&&scene.is_none(){return Err("Required scene cache needs a scene manifest".into());}
+         let parameters=crate::exposed_edge_cache::Parameters::load(assets)?;
+-        let base=Arc::new(CompactWorld::load(manifest)?);let initial_source=source(&base,scene)?;
++        let(base,initial_source)=cache_progress::run("init","collision_load",||{
++            let base=Arc::new(CompactWorld::load(manifest)?);let initial_source=source(&base,scene)?;Ok((base,initial_source))
++        })?;
+         // An exact derived scene, or a complete derived base plus bounded host
+         // changes, is selected before the legacy scene lip/merge machinery.
+-        if let Some(exposed)=Self::derived(manifest,&base,&initial_source,&parameters,scene_cache_required)?{
+-            let(rails,stitch,rail_cache)=exposed_rails(&exposed,exposed.stats["cache_hit"].as_bool()!=Some(true))?;
++        if let Some(exposed)=cache_progress::run("init","preparing_exposed_cells",||Self::derived(manifest,&base,&initial_source,&parameters,scene_cache_required))?{
++            let(rails,stitch,rail_cache)=exposed_rails(&exposed,exposed.stats["cache_hit"].as_bool()!=Some(true),"init")?;
+             let rail_count=rails.len();
+-            let session=Session::new_with_source_exposed(assets,initial_source.clone(),rails,spawn,heading)?;
++            let session=cache_progress::run("init","building_runtime_provider",||Session::new_with_source_exposed(assets,initial_source.clone(),rails,spawn,heading))?;
+             let mut status=Self::describe(&base,&initial_source,rail_count);
+             status["exposed_edges"]=exposed.status(rail_count);status["exposed_edges"]["stitch"]=stitch;status["exposed_edges"]["rail_cache"]=rail_cache.clone();status["exposed_edges"]["candidate_admission"]=json!("nearest40_then_native_order");
+             if let Some(mut checkpoint)=exposed.checkpoint(){checkpoint["rail_cache"]=rail_cache;status["scene_checkpoint"]=checkpoint;}
+@@ -121,9 +127,10 @@
+         let cached_base=manifest.with_file_name("world.lips");
+         let rail_file=if scene_cache_required{Some(rail_file.unwrap_or(&cached_base))}else{rail_file};
+         let started=Instant::now();
++        let source=initial_source;
++        let (bake,rails,checkpoint)=cache_progress::run("init","loading_cached_grind_data",||{
+         let bake=compact_rails::load(rail_file.unwrap_or(&cached_base),&base)
+             .map_err(|e|format!("No complete exposed cache and the legacy fallback needs offline preparation: {e}"))?;
+-        let source=initial_source;
+         let accepted=scene.and_then(|scene|match crate::legacy_cache_read::accepted(scene,&source){
+             Ok(cached)=>Some(cached),Err(error)=>{eprintln!("WORLD_ACCEPTED_SCENE_CACHE unavailable: {error}");None}});
+         let (bake,rails,checkpoint)=if let Some(cached)=accepted {(Arc::new(cached.bake),cached.rails,Some(cached.checkpoint))}else{
+@@ -141,8 +148,9 @@
+         }else{bake});
+         let rails=crate::legacy_cache_read::merged(manifest,&bake)?;
+         (bake,rails,None)};
+-        let(rails,conditioning)=condition_rails(&source,scene,rails)?;
+-        let rail_count=rails.len();let session=Session::new_with_source(assets,source.clone(),rails,spawn,heading)?;
++        Ok((bake,rails,checkpoint))})?;
++        let(rails,conditioning)=cache_progress::run("init","joining_grind_paths",||condition_rails(&source,scene,rails))?;
++        let rail_count=rails.len();let session=cache_progress::run("init","building_runtime_provider",||Session::new_with_source(assets,source.clone(),rails,spawn,heading))?;
+         eprintln!("WORLD_SESSION_READY triangles={} rails={} elapsed_ms={}",source.world.triangle_count(),rail_count,started.elapsed().as_millis());
+         let mut status=Self::describe(&base,&source,rail_count);
+         status["exposed_edges"]=json!({"schema":1,"ready":false,"reason":"complete_derived_cache_unavailable","legacy_coverage":true});
+@@ -161,7 +169,7 @@
+         }Ok(None)
+     }
+     pub fn scene(&self,builder:CollisionBuilder,path:&Path)->Result<(Option<PreparedCollision>,Self),String> {
+-        let started=Instant::now();let source=source(&self.base,Some(path))?;
++        let started=Instant::now();let source=cache_progress::run("scene","collision_load",||source(&self.base,Some(path)))?;
+         if source.world.scene_fingerprint==self.source.world.scene_fingerprint {
+             // The exporter fingerprints exact mesh/instance/package content,
+             // excluding capture timestamps/revisions. All files were validated
+@@ -172,10 +180,10 @@
+         let difference=source.world.difference_bounds(&self.source.world)?;
+         eprintln!("WORLD_SCENE_DIFFERENCE bounds={}",difference.len());
+         if let Some(previous)=&self.exposed{
+-            let exposed=crate::exposed_edge_cache::prepare(&self.manifest,&source.world,&self.parameters,Some(previous),&difference)?;
+-            let(rails,stitch,rail_cache)=exposed_rails(&exposed,exposed.stats["cache_hit"].as_bool()!=Some(true))?;
++            let exposed=cache_progress::run("scene","preparing_exposed_cells",||crate::exposed_edge_cache::prepare(&self.manifest,&source.world,&self.parameters,Some(previous),&difference))?;
++            let(rails,stitch,rail_cache)=exposed_rails(&exposed,exposed.stats["cache_hit"].as_bool()!=Some(true),"scene")?;
+             let rail_count=rails.len();
+-            let collision=builder.build_source_exposed(source.clone(),rails)?;
++            let collision=cache_progress::run("scene","building_runtime_provider",||builder.build_source_exposed(source.clone(),rails))?;
+             let mut status=Self::describe(&self.base,&source,rail_count);
+             status["exposed_edges"]=exposed.status(rail_count);status["exposed_edges"]["stitch"]=stitch;status["exposed_edges"]["rail_cache"]=rail_cache.clone();status["exposed_edges"]["candidate_admission"]=json!("nearest40_then_native_order");
+             if let Some(mut checkpoint)=exposed.checkpoint(){checkpoint["rail_cache"]=rail_cache;status["scene_checkpoint"]=checkpoint;}
+--- /dev/null
++++ b/dragonwilds-skate-worker/src/cache_progress.rs
+@@ -0,0 +1,47 @@
++//! Human-facing cache telemetry only; never writes to the JSON response pipe.
++use std::time::Instant;
++
++fn line(operation: &str, phase: &str, state: &str, elapsed_ms: u128) -> String {
++    format!("DWS_CACHE_PHASE operation={operation} phase={phase} state={state} elapsed_ms={elapsed_ms}")
++}
++
++fn run_with<T>(operation: &str, phase: &str, work: impl FnOnce() -> Result<T, String>,
++    mut emit: impl FnMut(String)) -> Result<T, String> {
++    emit(line(operation, phase, "start", 0));
++    let started = Instant::now();
++    let result = work();
++    emit(line(operation, phase, if result.is_ok() { "end" } else { "error" }, started.elapsed().as_millis()));
++    result
++}
++
++pub fn run<T>(operation: &str, phase: &str, work: impl FnOnce() -> Result<T, String>) -> Result<T, String> {
++    run_with(operation, phase, work, |line| eprintln!("{line}"))
++}
++
++/// Call only after durable offline completion or successful native acceptance.
++pub fn ready(operation: &str, started: Instant) {
++    eprintln!("{}", line(operation, "ready", "end", started.elapsed().as_millis()));
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    #[test]
++    fn success_has_start_and_end_and_preserves_the_value() {
++        let mut events = Vec::new();
++        let value = run_with("scene", "building_runtime_provider", || Ok(42), |line| events.push(line));
++        assert_eq!(value, Ok(42));
++        assert_eq!(events.len(), 2);
++        assert_eq!(events[0], "DWS_CACHE_PHASE operation=scene phase=building_runtime_provider state=start elapsed_ms=0");
++        assert!(events[1].starts_with("DWS_CACHE_PHASE operation=scene phase=building_runtime_provider state=end elapsed_ms="));
++    }
++    #[test]
++    fn failure_is_not_reported_as_completion_or_ready() {
++        let mut events = Vec::new();
++        let value = run_with::<()>("prepare", "joining_grind_paths", || Err("original error".into()), |line| events.push(line));
++        assert_eq!(value, Err("original error".into()));
++        assert_eq!(events.len(), 2);
++        assert!(events[1].starts_with("DWS_CACHE_PHASE operation=prepare phase=joining_grind_paths state=error elapsed_ms="));
++        assert!(!events.iter().any(|line| line.contains("phase=ready")));
++    }
++}
+--- /dev/null
++++ b/dragonwilds-skate-worker/tests/cache_progress.rs
+@@ -0,0 +1,3 @@
++// No geometry, simulation, input or game dependencies.
++#[path = "../src/cache_progress.rs"]
++mod cache_progress;

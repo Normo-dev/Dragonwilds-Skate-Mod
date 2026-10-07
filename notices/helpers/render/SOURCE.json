@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "component": "render",
+  "artifact_sha256": "6af6481fa2f35485402f042618afddc01ad63a233259547a0815394955cfad1d",
+  "compiled_source_sha256": "f59aa5330efb1828205528b7a95a66783d69fd04e260ac2c06d4db9168174f63",
+  "files": [
+    {
+      "path": "Cargo.lock",
+      "sha256": "322ec1f37ed5b72a2a9f0ed9fb429041734d9d8652572c8facbedff3f30f89ad"
+    },
+    {
+      "path": "Cargo.toml",
+      "sha256": "4f9e0fd3f746d8642e5a38401d02b8d275c1f257b4ab1355b577afb6f26fe7e2"
+    },
+    {
+      "path": "src/lib.rs",
+      "sha256": "2c91e37595db02b9cda5060c29afb8740d4b16dbdee9efb7748b520def8c0120"
+    }
+  ],
+  "build": "cargo build --release --locked --offline with source/user/tool path remaps; Rust 1.96.0",
+  "source_status": "Exact source files retained unchanged since designated public helper build"
+}

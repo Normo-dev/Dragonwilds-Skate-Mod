@@ -1,0 +1,10 @@
+{
+  "initial": {
+    "algorithm_sha256": "71f58fe35900948f0532558b4d24104325ef1b771d197d64e822e68d9bc9ba32",
+    "manifest_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "next": {
+    "algorithm_sha256": "71f58fe35900948f0532558b4d24104325ef1b771d197d64e822e68d9bc9ba32",
+    "manifest_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+  }
+}

@@ -1,0 +1,210 @@
+--- a/dragonwilds-skate-worker/src/main.rs
++++ b/dragonwilds-skate-worker/src/main.rs
+@@ -41,7 +41,7 @@
+ enum Command {
+     PrepareWorld { manifest:PathBuf,#[serde(default)] scene_file:Option<PathBuf> },
+     InitWorld { assets:PathBuf,manifest:PathBuf,anchor:[f64;3],#[serde(default)] scene_file:Option<PathBuf>,
+-        #[serde(default)] rail_file:Option<PathBuf>,spawn:[f32;3],heading:f32 },
++        #[serde(default)] rail_file:Option<PathBuf>,#[serde(default)] scene_cache_required:bool,spawn:[f32;3],heading:f32 },
+     WorldScene {revision:u32,scene_file:PathBuf},
+     Surface {point:[f32;3],above:f32,below:f32},
+     Camera { mode: CameraMode },
+@@ -151,9 +151,9 @@
+         if session.is_some(){return Err("Offline preparation requires a fresh worker without an active Session".into());}
+         return world_runtime::prepare_offline(&manifest,scene_file.as_deref());
+     }
+-    if let Command::InitWorld{assets,manifest,anchor,scene_file,rail_file,spawn,heading}=command {
++    if let Command::InitWorld{assets,manifest,anchor,scene_file,rail_file,scene_cache_required,spawn,heading}=command {
+         if anchor!=[0.;3]||!valid_point(&spawn)||!heading.is_finite(){return Err("Invalid fixed world origin/spawn".into());}
+-        let (new_session,new_world)=world_runtime::WorldRuntime::init(&assets,&manifest,scene_file.as_deref(),rail_file.as_deref(),spawn,heading)?;
++        let (new_session,new_world)=world_runtime::WorldRuntime::init(&assets,&manifest,scene_file.as_deref(),rail_file.as_deref(),scene_cache_required,spawn,heading)?;
+         *session=Some(new_session);*world=Some(new_world);*pending=None;*pending_world=None;*revision=0;*collision_error=None;
+         return Ok(json!({"ok":true,"status":"ready","period":session.as_ref().unwrap().period()}));
+     }
+@@ -313,6 +313,16 @@
+     use super::*;
+ 
+     #[test]
++    fn required_scene_cache_is_opt_in_and_rejects_missing_scene_before_loading() {
++        let value=json!({"op":"init_world","assets":"unused","manifest":"unused","anchor":[0,0,0],"spawn":[0,0,0],"heading":0});
++        assert!(matches!(serde_json::from_value::<Command>(value.clone()).unwrap(),Command::InitWorld{scene_cache_required:false,..}));
++        let mut required=value;required["scene_cache_required"]=true.into();
++        assert!(matches!(serde_json::from_value::<Command>(required).unwrap(),Command::InitWorld{scene_cache_required:true,..}));
++        let error=world_runtime::WorldRuntime::init(std::path::Path::new("unused"),std::path::Path::new("unused"),None,None,true,[0.;3],0.).err().unwrap();
++        assert!(error.contains("Required scene cache needs a scene manifest"));
++    }
++
++    #[test]
+     fn json_world_validation_accepts_limit_and_rejects_next_triangle() {
+         let mut triangles=Vec::with_capacity(MAX_TRIANGLES+1);
+         triangles.resize(MAX_TRIANGLES,[[0.,0.,0.],[0.,0.,1.],[1.,0.,0.]]);
+--- a/dragonwilds-skate-worker/src/world_runtime.rs
++++ b/dragonwilds-skate-worker/src/world_runtime.rs
+@@ -47,11 +47,21 @@
+         "candidates":bake.candidates,"merged_rails":merged.rails.len(),"merged_rail_cache":merged.path,"elapsed_ms":started.elapsed().as_millis()}))
+ }
+ impl WorldRuntime {
+-    pub fn init(assets:&Path,manifest:&Path,scene:Option<&Path>,rail_file:Option<&Path>,spawn:[f32;3],heading:f32)
++    pub fn init(assets:&Path,manifest:&Path,scene:Option<&Path>,rail_file:Option<&Path>,scene_cache_required:bool,spawn:[f32;3],heading:f32)
+         ->Result<(Session,Self),String> {
++        if scene_cache_required&&scene.is_none(){return Err("Required scene cache needs a scene manifest".into());}
++        let cached_base=manifest.with_file_name("world.lips");
++        let rail_file=if scene_cache_required{Some(rail_file.unwrap_or(&cached_base))}else{rail_file};
+         let started=Instant::now();let(base,bake,_)=base_bake(manifest,rail_file)?;
+         let source=source(&base,scene)?;
+-        let bake=Arc::new(if let Some(scene)=scene {crate::scene_rail_cache::prepare(&bake,&source,scene)?}else{bake});
++        let bake=Arc::new(if let Some(scene)=scene {
++            if scene_cache_required {
++                let key=crate::scene_rail_cache::key(&bake,&source)?;let path=crate::scene_rail_cache::path(scene,&key)?;
++                let cached=compact_rails::load_with_identity(&path,&source.world,&key)
++                    .map_err(|e|format!("Required scene cache rejected: {e}"))?;
++                eprintln!("WORLD_SCENE_LIP_CACHE required hit key={key} lips={}",cached.lips.len());cached
++            }else{crate::scene_rail_cache::prepare(&bake,&source,scene)?}
++        }else{bake});
+         let rails=crate::merged_rail_cache::prepare(manifest,&bake)?.rails;
+         let rail_count=rails.len();let session=Session::new_with_source(assets,source.clone(),rails,spawn,heading)?;
+         eprintln!("WORLD_SESSION_READY triangles={} rails={} elapsed_ms={}",source.world.triangle_count(),rail_count,started.elapsed().as_millis());
+--- a/dragonwilds-skate-worker/src/compact_world.rs
++++ b/dragonwilds-skate-worker/src/compact_world.rs
+@@ -336,6 +336,25 @@
+     /// when an otherwise identical package first moves into the live overlay.
+     pub fn difference_bounds(&self,previous:&Self)->Result<Vec<Bounds>,String>{
+         if self.source_fingerprint!=previous.source_fingerprint{return Err("Cannot compare different compact world bases".into());}
++        // A package can contain thousands of static objects and a handful of
++        // animated attachments. Compare their actual ordered geometry records
++        // before falling back to package-level invalidation. Ordinal shifts do
++        // not move a face; an insertion/deletion/movement needs only its own
++        // old/new bounds, provided all surviving records retain their order.
++        let current=self.ordered_static_records();let old=previous.ordered_static_records();
++        let current_set:HashSet<_>=current.iter().map(|&(key,_)|key).collect();
++        let old_set:HashSet<_>=old.iter().map(|&(key,_)|key).collect();
++        let current_common:Vec<_>=current.iter().filter_map(|&(key,_)|old_set.contains(&key).then_some(key)).collect();
++        let old_common:Vec<_>=old.iter().filter_map(|&(key,_)|current_set.contains(&key).then_some(key)).collect();
++        if current_common==old_common {
++            let mut bounds=Vec::new();
++            for &(key,index) in &old {if !current_set.contains(&key){bounds.push(previous.groups[index].bounds);}}
++            for &(key,index) in &current {if !old_set.contains(&key){bounds.push(self.groups[index].bounds);}}
++            return Ok(bounds);
++        }
++        // Reordering surviving records can change the original earliest face
++        // owner. Keep the established conservative package fallback for that
++        // case rather than treating an unordered geometry multiset as equal.
+         let mut changed=HashSet::new();
+         for package in self.package_content.keys().chain(previous.package_content.keys()){
+             if self.package_content.get(package)!=previous.package_content.get(package){changed.insert(package.as_str());}
+@@ -353,6 +372,24 @@
+             if world.group_package(index).is_some_and(|p|changed.contains(p)){bounds.push(group.bounds);}
+         }}}
+         Ok(bounds)
++    }
++    fn ordered_static_records(&self)->Vec<(([u8;32],usize),usize)> {
++        let mut occurrences=HashMap::<[u8;32],usize>::new();let mut result=Vec::new();
++        for index in 0..self.groups.len(){
++            let Some((world,instance,live))=self.static_record(index) else{continue;};
++            let mut hash=Sha256::new();hash.update(b"S3W1 ordered static instance v1\0");
++            let package=&world.packages[instance.package];hash.update((package.len() as u64).to_le_bytes());hash.update(package.as_bytes());
++            hash.update([u8::from(live)]);hash_instance(&mut hash,world.mesh_data(instance.geometry).0,instance);
++            let digest:[u8;32]=hash.finalize().into();let ordinal=occurrences.entry(digest).or_default();
++            result.push(((digest,*ordinal),index));*ordinal+=1;
++        }result
++    }
++    fn static_record(&self,index:usize)->Option<(&Self,&Instance,bool)> {
++        match self.sources[index] {
++            Source::Terrain(_)=>None,
++            Source::Instance(i)=>Some((self,&self.instances[i],self.base.is_some())),
++            Source::Base(i)=>self.base.as_ref().unwrap().static_record(i),
++        }
+     }
+     pub fn pristine_base(self:&Arc<Self>)->Arc<Self>{self.base.as_ref().unwrap_or(self).clone()}
+     fn geometry_count(&self)->usize{self.base.as_ref().map_or(0,|base|base.geometry_count())+self.meshes.len()}
+--- a/dragonwilds-skate-worker/tests/compact_world_reader.rs
++++ b/dragonwilds-skate-worker/tests/compact_world_reader.rs
+@@ -79,6 +79,56 @@
+     let disabled=CompactWorld::with_overlay(&base,&root.join("overlay-disabled/manifest.json")).unwrap();
+     assert!(removed.difference_bounds(&disabled).unwrap().is_empty());
+     assert!(!add.difference_bounds(&base).unwrap().is_empty());
++}
++
++#[test]
++fn moving_one_instance_does_not_invalidate_its_unchanged_package_neighbors(){
++    use sha2::{Digest,Sha256};
++    let root=PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../compact-world-fixture");
++    let base=std::sync::Arc::new(CompactWorld::load(&root.join("export/manifest.json")).unwrap());
++    let scene=root.join("overlay-add");let before=CompactWorld::with_overlay(&base,&scene.join("manifest.json")).unwrap();
++    let temporary=root.join(format!("instance-delta-test-{}",std::process::id()));fs::create_dir_all(&temporary).unwrap();
++    fs::copy(scene.join("geometry.f64"),temporary.join("geometry.f64")).unwrap();
++    let original=fs::read(scene.join("instances.bin")).unwrap();
++    let manifest:serde_json::Value=serde_json::from_slice(&fs::read(scene.join("manifest.json")).unwrap()).unwrap();
++    let write=|bytes:&[u8],count:usize|{
++        let mut m=manifest.clone();m["instance_count"]=count.into();m["triangle_count"]=(count*12).into();
++        let digest:String=Sha256::digest(bytes).iter().map(|b|format!("{b:02x}")).collect();
++        m["instance_file"]["bytes"]=bytes.len().into();m["instance_file"]["sha256"]=digest.clone().into();
++        m["source_fingerprint"]=digest.into();
++        fs::write(temporary.join("instances.bin"),bytes).unwrap();
++        fs::write(temporary.join("manifest.json"),serde_json::to_vec(&m).unwrap()).unwrap();
++        CompactWorld::with_overlay(&base,&temporary.join("manifest.json")).unwrap()
++    };
++    let mut bytes=original.clone();
++    // Translation and both cached bound X coordinates of the second instance.
++    for offset in [80,104,128]{let at=152+offset;let x=f64::from_le_bytes(bytes[at..at+8].try_into().unwrap());bytes[at..at+8].copy_from_slice(&(x+20.).to_le_bytes());}
++    let moved=write(&bytes,2);let delta=moved.difference_bounds(&before).unwrap();
++    assert_eq!(delta.len(),2);assert!(delta.iter().all(|b|b.min[0]>5900.));
++    let added=write(&[original.as_slice(),&original[152..]].concat(),3);
++    assert_eq!(added.difference_bounds(&before).unwrap().len(),1);
++    let removed=write(&original[..152],1);
++    assert_eq!(removed.difference_bounds(&before).unwrap().len(),1);
++    let reordered=write(&[&original[152..],&original[..152]].concat(),2);
++    assert_eq!(reordered.difference_bounds(&before).unwrap().len(),4);
++    let absolute=temporary.canonicalize().unwrap();assert!(absolute.starts_with(root.canonicalize().unwrap()));
++    fs::remove_dir_all(absolute).unwrap();
++}
++
++#[test]
++#[ignore="Reads locally captured scenes supplied through environment variables"]
++fn recorded_scene_instance_delta(){
++    let manifest=PathBuf::from(std::env::var_os("SKATE_WORLD_MANIFEST").expect("SKATE_WORLD_MANIFEST"));
++    let old=PathBuf::from(std::env::var_os("SKATE_PREVIOUS_SCENE").expect("SKATE_PREVIOUS_SCENE"));
++    let next=PathBuf::from(std::env::var_os("SKATE_NEXT_SCENE").expect("SKATE_NEXT_SCENE"));
++    let base=std::sync::Arc::new(CompactWorld::load(&manifest).unwrap());
++    let previous=CompactWorld::with_overlay(&base,&old).unwrap();let current=CompactWorld::with_overlay(&base,&next).unwrap();
++    let started=Instant::now();let bounds=current.difference_bounds(&previous).unwrap();let delta_ms=started.elapsed().as_secs_f64()*1000.;
++    let regions:Vec<_>=bounds.iter().map(|b|{let scale=b.min.into_iter().chain(b.max).map(f64::abs).fold(1.,f64::max);
++        let pad=16.+scale*f64::from(f32::EPSILON)*32.;Bounds{min:b.min.map(|x|x-pad),max:b.max.map(|x|x+pad)}}).collect();
++    let old_ids=previous.candidate_triangles_many(&regions);let new_ids=current.candidate_triangles_many(&regions);
++    println!("RECORDED_SCENE_DELTA bounds={} delta_ms={delta_ms:.3} old_triangles={} new_triangles={}",bounds.len(),old_ids.len(),new_ids.len());
++    if let Ok(count)=std::env::var("SKATE_EXPECTED_BOUND_COUNT"){assert_eq!(bounds.len(),count.parse::<usize>().unwrap());}
+ }
+ 
+ fn repeated_union(world:&CompactWorld,boxes:&[Bounds])->Vec<usize>{
+--- a/dragonwilds-skate-worker/tests/compact_rails.rs
++++ b/dragonwilds-skate-worker/tests/compact_rails.rs
+@@ -92,8 +92,28 @@
+     std::fs::write(changed.join("manifest.json"),serde_json::to_vec(&manifest).unwrap()).unwrap();
+     let after=Arc::new(CompactWorld::with_overlay(&base,&changed.join("manifest.json")).unwrap());
+     let after=CompactGeometry::new(after,[0.;3]).unwrap();
+-    let updated=compact_rails::update(&previous,&before,&after,vec![old,new]).unwrap();let expected=compact_rails::bake(&after).unwrap();
++    let difference=after.world.difference_bounds(&before.world).unwrap();assert_eq!(difference.len(),2);
++    for (actual,serialized) in difference.iter().zip([old,new]) {for axis in 0..3 {
++        assert!(actual.min[axis]<=serialized.min[axis]&&actual.max[axis]>=serialized.max[axis]);
++        assert!((actual.min[axis]-serialized.min[axis]).abs()<1e-8&&(actual.max[axis]-serialized.max[axis]).abs()<1e-8);
++    }}
++    let updated=compact_rails::update(&previous,&before,&after,difference).unwrap();let expected=compact_rails::bake(&after).unwrap();
+     assert_eq!(keys(&updated),keys(&expected));assert_eq!(updated.candidates,expected.candidates);
++}
++
++#[test]
++#[ignore="Read-only benchmark using explicitly supplied owned snapshots and verified earlier bake"]
++fn recorded_delta_update(){
++    let required=|name:&str|std::env::var(name).unwrap_or_else(|_|panic!("Missing {name}"));
++    let base=Arc::new(CompactWorld::load(&PathBuf::from(required("SKATE_WORLD_MANIFEST"))).unwrap());
++    let before=CompactGeometry::new(Arc::new(CompactWorld::with_overlay(&base,&PathBuf::from(required("SKATE_PREVIOUS_SCENE"))).unwrap()),[0.;3]).unwrap();
++    let after=CompactGeometry::new(Arc::new(CompactWorld::with_overlay(&base,&PathBuf::from(required("SKATE_NEXT_SCENE"))).unwrap()),[0.;3]).unwrap();
++    assert_eq!(before.world.scene_fingerprint.as_deref(),Some(required("SKATE_PREVIOUS_FINGERPRINT").as_str()));
++    let previous=compact_rails::load_with_identity(&PathBuf::from(required("SKATE_PREVIOUS_LIPS")),&before.world,&required("SKATE_PREVIOUS_LIP_ID")).unwrap();
++    let started=std::time::Instant::now();let difference=after.world.difference_bounds(&before.world).unwrap();let bound_count=difference.len();
++    let updated=compact_rails::update(&previous,&before,&after,difference).unwrap();let update_ms=started.elapsed().as_secs_f64()*1000.;
++    let started=std::time::Instant::now();let rails=compact_rails::rails(&updated);let merge_ms=started.elapsed().as_secs_f64()*1000.;
++    println!("RECORDED_RAIL_DELTA bounds={bound_count} update_ms={update_ms:.3} merge_ms={merge_ms:.3} candidates={} lips={} rails={}",updated.candidates,updated.lips.len(),rails.len());
+ }
+ #[test]
+ #[ignore="One-time original rail bake over the owned whole-world geometry"]

@@ -1,0 +1,393 @@
+--- a/crates/skate-core/src/physics/board_world/broadphase.rs
++++ b/crates/skate-core/src/physics/board_world/broadphase.rs
+@@ -8,6 +8,10 @@
+     /// Conservative cluster culling, retaining canonical traversal order and
+     /// every triangle in intersecting clusters. Narrow-phase remains unchanged.
+     pub fn candidate_ranges(&self, bounds: Option<Bounds>) -> Vec<std::ops::Range<usize>> {
++        if let Some((source, _)) = &self.source {
++            return source.candidate_ranges(bounds.filter(|b| b.valid()).map(|b|
++                conservative_bounds(b, self.maximum_fatness + self.maximum_triangle_margin)));
++        }
+         let (Some(metadata), Some(bounds)) = (&self.query_metadata, bounds.filter(|b| b.valid()))
+         else {
+             return vec![0..self.triangles.len()];
+@@ -38,16 +42,16 @@
+         start: Vector3,
+         end: Vector3,
+         radius: f32,
+-    ) -> impl Iterator<Item = (usize, &WorldTriangle)> {
++    ) -> impl Iterator<Item = (usize, WorldTriangle)> {
+         let bounds = self.line_candidate_bounds(start, end, radius);
+         self.candidate_ranges(bounds)
+             .into_iter()
+             .flatten()
+             .filter(move |&i| {
+-                self.query_metadata.is_none()
+-                    || bounds.is_none_or(|b| self.triangle_bounds[i].overlaps(b))
++                (self.query_metadata.is_none() && self.source.is_none())
++                    || bounds.is_none_or(|b| self.triangle_bounds(i).overlaps(b))
+             })
+-            .map(|i| (i, &self.triangles[i]))
++            .filter_map(|i| self.triangle(i).map(|triangle| (i, triangle)))
+     }
+ 
+     /// Bounds shared with adapters that retain mesh pool/group/identity filtering.
+@@ -79,6 +83,10 @@
+         &self,
+         bounds: Option<Bounds>,
+     ) -> Result<Vec<usize>, &'static str> {
++        if let Some((source, _)) = &self.source {
++            return Ok(source.candidate_mesh_indices(bounds.filter(|b| b.valid()).map(|b|
++                conservative_bounds(b, self.maximum_fatness + self.maximum_triangle_margin))));
++        }
+         let metadata = self.query_metadata()?;
+         let Some(bounds) = bounds.filter(|b| b.valid()) else {
+             return Ok((0..metadata.meshes.len()).collect());
+--- /dev/null
++++ b/crates/skate-core/src/physics/board_world/geometry_source.rs
+@@ -0,0 +1,22 @@
++//! Host geometry storage/query interface. Narrow-phase and contact retention
++//! remain owned by BoardWorld; providers retain stable canonical triangle IDs.
++use super::{WorldTriangle, query_metadata::{Bounds, QueryMetadata}};
++use crate::physics::contact::RetailContactMaterial;
++use std::ops::Range;
++
++pub trait WorldGeometry: Send + Sync {
++    fn validate(&self) -> Result<(), &'static str>;
++    fn triangle_count(&self) -> usize;
++    fn metadata(&self) -> &QueryMetadata;
++    /// None is an explicitly degenerate source primitive, never unavailable
++    /// streamed data. All immutable source geometry must be available at load.
++    fn triangle(&self, index: usize, material: RetailContactMaterial) -> Option<WorldTriangle>;
++    fn triangle_bounds(&self, index: usize) -> Bounds;
++    fn packed_surface(&self, index: usize) -> u16;
++    /// Sorted, nonoverlapping ranges in canonical source order; conservative
++    /// culling only. Invalid/absent query bounds mean every source primitive.
++    fn candidate_ranges(&self, bounds: Option<Bounds>) -> Vec<Range<usize>>;
++    fn candidate_mesh_indices(&self, bounds: Option<Bounds>) -> Vec<usize>;
++    fn maximum_fatness(&self) -> f32;
++    fn maximum_triangle_margin(&self) -> f32;
++}
+--- a/crates/skate-core/src/physics/board_world/tests.rs
++++ b/crates/skate-core/src/physics/board_world/tests.rs
+@@ -58,6 +58,32 @@
+         .collect()
+ }
+ 
++struct StoredSource(BoardWorld);
++impl geometry_source::WorldGeometry for StoredSource {
++    fn validate(&self) -> Result<(), &'static str> { self.0.query_metadata().map(|_| ()) }
++    fn triangle_count(&self) -> usize { self.0.triangle_count() }
++    fn metadata(&self) -> &QueryMetadata { self.0.query_metadata().unwrap() }
++    fn triangle(&self, index: usize, _: RetailContactMaterial) -> Option<WorldTriangle> { self.0.triangle(index) }
++    fn triangle_bounds(&self, index: usize) -> Bounds { self.0.triangle_bounds(index) }
++    fn packed_surface(&self, index: usize) -> u16 { self.0.packed_surface(index).unwrap() }
++    fn candidate_ranges(&self, bounds: Option<Bounds>) -> Vec<std::ops::Range<usize>> {
++        match bounds {
++            Some(b) => self.0.query_index.query(b, &self.metadata().meshes).into_iter()
++                .map(|i| self.metadata().meshes[i].triangle_range.clone()).collect(),
++            None => vec![0..self.triangle_count()],
++        }
++    }
++    fn candidate_mesh_indices(&self, bounds: Option<Bounds>) -> Vec<usize> {
++        bounds.map_or_else(|| (0..self.metadata().meshes.len()).collect(), |b|
++            self.0.query_index.query(b, &self.metadata().meshes))
++    }
++    fn maximum_fatness(&self) -> f32 { self.0.maximum_fatness }
++    fn maximum_triangle_margin(&self) -> f32 { self.0.maximum_triangle_margin }
++}
++fn sourced(triangles: Vec<WorldTriangle>) -> BoardWorld {
++    BoardWorld::from_source(std::sync::Arc::new(StoredSource(annotated(triangles))), material()).unwrap()
++}
++
+ #[test]
+ fn zip_hierarchy_matches_inclusive_linear_mesh_scan_and_source_order() {
+     let world = annotated(tiled());
+@@ -111,6 +137,7 @@
+     triangles.insert(0, face(0., 9000, 0.1));
+     triangles.insert(0, face(0., 9001, 0.1));
+     let linear = BoardWorld::new(triangles.clone());
++    let source = sourced(triangles.clone());
+     let world = annotated(triangles);
+     for x in [-100., -2.1, -1., 0., 2., 9., 509., 10229.] {
+         for radius in [0., 0.03, 0.5] {
+@@ -120,6 +147,7 @@
+                 world.query_swept_line(start, end, radius),
+                 linear.query_swept_line(start, end, radius)
+             );
++            assert_eq!(source.query_swept_line(start, end, radius), linear.query_swept_line(start, end, radius));
+         }
+     }
+     assert_eq!(
+@@ -159,10 +187,20 @@
+ 
+ #[test]
+ fn predictive_contacts_and_retention_match_full_scan_for_every_primitive() {
++    contact_storage_comparison(false);
++}
++
++#[test]
++fn source_contacts_match_original_indexed_world_for_every_primitive() {
++    contact_storage_comparison(true);
++}
++
++fn contact_storage_comparison(indexed_reference:bool) {
+     let mut triangles = tiled();
+     triangles.insert(0, face(0., 9000, 0.02));
+     triangles.insert(0, face(0., 9001, 0.02));
+-    let mut linear = BoardWorld::new(triangles.clone());
++    let mut linear = if indexed_reference {annotated(triangles.clone())} else {BoardWorld::new(triangles.clone())};
++    let mut source = sourced(triangles.clone());
+     let mut world = annotated(triangles);
+     let center = Vector3::new(-0.7, 0.25, -0.7);
+     let primitives = [
+@@ -233,6 +271,7 @@
+                         snapshot(world.query_primitives(&volumes, query, retention)),
+                         expected
+                     );
++                    assert_eq!(snapshot(source.query_primitives(&volumes, query, retention)), expected);
+                     assert_eq!(world.dropped_contacts(), linear.dropped_contacts());
+                 }
+             }
+--- a/crates/skate-core/src/physics/board_world.rs
++++ b/crates/skate-core/src/physics/board_world.rs
+@@ -5,6 +5,7 @@
+ mod broadphase;
+ mod query_index;
+ pub mod query_metadata;
++pub mod geometry_source;
+ use crate::math::Vector3;
+ use broadphase::{conservative_bounds, primitive_bounds};
+ use query_metadata::{Bounds, QueryMetadata};
+@@ -118,6 +119,7 @@
+ /// World geometry remains in supplied order. Each query reuses output storage;
+ /// the returned contacts are valid until the next mutable call.
+ pub struct BoardWorld {
++    source: Option<(std::sync::Arc<dyn geometry_source::WorldGeometry>, RetailContactMaterial)>,
+     triangles: Vec<WorldTriangle>,
+     external: Option<std::sync::Arc<dyn ExternalQueries>>,
+     triangle_bounds: Vec<Bounds>,
+@@ -125,6 +127,7 @@
+     query_index: query_index::QueryIndex,
+     maximum_fatness: f32,
+     maximum_triangle_margin: f32,
++    imported_floor_seams: bool,
+     contacts: Vec<BoardCollision>,
+     buffer: ContactBuffer,
+ }
+@@ -162,6 +165,7 @@
+             })
+             .fold(0., f32::max);
+         Self {
++            source: None,
+             triangles,
+             external: None,
+             triangle_bounds,
+@@ -169,6 +173,7 @@
+             query_index: query_index::QueryIndex::default(),
+             maximum_fatness,
+             maximum_triangle_margin,
++            imported_floor_seams: false,
+             contacts: Vec::new(),
+             buffer: ContactBuffer {
+                 count: 0,
+@@ -196,6 +201,7 @@
+     }
+ 
+     pub fn query_metadata(&self) -> Result<&QueryMetadata, &'static str> {
++        if let Some((source, _)) = &self.source { return Ok(source.metadata()); }
+         self.query_metadata
+             .as_ref()
+             .ok_or("Canonical world has no authored query metadata")
+@@ -213,6 +219,44 @@
+ 
+     pub fn triangles(&self) -> &[WorldTriangle] {
+         &self.triangles
++    }
++
++    pub fn from_source(source: std::sync::Arc<dyn geometry_source::WorldGeometry>, material: RetailContactMaterial) -> Result<Self, &'static str> {
++        source.validate()?;
++        let mut world = Self::new(Vec::new());
++        world.maximum_fatness = source.maximum_fatness();
++        world.maximum_triangle_margin = source.maximum_triangle_margin();
++        if !world.maximum_fatness.is_finite() || world.maximum_fatness < 0.
++            || !world.maximum_triangle_margin.is_finite() || world.maximum_triangle_margin < 0. {
++            return Err("Invalid geometry-source conservative query margins");
++        }
++        world.source = Some((source, material));
++        Ok(world)
++    }
++
++    pub fn triangle_count(&self) -> usize {
++        self.source.as_ref().map_or(self.triangles.len(), |(source, _)| source.triangle_count())
++    }
++
++    pub fn triangle(&self, index: usize) -> Option<WorldTriangle> {
++        if let Some((source, material)) = &self.source { return source.triangle(index, *material); }
++        self.triangles.get(index).copied()
++    }
++
++    pub fn triangle_bounds(&self, index: usize) -> Bounds {
++        self.source.as_ref().map_or_else(|| self.triangle_bounds[index], |(source, _)| source.triangle_bounds(index))
++    }
++
++    pub fn packed_surface(&self, index: usize) -> Result<u16, &'static str> {
++        if let Some((source, _)) = &self.source { return Ok(source.packed_surface(index)); }
++        self.query_metadata()?.packed_surfaces.get(index).copied().ok_or("Triangle surface unavailable")
++    }
++
++    /// Imported brush floors can meet at split edges without sharing vertices.
++    /// Their continuation is checked at the contact point rather than marking
++    /// the entire edge smooth, which would erase a real ledge on an open span.
++    pub fn enable_imported_floor_seams(&mut self) {
++        self.imported_floor_seams = true;
+     }
+ 
+     /// Board wheel segments use zero query radius; rounded world triangles
+@@ -327,16 +371,21 @@
+         let bounds = bounds
+             .and_then(|b| Bounds::from_points(b.iter().flat_map(|b| [b.min, b.max])))
+             .map(|b| b.expanded(padding));
+-        let ranges = self.candidate_ranges(bounds);
++        let candidates: Vec<_> = self
++            .candidate_ranges(bounds)
++            .into_iter()
++            .flatten()
++            .filter_map(|index| self.triangle(index).map(|entry| (index, entry, self.triangle_bounds(index))))
++            .collect();
++        let indexed = self.query_metadata.is_some() || self.source.is_some();
++        let imported_floor_seams = self.imported_floor_seams;
+         let output = &mut self.contacts;
+         let mut publish = |records: &[ContactRecord]| {
+             output.extend(records.iter().map(collision_from_record));
+         };
+-        for index in ranges.into_iter().flatten() {
+-            let entry = &self.triangles[index];
++        for &(index, ref entry, triangle_bounds) in &candidates {
+             for (volume, volume_bounds) in volumes.iter().zip(&volume_bounds) {
+-                if self.query_metadata.is_some()
+-                    && volume_bounds.is_some_and(|b| !self.triangle_bounds[index].overlaps(b))
++                if indexed && volume_bounds.is_some_and(|b| !triangle_bounds.overlaps(b))
+                 {
+                     continue;
+                 }
+@@ -350,6 +399,17 @@
+                 };
+                 let material = combine_contact_materials(volume.material, entry.material);
+                 for pair in &manifold.points[..manifold.count] {
++                    if imported_floor_seams
++                        && imported_internal_floor_edge(
++                            index,
++                            entry,
++                            pair.b,
++                            manifold.normal,
++                            &candidates,
++                        )
++                    {
++                        continue;
++                    }
+                     let contact = RetailContactInput {
+                         position_on_a: pair.a,
+                         position_on_b: pair.b,
+@@ -384,6 +444,101 @@
+     }
+ }
+ 
++fn imported_internal_floor_edge(
++    source_index: usize,
++    source: &WorldTriangle,
++    contact: Vector3,
++    contact_normal: Vector3,
++    candidates: &[(usize, WorldTriangle, Bounds)],
++) -> bool {
++    let face = source.triangle.feature.normal;
++    let lateral = contact_normal.x.hypot(contact_normal.z);
++    if lateral < 0.05 {
++        return false;
++    }
++    let probe = |sign: f32| {
++        Vector3::new(
++            contact.x + sign * 0.005 * contact_normal.x / lateral,
++            contact.y,
++            contact.z + sign * 0.005 * contact_normal.z / lateral,
++        )
++    };
++    if face.y >= 0.98 && contact_normal.y > 0.05 {
++        // A floor triangle's exposed edge is internal only where another
++        // coplanar floor covers the point immediately beyond it.
++        let mut beyond = probe(1.);
++        let origin = source.triangle.vertices[0];
++        beyond.y =
++            origin.y - (face.x * (beyond.x - origin.x) + face.z * (beyond.z - origin.z)) / face.y;
++        return !point_in_floor_triangle(beyond, source.triangle.vertices)
++            && floor_at(
++                beyond,
++                Some(source_index),
++                Some(face),
++                candidates,
++            );
++    }
++    // A brush side ending at floor height is also internal when the same
++    // floor spans both sides. This catches buried sides of overlapping brush
++    // boxes without removing a true curb or a wall rising above the floor.
++    if face.y.abs() > 0.2
++        || source
++            .triangle
++            .vertices
++            .iter()
++            .any(|p| p.y > contact.y + 0.01)
++    {
++        return false;
++    }
++    floor_at(probe(-1.), None, None, candidates)
++        && floor_at(probe(1.), None, None, candidates)
++}
++
++fn floor_at(
++    probe: Vector3,
++    excluded: Option<usize>,
++    reference: Option<Vector3>,
++    candidates: &[(usize, WorldTriangle, Bounds)],
++) -> bool {
++    candidates.iter().any(|&(other_index, ref other, b)| {
++        if excluded == Some(other_index) {
++            return false;
++        }
++        let normal = other.triangle.feature.normal;
++        if normal.y < 0.98
++            || reference.is_some_and(|face| {
++                face.x * normal.x + face.y * normal.y + face.z * normal.z < 0.999
++            })
++        {
++            return false;
++        }
++        if probe.x < b.min.x - 0.001
++            || probe.x > b.max.x + 0.001
++            || probe.z < b.min.z - 0.001
++            || probe.z > b.max.z + 0.001
++        {
++            return false;
++        }
++        let p = other.triangle.vertices;
++        let plane_gap = (other.triangle.feature.normal.x * (probe.x - p[0].x)
++            + other.triangle.feature.normal.y * (probe.y - p[0].y)
++            + other.triangle.feature.normal.z * (probe.z - p[0].z))
++            .abs();
++        plane_gap <= 0.002 && point_in_floor_triangle(probe, p)
++    })
++}
++
++fn point_in_floor_triangle(point: Vector3, vertices: [Vector3; 3]) -> bool {
++    let cross =
++        |a: Vector3, b: Vector3, p: Vector3| (b.x - a.x) * (p.z - a.z) - (b.z - a.z) * (p.x - a.x);
++    let winding = cross(vertices[0], vertices[1], vertices[2]).signum();
++    (0..3).all(|i| {
++        let a = vertices[i];
++        let b = vertices[(i + 1) % 3];
++        winding * cross(a, b, point) >= -0.001 * (b.x - a.x).hypot(b.z - a.z)
++    })
++}
++
+ /// Retention reads only contact header geometry, body IDs and material/tag.
+ /// BoardStep builds the actual body workspaces after this frame's force queue
+ /// has been applied, preventing stale acceleration copies in solver contacts.

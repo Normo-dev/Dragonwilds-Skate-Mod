@@ -1,0 +1,268 @@
+{
+  "schema": 1,
+  "status": "Candidate24 native replay, incremental scene and public regression gates passed. Public/live gameplay acceptance and minimum hardware requirements remain unverified.",
+  "artifact_sha256": "7faa98dc3f96d27354bdd1d848142335d70a884b2dc632c91a8457e4c95309de",
+  "artifact_bytes": 8841216,
+  "compiled_source_sha256": "42cc0f55ec36caa5fe0485c7f24a70731dbc6623ffd1b87b8c2a68b8c27c8365",
+  "compiled_source_records": 1277,
+  "compiled_source_hash_algorithm": {
+    "selection": "Every SOURCE-PROVENANCE.json files entry whose relative POSIX path ends .rs or has basename Cargo.toml or Cargo.lock",
+    "records": "Objects containing only path and lowercase sha256, sorted lexicographically by path",
+    "encoding": "UTF-8 of Python json.dumps(records, sort_keys=True, separators=(',', ':'), ensure_ascii=True)",
+    "digest": "SHA256"
+  },
+  "pre_build_source_freeze_sha256": "cc529aa9fa20a6a7b9359bb57a59de1d5c9d722eb215f60bb754b00270a966f1",
+  "baseline_source_archive_sha256": "a873a7ffb1e2ba91ed6ee7a445e62c4f04535fb2b2bfba016d6ce9f130a29437",
+  "baseline_artifact_sha256": "f6ca12a29ae2f26bd9939c6d8a175dd2ba89c708e416b9212aa99d3a25669fd2",
+  "changed_existing_rust_and_cargo_files": [
+    "dragonwilds-skate-worker/src/main.rs",
+    "dragonwilds-skate-worker/src/world_runtime.rs",
+    "dragonwilds-skate-worker/tests/seam_grind_contacts.rs",
+    "skate3-mashup/skate/crates/skate-core/src/physics/board_world.rs",
+    "skate3-mashup/skate/crates/skate-host/src/grind_world/provider.rs",
+    "skate3-mashup/skate/crates/skate-host/src/physics.rs",
+    "skate3-mashup/skate/crates/skate-host/src/physics/air_trajectory/grind.rs",
+    "skate3-mashup/skate/crates/skate-host/src/physics/bridge.rs",
+    "skate3-mashup/skate/crates/skate-host/src/physics/footplant/update.rs",
+    "skate3-mashup/skate/crates/skate-host/src/physics/frame.rs",
+    "skate3-mashup/skate/crates/skate-host/src/physics/handplant.rs",
+    "skate3-mashup/skate/crates/skate-host/src/physics/handplant/contact.rs",
+    "skate3-mashup/skate/crates/skate-host/src/physics/known_air/runtime.rs",
+    "skate3-mashup/skate/crates/skate-host/src/physics/player_input/grind.rs",
+    "skate3-mashup/skate/crates/skate-host/src/physics/player_input/grind/pre.rs",
+    "skate3-mashup/skate/crates/skate-host/src/physics/solve.rs"
+  ],
+  "new_rust_and_cargo_files": [
+    "dragonwilds-skate-worker/src/change_bounds_index.rs",
+    "dragonwilds-skate-worker/src/exposed_resident.rs",
+    "dragonwilds-skate-worker/src/grind_path_index.rs",
+    "dragonwilds-skate-worker/src/world_runtime_graph.rs",
+    "dragonwilds-skate-worker/src/world_runtime_graph_tests.rs",
+    "dragonwilds-skate-worker/tests/cached_geometry.rs",
+    "dragonwilds-skate-worker/tests/change_bounds_index.rs",
+    "dragonwilds-skate-worker/tests/exposed_resident.rs",
+    "dragonwilds-skate-worker/tests/grind_contact_response.rs",
+    "dragonwilds-skate-worker/tests/grind_path_index.rs",
+    "dragonwilds-skate-worker/tests/native_grind_session.rs",
+    "dragonwilds-skate-worker/tests/support/grind_fixture_inputs.rs",
+    "skate3-mashup/skate/crates/skate-host/src/grind_world/provider/incremental.rs",
+    "skate3-mashup/skate/crates/skate-host/src/grind_world/provider/incremental/tests.rs",
+    "skate3-mashup/skate/crates/skate-host/src/physics/cached_geometry.rs",
+    "skate3-mashup/skate/crates/skate-host/src/physics/cached_geometry_tests.rs",
+    "skate3-mashup/skate/crates/skate-host/src/physics/performance_trace.rs",
+    "skate3-mashup/skate/crates/skate-host/src/physics/solve/grind_seams.rs",
+    "skate3-mashup/skate/crates/skate-host/src/physics/solve/grind_seams/footprint.rs",
+    "skate3-mashup/skate/crates/skate-host/src/physics/solve/grind_seams/proof.rs",
+    "skate3-mashup/skate/crates/skate-host/src/physics/solve/grind_seams/witness.rs"
+  ],
+  "unchanged_rust_and_cargo_files": 1240,
+  "new_public_fixture_files": [
+    "dragonwilds-skate-worker/tests/fixtures/grind-v1/README.md",
+    "dragonwilds-skate-worker/tests/fixtures/grind-v1/cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.dgi1.hex",
+    "dragonwilds-skate-worker/tests/fixtures/grind-v1/dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.dgi1.hex",
+    "dragonwilds-skate-worker/tests/fixtures/grind-v1/legacy-added-compacted.dgi1.hex",
+    "dragonwilds-skate-worker/tests/fixtures/grind-v1/legacy-base.dgi1.hex",
+    "dragonwilds-skate-worker/tests/fixtures/grind-v1/legacy-compacted.dgi1.hex",
+    "dragonwilds-skate-worker/tests/fixtures/grind-v1/legacy-delta.dgi1.hex",
+    "dragonwilds-skate-worker/tests/fixtures/grind-v1/records.json"
+  ],
+  "patch": "patches/dragonwilds-physics-performance-24.patch",
+  "patch_sha256": "d95c8e14d6eec964ac14918edc74a2672fc3ca9a364c578b7895bb2dbd27ec08",
+  "patch_reverse_apply_check": true,
+  "scope": "Candidate24 incremental grind graph/provider, resident edge payloads, bounded exact geometry memo, and narrow supported grind seam contact adapter",
+  "source_mechanics": "Imported fixed step, input, animations and contact math are retained. The host adapter filters narrowly proved decorative seam responses for engaged exposed Fifty-Fifty (0), Boardslide (1), Tipslide (2) and 5-0/FiveO (3) grinds; real gaps/obstacles still release. Families 4 and 5 retain the original response and are untested here.",
+  "cache_compatibility": {
+    "old_eight_identity_inputs_identical": true,
+    "old_identity_inputs": [
+      {
+        "path": "dragonwilds-skate-worker/src/compact_world.rs",
+        "sha256": "159d354ed49d5b2dc128bfe857d1a8f6aecd2ef9449d5de9f442cf370a44958b"
+      },
+      {
+        "path": "dragonwilds-skate-worker/src/compact_geometry.rs",
+        "sha256": "74b1821b5ce9eb79cc80bdee674fcca833181b218c0d193a245444695fe7cb7d"
+      },
+      {
+        "path": "dragonwilds-skate-worker/src/compact_rails.rs",
+        "sha256": "4d086947cc8e08234f2b71eea800ed531b5483b03e7fd835cf9f87c753e3ff7c"
+      },
+      {
+        "path": "dragonwilds-skate-worker/src/scene_rail_cache.rs",
+        "sha256": "c1df95c90bcf97e28e79bc214f4b6d715a34be8a3ce60f5c45bc95373e863fc8"
+      },
+      {
+        "path": "dragonwilds-skate-worker/src/accepted_scene_cache.rs",
+        "sha256": "e58c8d3ae39d4bfe120ff97dfdf10968985ed16ea0c5bcab86a55cba0eeff4df"
+      },
+      {
+        "path": "dragonwilds-skate-worker/src/merged_rail_cache.rs",
+        "sha256": "9d88ecf3852a5a1fd4eccc972a90540faf26d635157c54bbe687445961bc39ad"
+      },
+      {
+        "path": "dragonwilds-skate-worker/Cargo.lock",
+        "sha256": "320c408d09581755d041c9c7a598011e32780f4baa81d6c13581b71a7c0fa23d"
+      },
+      {
+        "path": "skate3-mashup/crates/render_anim/src/skate/rails.rs",
+        "sha256": "3dfc6d763eeaebd6dfb2bce9c846aa732da3144e81818b0f7aa00c161badc76a"
+      }
+    ],
+    "dwe_dwr_algorithm_inputs_identical": true,
+    "dwe_dwr_algorithm_inputs": [
+      {
+        "path": "dragonwilds-skate-worker/src/exposed_edge_cache.rs",
+        "sha256": "6ed38df832e058c3c1a2d3846fadd27bcda404bf51aeec3ca769b9c19ad1394f"
+      },
+      {
+        "path": "dragonwilds-skate-worker/src/exposed_edges.rs",
+        "sha256": "f93193444ccc4e857a33568083c780caccc9a907d8d40a2abe80318f2bdc6c51"
+      },
+      {
+        "path": "dragonwilds-skate-worker/src/exposed_query.rs",
+        "sha256": "605ff0cd3e5d03e600ef65a3326009aeeec407d9539feaafa40d034feb96ecac"
+      },
+      {
+        "path": "dragonwilds-skate-worker/src/exposed_rail_cache.rs",
+        "sha256": "e2c740596b7bb6c7b446f7caa1ba1132df2bcf5163397c5555dee23d00d4e803"
+      },
+      {
+        "path": "dragonwilds-skate-worker/src/compact_world.rs",
+        "sha256": "159d354ed49d5b2dc128bfe857d1a8f6aecd2ef9449d5de9f442cf370a44958b"
+      },
+      {
+        "path": "dragonwilds-skate-worker/src/compact_geometry.rs",
+        "sha256": "74b1821b5ce9eb79cc80bdee674fcca833181b218c0d193a245444695fe7cb7d"
+      },
+      {
+        "path": "dragonwilds-skate-worker/Cargo.lock",
+        "sha256": "320c408d09581755d041c9c7a598011e32780f4baa81d6c13581b71a7c0fa23d"
+      },
+      {
+        "path": "skate3-mashup/skate/crates/skate-core/src/air/trajectory/grind_surface.rs",
+        "sha256": "8c29b00ae39174e2f96288eb451a83f776315902e2f303ed640683dce3552f5e"
+      },
+      {
+        "path": "skate3-mashup/skate/crates/skate-core/src/air/trajectory/grind_surface/classify.rs",
+        "sha256": "508426f634f68b9dbfb27fe3a4d5f553c1803abe2c29e0eede115b4daae3cbed"
+      }
+    ],
+    "incremental_graph": "Separately pinned DGI1/DGD1 immutable graph history; existing DWE/DWR inputs remain identical.",
+    "runtime_full_map_reuse_verified": true
+  },
+  "build": {
+    "target": "x86_64-pc-windows-msvc",
+    "offline": true,
+    "locked": true,
+    "jobs": 2,
+    "incremental": false,
+    "source_remap": "/source/dragonwilds-skate",
+    "cargo_registry_remap": "/cargo/registry",
+    "build_log_sha256": "1c0aa40e863348e1a4c9c54c360d996b9fac296a9fb086bda24a7ad5949c9af1",
+    "cached_archives_verified_against_lock": 258
+  },
+  "checks": {
+    "worker_test_case_executions_passed": 246,
+    "worker_test_case_executions_failed": 0,
+    "ignored_test_case_executions": 24,
+    "test_target_results": 30,
+    "key_regressions_passed": [
+      "retaining_the_global_native_base_preserves_initial_dense_query_parity",
+      "replacement_retires_old_handles_without_changing_untouched_owners_or_storage",
+      "global_nearest_forty_includes_overlays_and_emits_retained_native_order",
+      "handplant_source_order_and_uncapped_footplant_both_use_spatial_candidates",
+      "independent_replays_preserve_owners_slots_compaction_and_rebind_after_many_edits",
+      "a_failed_provider_or_persistence_step_rolls_back_and_returns_exact_owners",
+      "returning_to_prior_geometry_never_replaces_an_ancestor_with_a_cycle",
+      "exact_values_material_bits_and_degenerate_results_are_memoized",
+      "eviction_and_new_source_epoch_never_reuse_stale_values",
+      "traversal_metadata_lines_and_retained_contact_order_match_source",
+      "single_pass_load_matches_original_and_locks_verified_contents",
+      "resident_add_move_delete_matches_verified_cold_reader",
+      "payload_leases_deny_mutation_and_reject_prior_corruption",
+      "positive_gap_is_never_bridged",
+      "invalid_or_remote_support_witness_cannot_expand_board_locality"
+    ],
+    "count_note": "Imported module tests may execute in multiple targets; totals are executions, not unique tests.",
+    "private_proof_sha256": "ff72ac30aa7df1b335f8a52a94458fcd53ce7fd04e4863962b85c4175b872d8c",
+    "grind_families_verified": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "negative_grind_contacts_preserved": true,
+    "grind_family_names_verified": [
+      "FiftyFifty",
+      "Boardslide",
+      "Tipslide",
+      "FiveO"
+    ],
+    "grind_known_limitations": [
+      "Live game acceptance remains pending; replay uses actual imported Session and caller-owned assets.",
+      "Fifty/FiveO crosses four joins with154total grind ticks, but interrupts at poses297..305(Nonspecific/PhysicsAir/KnownAir), reacquires306. This is not uninterrupted four-join continuity.",
+      "Right spin loses native admission for pose300, reacquires301, changes toTipslide314, exits336 after two joins. This is not uninterrupted four-join continuity.",
+      "Families4/5 retain original contact response and have not been proved for rough seam tolerance.",
+      "Sloped/curved contact and geometric proofs are separate from actual Session coverage on this Castle fixture.",
+      "FiveO occurred for one tick; sustained FiveO across four joins is not separately proved."
+    ],
+    "full_map_carrying_frames": 240,
+    "exact_full_map_carrying_pose_parity": true,
+    "carrying_pose_sha256": "a8300d3518ee96cd604fb1111d773c7656a38132ece1a0881f789db4f6c5bc66",
+    "small_scene_delta_applied": true,
+    "previous_snapshot_preserved": true,
+    "geometry_memo_exact_source_pose_parity": true,
+    "memo_full_map_performance_verified": false,
+    "private_measurements": {
+      "warm_init_seconds": 121.09400000000096,
+      "small_scene_delta_seconds": 2.82799999999952,
+      "baseline_small_scene_delta_seconds": 128.2650000000001,
+      "carrying": {
+        "load_seconds": 129.24677350000093,
+        "private_bytes_after_load": 14289534976,
+        "peak_pagefile_bytes_after_ticks": 16143589376,
+        "carry_idle": {
+          "ticks": 60,
+          "mean_ms": 5.6844649999220564,
+          "median_ms": 5.856000000676431,
+          "p95_ms": 6.592300000193063,
+          "max_ms": 7.267000000865664
+        },
+        "carry_run": {
+          "ticks": 180,
+          "mean_ms": 5.6156661110940655,
+          "median_ms": 5.575799999860465,
+          "p95_ms": 6.981200000154786,
+          "max_ms": 11.363600000549923
+        }
+      },
+      "grinds": {
+        "fifty": {
+          "ticks": 154,
+          "farthest_m": 15.503173828125,
+          "crossed_joins": 4
+        },
+        "left": {
+          "ticks": 162,
+          "farthest_m": 12.14678955078125,
+          "crossed_joins": 3
+        },
+        "right": {
+          "ticks": 65,
+          "farthest_m": 8.177688598632812,
+          "crossed_joins": 2
+        }
+      }
+    },
+    "test_inputs": "Public tests use synthetic inputs. Private world geometry, identifiers, caches and assets are excluded."
+  },
+  "limits": [
+    "Native helper measurements are not in-game FPS or public acceptance.",
+    "Full-map resident graph/provider memory is substantial; minimum RAM and hardware suitability are not established.",
+    "Live controller, grind, build/update, recovery and whole-map gameplay checks remain pending."
+  ],
+  "game_input_sent": false,
+  "installed_files_changed": false,
+  "live_gameplay_tested": false,
+  "assets_included": false,
+  "published": false
+}

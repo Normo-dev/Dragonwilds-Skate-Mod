@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "mode": "external_manual_prerequisite",
+  "version": "v3.0.1-1152-ge3ba1016",
+  "source_revision": "e3ba1016562d6c0868c410d0a71e88bfcdbf691b",
+  "release_page": "https://github.com/UE4SS-RE/RE-UE4SS/releases",
+  "files": [
+    {
+      "destination": "dwmapi.dll",
+      "sha256": "cf440b9eb8643bb7c434acfda696aee57fd981d185dca5e57fb8dbb18f8fc1cd",
+      "bytes": 279552
+    },
+    {
+      "destination": "ue4ss/Mods/shared/UEHelpers/UEHelpers.lua",
+      "sha256": "7476f02eef0c87bfeab169f2ffe2e704363faeaae4bf9f1bda574b1e34f4a0e9",
+      "bytes": 10237
+    },
+    {
+      "destination": "ue4ss/UE4SS.dll",
+      "sha256": "680a026890abb4d0df2211251f8defc1681a584275f1521dcc0fe30af480006f",
+      "bytes": 20605440
+    }
+  ],
+  "redistribution_status": "No UE4SS binary or UEHelpers source is included. UEPseudo licensing closure has not been established."
+}

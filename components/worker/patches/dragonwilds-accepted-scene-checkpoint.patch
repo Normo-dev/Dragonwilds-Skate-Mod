@@ -1,0 +1,238 @@
+--- a/dragonwilds-skate-worker/src/main.rs
++++ b/dragonwilds-skate-worker/src/main.rs
+@@ -13,6 +13,7 @@
+ mod scene_rail_cache;
+ mod world_runtime;
+ mod merged_rail_cache;
++mod accepted_scene_cache;
+ 
+ // Dense host windows can exceed the old one-million-triangle ceiling. Sixteen
+ // million bounds the binary payload at 576 MB. Allocation still uses only the
+--- a/dragonwilds-skate-worker/src/world_runtime.rs
++++ b/dragonwilds-skate-worker/src/world_runtime.rs
+@@ -54,6 +54,9 @@
+         let rail_file=if scene_cache_required{Some(rail_file.unwrap_or(&cached_base))}else{rail_file};
+         let started=Instant::now();let(base,bake,_)=base_bake(manifest,rail_file)?;
+         let source=source(&base,scene)?;
++        let accepted=scene.and_then(|scene|match crate::accepted_scene_cache::load(scene,&source){
++            Ok(cached)=>Some(cached),Err(error)=>{eprintln!("WORLD_ACCEPTED_SCENE_CACHE unavailable: {error}");None}});
++        let (bake,rails,checkpoint)=if let Some(cached)=accepted {(Arc::new(cached.bake),cached.rails,Some(cached.checkpoint))}else{
+         let bake=Arc::new(if let Some(scene)=scene {
+             if scene_cache_required {
+                 let key=crate::scene_rail_cache::key(&bake,&source)?;let path=crate::scene_rail_cache::path(scene,&key)?;
+@@ -63,9 +66,11 @@
+             }else{crate::scene_rail_cache::prepare(&bake,&source,scene)?}
+         }else{bake});
+         let rails=crate::merged_rail_cache::prepare(manifest,&bake)?.rails;
++        (bake,rails,None)};
+         let rail_count=rails.len();let session=Session::new_with_source(assets,source.clone(),rails,spawn,heading)?;
+         eprintln!("WORLD_SESSION_READY triangles={} rails={} elapsed_ms={}",source.world.triangle_count(),rail_count,started.elapsed().as_millis());
+-        let status=Self::describe(&base,&source,rail_count);
++        let mut status=Self::describe(&base,&source,rail_count);
++        if let Some(checkpoint)=checkpoint{status["scene_checkpoint"]=checkpoint;}
+         Ok((session,Self{base,bake,source,rail_count,status}))
+     }
+     pub fn scene(&self,builder:CollisionBuilder,path:&Path)->Result<(Option<PreparedCollision>,Self),String> {
+@@ -80,11 +85,12 @@
+         let difference=source.world.difference_bounds(&self.source.world)?;
+         eprintln!("WORLD_SCENE_DIFFERENCE bounds={}",difference.len());
+         let bake=Arc::new(compact_rails::update(&self.bake,&self.source,&source,difference)?);
+-        let rails=compact_rails::rails(&bake);let rail_count=rails.len();
++        let(rails,checkpoint)=crate::accepted_scene_cache::prepare(path,&source,&bake)?;let rail_count=rails.len();
+         let collision=builder.build_source(source.clone(),rails)?;
+         eprintln!("WORLD_SCENE_READY active_triangles={} rails={} elapsed_ms={}",
+             source.world.counts.static_triangles+source.world.counts.terrain_triangles,rail_count,started.elapsed().as_millis());
+-        let status=Self::describe(&self.base,&source,rail_count);
++        let mut status=Self::describe(&self.base,&source,rail_count);
++        if let Some(checkpoint)=checkpoint{status["scene_checkpoint"]=checkpoint;}
+         Ok((Some(collision),Self{base:self.base.clone(),bake,source,rail_count,status}))
+     }
+     pub fn status(&self)->Value {self.status.clone()}
+--- /dev/null
++++ b/dragonwilds-skate-worker/src/accepted_scene_cache.rs
+@@ -0,0 +1,122 @@
++//! Preserve the exact ordered result of an incremental scene update. This is
++//! deliberately separate from pristine-base -> scene caches: incremental lip
++//! ordering is history dependent, and must never be written under their keys.
++use crate::{compact_geometry::CompactGeometry,compact_rails::{self,LipBake},merged_rail_cache};
++use serde::{Deserialize,Serialize};
++use serde_json::{Value,json};
++use std::{fs,io::Write,path::{Path,PathBuf},sync::atomic::{AtomicU64,Ordering},time::Instant};
++
++const SCHEMA:u32=1;
++const RETAIN:usize=3;
++#[derive(Serialize,Deserialize)]
++#[serde(deny_unknown_fields)]
++struct Record {schema:u32,base_fingerprint:String,scene_fingerprint:String,algorithm:String,payload:String,
++    identity:String,candidates:usize,lips:usize,merged_file:String}
++pub struct Restored {pub bake:LipBake,pub rails:Vec<Vec<[f32;3]>>,pub checkpoint:Value}
++
++fn hex(value:&str)->bool{value.len()==64&&value.bytes().all(|c|c.is_ascii_digit()||(b'a'..=b'f').contains(&c))}
++fn folder(scene:&Path)->Result<PathBuf,String>{Ok(scene.parent().and_then(Path::parent)
++    .ok_or("Scene manifest has no cache parent")?.join("accepted-scene-cache"))}
++fn algorithm()->String{
++    let mut hash=blake3::Hasher::new();hash.update(b"Dragonwilds accepted incremental scene v1\0");
++    for bytes in [include_bytes!("compact_rails.rs").as_slice(),include_bytes!("compact_geometry.rs").as_slice(),
++        include_bytes!("compact_world.rs").as_slice(),include_bytes!("accepted_scene_cache.rs").as_slice(),
++        include_bytes!("merged_rail_cache.rs").as_slice(),include_bytes!("../Cargo.lock").as_slice(),
++        include_bytes!("../../skate3-mashup/crates/render_anim/src/skate/rails.rs").as_slice()] {
++        hash.update(&(bytes.len() as u64).to_le_bytes());hash.update(bytes);
++    }hash.finalize().to_hex().to_string()
++}
++fn identity(base:&str,scene:&str,algorithm:&str,payload:&str)->String{
++    let mut hash=blake3::Hasher::new();hash.update(b"Dragonwilds exact accepted scene checkpoint v1\0");
++    for value in [base,scene,algorithm,payload]{hash.update(&(value.len() as u64).to_le_bytes());hash.update(value.as_bytes());}
++    hash.finalize().to_hex().to_string()
++}
++fn checkpoint(path:&Path,record:&Record)->Value{json!({"schema":SCHEMA,"durable":true,
++    "format":"accepted_incremental_v1","scene_fingerprint":record.scene_fingerprint,"checkpoint_file":path})}
++fn scene_identity(source:&CompactGeometry)->Result<&str,String>{
++    if source.anchor!=[0.;3]{return Err("Accepted scene cache requires fixed origin".into());}
++    let scene=source.world.scene_fingerprint.as_deref().ok_or("Accepted scene cache requires an overlay")?;
++    if !hex(scene)||!hex(&source.world.source_fingerprint){return Err("Invalid accepted scene identity".into());}Ok(scene)
++}
++fn atomic_json(path:&Path,record:&Record)->Result<(),String>{
++    static SERIAL:AtomicU64=AtomicU64::new(0);
++    let temporary=path.with_extension(format!("tmp-{}-{}",std::process::id(),SERIAL.fetch_add(1,Ordering::Relaxed)));
++    let result=(||{let mut file=fs::OpenOptions::new().write(true).create_new(true).open(&temporary).map_err(|e|e.to_string())?;
++        let bytes=serde_json::to_vec(record).map_err(|e|e.to_string())?;file.write_all(&bytes).map_err(|e|e.to_string())?;
++        file.sync_all().map_err(|e|e.to_string())?;drop(file);fs::rename(&temporary,path).map_err(|e|e.to_string())})();
++    if result.is_err(){let _=fs::remove_file(temporary);}result
++}
++/// Called only by the collision builder thread. Disk failure leaves the exact
++/// freshly derived rails usable, but never advertises a durable checkpoint.
++pub fn prepare(scene:&Path,source:&CompactGeometry,bake:&LipBake)->Result<(Vec<Vec<[f32;3]>>,Option<Value>),String>{
++    let started=Instant::now();let scene_id=scene_identity(source)?;
++    if bake.fingerprint!=scene_id{return Err("Accepted lip checkpoint snapshot mismatch".into());}
++    let root=folder(scene)?;let rail_manifest=root.join("manifest.json");
++    let merged=merged_rail_cache::prepare(&rail_manifest,bake)?;
++    let persist=(||{
++        let merged_path=merged.path.as_ref().ok_or("Merged rails were not persisted")?;
++        let payload=compact_rails::payload_digest(bake).to_hex().to_string();let algorithm=algorithm();
++        let id=identity(&source.world.source_fingerprint,scene_id,&algorithm,&payload);
++        fs::create_dir_all(&root).map_err(|e|e.to_string())?;
++        let lip_file=root.join(format!("{id}.lips"));
++        // A checksummed existing immutable file needs no repeat write.
++        if compact_rails::load_with_identity(&lip_file,&source.world,&id).is_err(){compact_rails::save_with_identity(&lip_file,bake,&id)?;}
++        let merged_file=merged_path.file_name().and_then(|s|s.to_str()).ok_or("Invalid merged cache filename")?.to_string();
++        let record=Record{schema:SCHEMA,base_fingerprint:source.world.source_fingerprint.clone(),scene_fingerprint:scene_id.into(),
++            algorithm,payload,identity:id,candidates:bake.candidates,lips:bake.lips.len(),merged_file};
++        let marker=root.join(format!("{scene_id}.json"));atomic_json(&marker,&record)?;
++        prune(&root,&marker);
++        Ok::<_,String>(checkpoint(&marker,&record))
++    })();
++    let status=match persist{Ok(value)=>{eprintln!("WORLD_ACCEPTED_SCENE_CACHE saved elapsed_ms={}",started.elapsed().as_millis());Some(value)},
++        Err(error)=>{eprintln!("WORLD_ACCEPTED_SCENE_CACHE write failed (computed scene retained): {error}");None}};
++    Ok((merged.rails,status))
++}
++pub fn load(scene:&Path,source:&CompactGeometry)->Result<Restored,String>{
++    let started=Instant::now();let scene_id=scene_identity(source)?;let root=folder(scene)?;
++    let marker=root.join(format!("{scene_id}.json"));
++    if fs::metadata(&marker).map_err(|e|e.to_string())?.len()>8192{return Err("Oversized accepted scene marker".into());}
++    let record:Record=serde_json::from_slice(&fs::read(&marker).map_err(|e|e.to_string())?).map_err(|e|e.to_string())?;
++    if record.schema!=SCHEMA||record.base_fingerprint!=source.world.source_fingerprint||record.scene_fingerprint!=scene_id
++        ||record.algorithm!=algorithm()||!hex(&record.payload)||!hex(&record.identity)
++        ||record.identity!=identity(&record.base_fingerprint,scene_id,&record.algorithm,&record.payload){return Err("Accepted scene checkpoint identity mismatch".into());}
++    let bake=compact_rails::load_with_identity(&root.join(format!("{}.lips",record.identity)),&source.world,&record.identity)?;
++    if bake.candidates!=record.candidates||bake.lips.len()!=record.lips||compact_rails::payload_digest(&bake).to_hex().as_str()!=record.payload{
++        return Err("Accepted scene checkpoint payload mismatch".into());}
++    let expected=format!("{}.rails",blake3::Hash::from(merged_rail_cache::key(&bake)).to_hex());
++    if record.merged_file!=expected{return Err("Accepted scene merged identity mismatch".into());}
++    // The original merged-cache implementation validates all headers, ordering,
++    // float bits and checksum. If only that cache is damaged it recreates the
++    // original merge from verified lips, never re-probing the world geometry.
++    let merged=merged_rail_cache::prepare(&root.join("manifest.json"),&bake)?;
++    if merged.path.is_none(){return Err("Accepted scene merged rails unavailable".into());}
++    eprintln!("WORLD_ACCEPTED_SCENE_CACHE hit lips={} rails={} elapsed_ms={}",bake.lips.len(),merged.rails.len(),started.elapsed().as_millis());
++    Ok(Restored{bake,rails:merged.rails,checkpoint:checkpoint(&marker,&record)})
++}
++fn prune(root:&Path,current:&Path){
++    // Bound the rolling checkpoint cache. Only our exact digest filenames are
++    // eligible; no recursive deletion and no paths supplied by marker contents.
++    let Ok(entries)=fs::read_dir(root)else{return;};let mut markers=Vec::new();
++    for entry in entries.flatten(){let path=entry.path();if path.extension().is_some_and(|s|s=="json")
++        &&path.file_stem().and_then(|s|s.to_str()).is_some_and(hex){
++        if let Ok(meta)=entry.metadata(){if meta.is_file(){markers.push((path,meta.modified().ok()));}}
++    }}
++    markers.sort_by(|a,b|b.1.cmp(&a.1));
++    let mut keep=std::collections::HashSet::new();keep.insert(current.to_path_buf());
++    for (path,_) in &markers{if keep.len()<RETAIN{keep.insert(path.clone());}}
++    let mut lips=std::collections::HashSet::new();let mut rails=std::collections::HashSet::new();
++    for (path,_) in markers{
++        if !keep.contains(&path){let _=fs::remove_file(path);continue;}
++        // A corrupt retained marker must not trigger destructive cache cleanup.
++        let Ok(bytes)=fs::read(&path)else{return;};let Ok(record)=serde_json::from_slice::<Record>(&bytes)else{return;};
++        if !hex(&record.identity)||!record.merged_file.strip_suffix(".rails").is_some_and(hex){return;}
++        lips.insert(format!("{}.lips",record.identity));rails.insert(record.merged_file);
++    }
++    for (folder,extension,referenced) in [(root.to_path_buf(),"lips",lips),(root.join("merged-rails-cache"),"rails",rails)]{
++        let Ok(entries)=fs::read_dir(folder)else{continue;};for entry in entries.flatten(){let path=entry.path();
++            if path.extension().is_some_and(|s|s==extension)&&path.file_stem().and_then(|s|s.to_str()).is_some_and(hex)
++                &&path.file_name().and_then(|s|s.to_str()).is_some_and(|s|!referenced.contains(s))
++                &&entry.file_type().is_ok_and(|t|t.is_file()){let _=fs::remove_file(path);}
++        }
++    }
++}
+--- /dev/null
++++ b/dragonwilds-skate-worker/tests/accepted_scene_cache.rs
+@@ -0,0 +1,60 @@
++#[path="../src/compact_world.rs"] mod compact_world;
++#[path="../src/compact_geometry.rs"] mod compact_geometry;
++#[path="../src/compact_rails.rs"] mod compact_rails;
++#[path="../src/merged_rail_cache.rs"] mod merged_rail_cache;
++#[path="../src/accepted_scene_cache.rs"] mod accepted_scene_cache;
++#[path="../../skate3-mashup/crates/render_anim/src/skate/rails.rs"] mod example_rails;
++use std::{fs,path::PathBuf,sync::{Arc,atomic::{AtomicU64,Ordering}}};
++use compact_world::CompactWorld;
++use compact_geometry::CompactGeometry;
++fn source(name:&str)->CompactGeometry{
++    let root=PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../compact-world-fixture");
++    let base=Arc::new(CompactWorld::load(&root.join("export/manifest.json")).unwrap());
++    CompactGeometry::new(Arc::new(CompactWorld::with_overlay(&base,&root.join(name).join("manifest.json")).unwrap()),[0.;3]).unwrap()
++}
++fn temporary()->PathBuf{static N:AtomicU64=AtomicU64::new(0);let p=std::env::temp_dir().join(format!("s3-accepted-scene-test-{}-{}",std::process::id(),N.fetch_add(1,Ordering::Relaxed)));fs::create_dir(&p).unwrap();p}
++fn cleanup(p:PathBuf){let p=p.canonicalize().unwrap();assert!(p.starts_with(std::env::temp_dir().canonicalize().unwrap()));assert!(p.file_name().unwrap().to_str().unwrap().starts_with("s3-accepted-scene-test-"));fs::remove_dir_all(p).unwrap();}
++fn bits(bake:&compact_rails::LipBake)->Vec<[u32;12]>{bake.lips.iter().map(|e|{let points=[e.a,e.b,e.normal,e.centroid];std::array::from_fn(|i|points[i/3].to_array()[i%3].to_bits())}).collect()}
++fn rail_bits(rails:&[Vec<[f32;3]>])->Vec<Vec<[u32;3]>>{rails.iter().map(|r|r.iter().map(|p|p.map(f32::to_bits)).collect()).collect()}
++#[test]
++fn incremental_checkpoint_keeps_exact_history_and_original_merged_result(){
++    let dir=temporary();let scene=dir.join("overlay/manifest.json");let source=source("overlay-add");
++    let mut bake=compact_rails::bake(&source).unwrap();bake.lips.reverse(); // valid alternate incremental history
++    let (rails,status)=accepted_scene_cache::prepare(&scene,&source,&bake).unwrap();assert!(status.unwrap()["durable"].as_bool().unwrap());
++    let warm=accepted_scene_cache::load(&scene,&source).unwrap();assert_eq!(bits(&bake),bits(&warm.bake));
++    assert_eq!(rail_bits(&rails),rail_bits(&warm.rails));assert_eq!(bake.candidates,warm.bake.candidates);
++    assert!(!dir.join("scene-lips-cache").exists(),"incremental history must not impersonate pristine overlay cache");cleanup(dir);
++}
++#[test]
++fn wrong_scene_changed_marker_and_corrupt_lips_are_rejected(){
++    let dir=temporary();let scene=dir.join("overlay/manifest.json");let view=source("overlay-add");let bake=compact_rails::bake(&view).unwrap();
++    let(_,status)=accepted_scene_cache::prepare(&scene,&view,&bake).unwrap();let marker=PathBuf::from(status.unwrap()["checkpoint_file"].as_str().unwrap());
++    let original=fs::read(&marker).unwrap();let record:serde_json::Value=serde_json::from_slice(&original).unwrap();
++    assert!(accepted_scene_cache::load(&scene,&source("overlay-delete")).is_err());
++    for field in ["base_fingerprint","scene_fingerprint","algorithm","payload","identity","merged_file"]{
++        let mut changed=record.clone();changed[field]="../wrong".into();fs::write(&marker,serde_json::to_vec(&changed).unwrap()).unwrap();
++        assert!(accepted_scene_cache::load(&scene,&view).is_err(),"{field}");
++    }fs::write(&marker,&original).unwrap();
++    let lips=marker.parent().unwrap().join(format!("{}.lips",record["identity"].as_str().unwrap()));let mut bad=fs::read(&lips).unwrap();let last=bad.len()-1;bad[last]^=1;fs::write(&lips,&bad).unwrap();
++    assert!(accepted_scene_cache::load(&scene,&view).is_err());cleanup(dir);
++}
++#[test]
++fn rolling_cache_retains_three_complete_checkpoints_and_ignores_unowned_files(){
++    let dir=temporary();let scene=dir.join("overlay/manifest.json");let cache=dir.join("accepted-scene-cache");fs::create_dir(&cache).unwrap();
++    fs::write(cache.join("keep.lips"),b"user data").unwrap();fs::write(cache.join("keep.json"),b"user data").unwrap();
++    let mut latest=None;
++    for name in ["overlay-add","overlay-delete","overlay-noop","overlay-two","overlay-two-moved"]{
++        let source=source(name);let bake=compact_rails::bake(&source).unwrap();accepted_scene_cache::prepare(&scene,&source,&bake).unwrap();
++        assert_eq!(bits(&accepted_scene_cache::load(&scene,&source).unwrap().bake),bits(&bake));latest=Some(source);
++    }
++    assert!(accepted_scene_cache::load(&scene,&latest.unwrap()).is_ok());
++    let count=|path:&std::path::Path,ext:&str|fs::read_dir(path).unwrap().flatten().filter(|e|e.path().extension().is_some_and(|s|s==ext)&&e.path().file_stem().unwrap().len()==64).count();
++    assert_eq!(count(&cache,"json"),3);assert_eq!(count(&cache,"lips"),3);assert_eq!(count(&cache.join("merged-rails-cache"),"rails"),3);
++    assert_eq!(fs::read(cache.join("keep.lips")).unwrap(),b"user data");assert_eq!(fs::read(cache.join("keep.json")).unwrap(),b"user data");cleanup(dir);
++}
++#[test]
++fn failed_checkpoint_write_does_not_discard_valid_computed_rails(){
++    let dir=temporary();let scene=dir.join("overlay/manifest.json");let view=source("overlay-add");let bake=compact_rails::bake(&view).unwrap();
++    fs::write(dir.join("accepted-scene-cache"),b"not a directory").unwrap();let(rails,status)=accepted_scene_cache::prepare(&scene,&view,&bake).unwrap();
++    assert_eq!(rail_bits(&rails),rail_bits(&compact_rails::rails(&bake)));assert!(status.is_none());assert!(accepted_scene_cache::load(&scene,&view).is_err());cleanup(dir);
++}

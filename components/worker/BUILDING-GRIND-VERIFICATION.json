@@ -1,0 +1,181 @@
+{
+  "schema": 1,
+  "status": "Candidate20 verified scene rail authoring and bounded diagnostics; live rough-edge acceptance pending",
+  "artifact_sha256": "e8b89433aa633dc16b695bbd22366729883fdf80ce6a2a6dbefc0df7bd6f73a4",
+  "artifact_bytes": 7022080,
+  "compiled_source_sha256": "b5160ae83fd488a5630707b9aff3efec9ddb564b06eaea67da2ab6be0c27c818",
+  "compiled_source_records": 1240,
+  "compiled_source_hash_algorithm": {
+    "selection": "Every SOURCE-PROVENANCE.json files entry whose relative POSIX path ends .rs or has basename Cargo.toml or Cargo.lock",
+    "records": "Objects containing only path and lowercase sha256, sorted lexicographically by path",
+    "encoding": "UTF-8 of Python json.dumps(records, sort_keys=True, separators=(',', ':'), ensure_ascii=True)",
+    "digest": "SHA256"
+  },
+  "baseline_source_archive_sha256": "978e860a0d4f843c257c31eb7a76d26b96de8619559d03564b75cd7cab1bf939",
+  "changed_existing_rust_files": [
+    "dragonwilds-skate-worker/src/main.rs",
+    "dragonwilds-skate-worker/src/world_runtime.rs",
+    "skate3-mashup/skate/crates/skate-host/src/physics/offboard/contact_toolkit/world.rs",
+    "skate3-mashup/skate/crates/skate-host/src/physics/player_state/selection.rs"
+  ],
+  "new_rust_files": [
+    "dragonwilds-skate-worker/src/building_rail_conditioner.rs",
+    "dragonwilds-skate-worker/tests/building_rail_conditioner.rs",
+    "dragonwilds-skate-worker/tests/offboard_query_equivalence.rs",
+    "dragonwilds-skate-worker/tests/support/offboard_world_reference.rs"
+  ],
+  "unchanged_rust_and_cargo_files": 1232,
+  "patch": "patches/dragonwilds-supported-building-grind-rails.patch",
+  "patch_sha256": "5d52de5b9dfe13fb86976d25f9469b250921c2c8c68c5f4a238fb59f554b0f11",
+  "scope": "Only complete existing straight rails over verified supplemental Castle double-doorframe geometry, synthetic building namespaces, identity rotation and unit scale. Raises the rail by at most3.2cm to continuously supported post tops; preserves count, order, point count and horizontal positions. Rejects support gaps, incompatible layouts and full-span outer/raised probe obstructions with conservative float-rounding bounds.",
+  "physical_geometry_and_source_mechanics": "No collision triangle, original narrow-phase collision/grind/selector rule, user input or simulation setting changes. Source selection adds opt-in bounded stderr diagnostics before the original wipeout-request reset. The offboard static-world query adapter filters metadata before preparing triangles, skips empty/nonmatching pools and retains already prepared triangles instead of repeating the same preparation; original hit arithmetic and ordering are preserved.",
+  "carrying_query_regression": "An exact prior adapter is retained as a licensed test oracle. Every result field is compared by floating-point bits over mixed pools/groups/rejection masks/ties and the64-face nearby cap. A counted one-face query proves three triangle preparations become one; empty or excluded pools perform zero.",
+  "diagnostics": {
+    "environment": "DWS_GRIND_DIAGNOSTICS=1",
+    "default_enabled": false,
+    "maximum_transition_records": 512,
+    "only": "Changes into or out of an original grind state"
+  },
+  "cache_compatibility": "Raw original lips, merged rails and accepted scene checkpoints remain byte-identical and valid. Conditioning runs after cache restore/merge and its source SHA is reported separately; it is never fed through the original merger again.",
+  "unchanged_cache_identity_inputs": [
+    {
+      "path": "dragonwilds-skate-worker/src/compact_world.rs",
+      "sha256": "159d354ed49d5b2dc128bfe857d1a8f6aecd2ef9449d5de9f442cf370a44958b"
+    },
+    {
+      "path": "dragonwilds-skate-worker/src/compact_geometry.rs",
+      "sha256": "74b1821b5ce9eb79cc80bdee674fcca833181b218c0d193a245444695fe7cb7d"
+    },
+    {
+      "path": "dragonwilds-skate-worker/src/compact_rails.rs",
+      "sha256": "4d086947cc8e08234f2b71eea800ed531b5483b03e7fd835cf9f87c753e3ff7c"
+    },
+    {
+      "path": "dragonwilds-skate-worker/src/scene_rail_cache.rs",
+      "sha256": "c1df95c90bcf97e28e79bc214f4b6d715a34be8a3ce60f5c45bc95373e863fc8"
+    },
+    {
+      "path": "dragonwilds-skate-worker/src/accepted_scene_cache.rs",
+      "sha256": "e58c8d3ae39d4bfe120ff97dfdf10968985ed16ea0c5bcab86a55cba0eeff4df"
+    },
+    {
+      "path": "dragonwilds-skate-worker/src/merged_rail_cache.rs",
+      "sha256": "9d88ecf3852a5a1fd4eccc972a90540faf26d635157c54bbe687445961bc39ad"
+    },
+    {
+      "path": "dragonwilds-skate-worker/Cargo.lock",
+      "sha256": "320c408d09581755d041c9c7a598011e32780f4baa81d6c13581b71a7c0fa23d"
+    },
+    {
+      "path": "skate3-mashup/crates/render_anim/src/skate/rails.rs",
+      "sha256": "3dfc6d763eeaebd6dfb2bce9c846aa732da3144e81818b0f7aa00c161badc76a"
+    }
+  ],
+  "build": {
+    "toolchain": "rustc 1.96.0 (ac68faa20 2026-05-25)",
+    "target": "x86_64-pc-windows-msvc",
+    "offline": true,
+    "locked": true,
+    "jobs": 2,
+    "incremental": false,
+    "source_remap": "/source/dragonwilds-skate",
+    "cargo_registry_remap": "/cargo/registry",
+    "build_log_sha256": "f326bcc054f525274d274b9f8dfaafbcb9ce54c1735e467bcafa5189c6061e23"
+  },
+  "checks": {
+    "worker_tests_passed": 81,
+    "worker_tests_failed": 0,
+    "ignored_owned_data_tests": 8,
+    "private_recorded_probe_stations": 752,
+    "private_probe_log_sha256": "388d158ddc2427afd5c4f24780a03c4617ec0c78513dd54c558866b61e5c9e72",
+    "public_test_inputs": "Synthetic three-box geometry only; no extracted game geometry is included. Private fixture test requires an explicitly supplied local file.",
+    "proof": {
+      "exact_before_after_simulation": true,
+      "baseline": {
+        "pose_digest": "35e852612d30c0a3d1ad1c7ba581e6347f6363aff46768ce3b4a038d171af220",
+        "frames": 451,
+        "states": {
+          "PhysicsGround": 64,
+          "PhysicsAir": 5,
+          "GroundAnimation": 5,
+          "BipedGround": 377
+        },
+        "mean_ms": 3.8653558756156667,
+        "max_ms": 20.501599996350706
+      },
+      "candidate": {
+        "pose_digest": "35e852612d30c0a3d1ad1c7ba581e6347f6363aff46768ce3b4a038d171af220",
+        "frames": 451,
+        "states": {
+          "PhysicsGround": 64,
+          "PhysicsAir": 5,
+          "GroundAnimation": 5,
+          "BipedGround": 377
+        },
+        "mean_ms": 4.654037473700577,
+        "max_ms": 31.35060000931844
+      },
+      "diagnostic_enabled": {
+        "pose_digest": "35e852612d30c0a3d1ad1c7ba581e6347f6363aff46768ce3b4a038d171af220",
+        "frames": 451,
+        "states": {
+          "PhysicsGround": 64,
+          "PhysicsAir": 5,
+          "GroundAnimation": 5,
+          "BipedGround": 377
+        },
+        "mean_ms": 3.5989261615635235,
+        "max_ms": 13.945200014859438
+      },
+      "carrying_exact_before_after": true,
+      "raw_checkpoint_and_geometry_byte_identical": true,
+      "existing_checkpoint_reused_without_bake": true,
+      "recorded_world": {
+        "init_ms": 24435.577299969736,
+        "zero_physics_ticks": true,
+        "scene_fingerprint": "da0f40ad106eeb62fbcd189c29a0c0639f13128f1b2b584ab6ba3e96402b6a14",
+        "rails": 1823667,
+        "checkpoint_durable": true,
+        "rail_conditioning": {
+          "algorithm_sha256": "d3e23ac0a65ca8c0b46e4fb6a6dc69159047140a3e14369e3160f27f337e8441",
+          "physical_geometry_changed": false,
+          "raw_cache_changed": false,
+          "report": {
+            "considered_rails": 2,
+            "eligible_instances": 6,
+            "maximum_rise_cm": 3.1555863682178824,
+            "raised_rails": 2,
+            "rejected_layout": 0,
+            "rejected_obstacles": 0,
+            "rejected_support": 0,
+            "target_instances": 6
+          }
+        }
+      },
+      "carrying": {
+        "baseline": {
+          "frames": 180,
+          "states": {
+            "BipedGround": 180
+          },
+          "mean_ms": 13.243081111512664,
+          "p95_ms": 20.738899998832494,
+          "max_ms": 29.202000005170703,
+          "pose_digest": "c1fc52caa4975da5d7a23fc2452dd237bb294c63a0c9ca243cbc6e3a8726c065"
+        },
+        "candidate": {
+          "frames": 180,
+          "states": {
+            "BipedGround": 180
+          },
+          "mean_ms": 8.69787055805015,
+          "p95_ms": 13.39809998171404,
+          "max_ms": 18.544199992902577,
+          "pose_digest": "c1fc52caa4975da5d7a23fc2452dd237bb294c63a0c9ca243cbc6e3a8726c065"
+        }
+      }
+    }
+  },
+  "assets_included": false,
+  "published": false
+}

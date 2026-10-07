@@ -1,0 +1,203 @@
+--- a/skate3-mashup/skate/crates/skate-host/src/physics/bridge.rs
++++ b/skate3-mashup/skate/crates/skate-host/src/physics/bridge.rs
+@@ -3,6 +3,9 @@
+ use bevy::prelude::*;
+ use skate_data::skate_map::{Collision, Geometry, Rail, SkateMap};
+ use std::path::Path;
++#[path = "bridge_summon.rs"]
++mod summon;
++pub use summon::SummonStatus;
+ 
+ #[derive(Clone, Copy, Default)]
+ pub struct Controls {
+@@ -19,6 +22,7 @@
+     input: ControllerInput,
+     camera: CameraRuntime,
+     markers: crate::session_marker::Runtime,
++    summon: summon::State,
+ }
+ pub struct Pose {
+     pub root: Mat4,
+@@ -74,6 +78,7 @@
+             input: ControllerInput::default(),
+             camera: CameraRuntime::load(root)?,
+             markers: crate::session_marker::Runtime::load(root)?,
++            summon: summon::State::default(),
+         })
+     }
+     /// A builder for collision to swap in later, usable on another thread.
+@@ -125,6 +130,10 @@
+     /// Reuse the complete world and animation session. The original teleport path
+     /// resets physical bodies and animation state at the new MW2 position.
+     pub fn activate(&mut self, spawn: [f32; 3], heading: f32) -> Result<Pose, String> {
++        self.position_for_entry(spawn, heading, true)
++    }
++    fn position_for_entry(&mut self, spawn: [f32; 3], heading: f32, on_board: bool) -> Result<Pose, String> {
++        self.summon = summon::State::default();
+         self.input = ControllerInput::default();
+         self.markers.suspend();
+         if self.physics.ticks == 0 {
+@@ -136,7 +145,11 @@
+         )
+         .to_cols_array_2d();
+         transform[3][3] = 0.;
+-        self.skater.travel_to(transform)?;
++        if on_board { self.skater.travel_to(transform)?; }
++        else {
++            self.skater.player_input.request_teleport(transform)?;
++            self.skater.teleport_state.request_manual(transform, false);
++        }
+         for _ in 0..4 {
+             self.tick(Controls::default())?;
+         }
+@@ -159,7 +172,7 @@
+         let published = self.input.tick_input();
+         self.markers
+             .advance(&self.input, &self.physics, &mut self.skater);
+-        let mut actions = published.actions();
++        let (mut actions, automatic_input) = self.summon_actions(published.actions());
+         self.controls.update_for_physics(
+             &mut actions,
+             &self.physics,
+@@ -176,7 +189,7 @@
+             &mut self.controls,
+             &self.graphs,
+             &mut actions,
+-            published.controller_available(),
++            published.controller_available() || automatic_input,
+             &mut self.camera,
+         )
+     }
+--- /dev/null
++++ b/skate3-mashup/skate/crates/skate-host/src/physics/bridge_summon.rs
+@@ -0,0 +1,94 @@
++//! One host-requested mount gesture through the original input and graphs.
++//! No clip timing, board trajectory, physical transition or animation is set here.
++use super::{Pose,Session};
++use skate_core::{input::gameplay_map::GameplayActions,player::state::PhysicalStateId};
++
++#[derive(Clone,Copy,Default)]
++pub(super) enum State {
++    #[default] Idle,
++    Waiting { since:u64 },
++    Press { since:u64 },
++    Mounting { since:u64 },
++    Complete,
++    CompleteReleased,
++    Failed(&'static str),
++}
++pub struct SummonStatus {
++    pub phase:&'static str,
++    pub error:Option<&'static str>,
++    pub motion_state:String,
++    pub holding_board:bool,
++    pub supported:bool,
++    pub locomotion:u32,
++}
++impl Session {
++    /// Prepare an off-board source actor, then expose every subsequent original
++    /// mount animation frame to the host. Ordinary activate remains immediate.
++    pub fn summon(&mut self,spawn:[f32;3],heading:f32)->Result<Pose,String> {
++        let pose=self.position_for_entry(spawn,heading,false)?;
++        self.summon=State::Waiting{since:self.physics.ticks};
++        Ok(pose)
++    }
++    pub fn summon_status(&self)->SummonStatus {
++        let (phase,error)=match self.summon {
++            State::Idle=>("idle",None),State::Waiting{..}=>("waiting_ground",None),
++            State::Press{..}=>("mount_queued",None),State::Mounting{..}=>("mounting",None),
++            State::Complete|State::CompleteReleased=>("riding",None),State::Failed(error)=>("failed",Some(error)),
++        };
++        let mut names=Vec::new();let mut state=self.skater.animation.motion_controller.frame.current;
++        while let Some(id)=state {
++            let value=&self.graphs.motion.binding.states[id];names.push(value.name.as_str());state=value.parent;
++        }
++        names.reverse();
++        let p=&self.skater.player_input.physical.off_board;
++        SummonStatus{phase,error,motion_state:names.join("."),holding_board:p.flag_311!=0,
++            supported:self.skater.biped_ground.contact.flags_176&1!=0,locomotion:p.locomotion_state_84}
++    }
++    pub(super) fn summon_actions(&mut self,input:GameplayActions)->(GameplayActions,bool) {
++        if matches!(self.summon,State::Idle|State::Complete|State::CompleteReleased|State::Failed(_)){
++            return(self.release_mount_button(input),false);
++        }
++        let status=self.summon_status();
++        let p=&self.skater.player_input.physical.off_board;
++        let ready=self.skater.player_state.current()==PhysicalStateId::BipedGround
++            && status.locomotion==0 && status.supported && status.holding_board
++            && status.motion_state.starts_with("Motion.OffBoard.OBGround.Locomotion.Stand.")
++            && p.flag_304==0 && p.returning_board_313==0 && p.dropping_board_322==0 && p.retrieving_board_323==0;
++        let mut press=false;
++        let active=match self.summon {
++            State::Waiting{since}=>{
++                if self.physics.ticks.saturating_sub(since)>600 {self.summon=State::Failed("Original actor did not reach a supported standing pose");false}
++                else {if ready {self.summon=State::Press{since:self.physics.ticks};}true}
++            },
++            State::Press{since}=>{
++                // The preceding waiting tick published a released Y value.
++                if ready {press=true;self.summon=State::Mounting{since:self.physics.ticks};}
++                else {self.summon=State::Waiting{since};}
++                true
++            },
++            State::Mounting{since}=>{
++                let mounted=status.motion_state.split('.').any(|name|name=="OnBoard")
++                    && matches!(self.skater.player_input.physical.state.category_12,100|200|400);
++                if mounted {self.summon=State::Complete;false}
++                else if self.physics.ticks.saturating_sub(since)>600 {self.summon=State::Failed("Original mount graph did not reach an on-board state");false}
++                else {true}
++            },
++            _=>false,
++        };
++        if !active {return(self.release_mount_button(input),false);}
++        // During the one-time entry, movement/trick input waits for the stock
++        // transition. Preserve look input. Slot15 is the stock Y action79;
++        // DerivedControllerInput still owns its edge/timer and both graphs.
++        let mut values=[0.;18];values[3]=input.values()[3];values[4]=input.values()[4];values[15]=if press {1.} else {0.};
++        (GameplayActions::from_values(values),true)
++    }
++    fn release_mount_button(&mut self,input:GameplayActions)->GameplayActions {
++        if !matches!(self.summon,State::Complete){return input;}
++        // A human holding Y while selecting the mount must release it before
++        // it can become another source toggle. All other riding input resumes.
++        let mut values=*input.values();
++        if values[15]==0. {self.summon=State::CompleteReleased;}
++        else {values[15]=0.;}
++        GameplayActions::from_values(values)
++    }
++}
+--- a/dragonwilds-skate-worker/src/main.rs
++++ b/dragonwilds-skate-worker/src/main.rs
+@@ -45,6 +45,7 @@
+     Init { assets: PathBuf, #[serde(default)] triangles: Vec<[[f32; 3]; 3]>, #[serde(default)] collision_file: Option<PathBuf>, rails: Vec<Vec<[f32; 3]>>,
+            spawn: [f32; 3], heading: f32, #[serde(default)] derive_rails: bool },
+     Activate { spawn: [f32; 3], heading: f32 },
++    Summon { spawn: [f32; 3], heading: f32 },
+     Tick { #[serde(default)] controls: Pad, #[serde(default = "one")] steps: u32 },
+     Poll { #[serde(default = "one")] steps: u32, #[serde(default)] mirror_steering: bool },
+     Collision { #[serde(default)] triangles: Vec<[[f32; 3]; 3]>, #[serde(default)] collision_file: Option<PathBuf>, rails: Vec<Vec<[f32; 3]>>, #[serde(default)] derive_rails: bool },
+@@ -175,6 +176,11 @@
+             if !valid_point(&spawn) || !heading.is_finite() { return Err("Invalid spawn".into()); }
+             let pose = s.activate(spawn, heading)?;
+             pose_value(pose, s.period())
++        },
++        Command::Summon { spawn, heading } => {
++            if !valid_point(&spawn) || !heading.is_finite() { return Err("Invalid spawn".into()); }
++            let pose=s.summon(spawn,heading)?;
++            pose_value(pose,s.period())
+         },
+         Command::Camera { mode } => {
+             s.set_low_camera(matches!(mode, CameraMode::Low));
+@@ -271,7 +277,12 @@
+         let mut response = parsed.map_err(|e| e.to_string()).and_then(|c| execute(c, &mut session, &mut pad,&mut pending,&mut revision,&mut collision_error,&mut world,&mut pending_world))
+             .unwrap_or_else(|e| json!({"ok":false,"error":e}));
+         response["collision_revision"]=json!(revision);
+-        if let Some(session)=&session { response["camera_mode"]=json!(session.camera_mode()); }
++        if let Some(session)=&session {
++            response["camera_mode"]=json!(session.camera_mode());
++            let mount=session.summon_status();
++            response["summon"]=json!({"phase":mount.phase,"error":mount.error,"motion_state":mount.motion_state,
++                "holding_board":mount.holding_board,"supported":mount.supported,"locomotion":mount.locomotion});
++        }
+         response["collision_pending_revision"]=json!(pending.as_ref().map(|(requested,_)|requested).or_else(||pending_world.as_ref().map(|(requested,_)|requested)));
+         if let Some(world)=&world {response["collision_scope"]=json!("whole_world");response["world"]=world.status();}
+         if let Some((requested,error))=&collision_error {

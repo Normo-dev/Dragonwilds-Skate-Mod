@@ -1,0 +1,30 @@
+{
+  "schema": "S3BUILDINGRULE1",
+  "verified": true,
+  "game_exe_sha256": "9785b1e121030b049f876a3e4890f772127338213bc280a160f7f287609b4111",
+  "selected_tag": "BuildingMesh",
+  "active_profile": "BuildingPlaced",
+  "inactive_profile": "BuildingPreview",
+  "transform_policy": "entity_local_then_piece_ftransform",
+  "body_policy": "captured_native_entity_body_v1",
+  "reader_protocol": "DWBBDY2",
+  "geometry_policy": "actual_bodysetup_matches_catalogue_mesh",
+  "evidence": [
+    "helpers/buildings/src/game_constants.rs: executable PE and code signatures with exact manager/piece vtables",
+    "helpers/buildings/src/mass_signatures.rs: version-specific native Mass storage and body getter signatures",
+    "helpers/buildings/src/mass.rs: actual entity serial/archetype/fragment traversal, actual body filters and weak owner conditions",
+    "Owned catalogue verifies entity-local transform and static mesh; typed runtime StaticMesh.BodySetup must match native physics fragment",
+    "Runtime snapshot repeats all dependent memory reads, then Lua repeats the complete inventory and body rows before publication",
+    "Full live STATE2 capture and independently decoded catalogue agreed on all loaded piece/derived/entity/BodySetup identities; 6,183 blocking bodies, 211 disabled, one nonblocking preview."
+  ],
+  "supported_bounds": {
+    "max_pieces_per_body_request": 4,
+    "max_entities_per_piece": 64,
+    "max_native_inventory": 50000,
+    "max_sparse_slots": 100000,
+    "max_mass_chunks": 4096,
+    "max_mass_chunk_capacity": 1048576,
+    "max_hash_chain": 1024
+  },
+  "acceptance": "Native reader and authored mesh binding verified against a complete, stable live game-thread snapshot: 6,136 loaded pieces / 6,395 entities. Runtime must repeat identity, schema and geometry checks; this rule is not a gameplay or whole-world coverage claim."
+}

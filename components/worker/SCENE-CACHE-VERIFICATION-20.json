@@ -1,0 +1,19 @@
+{
+  "schema": 2,
+  "status": "Candidate20 verified scene rail authoring and bounded diagnostics; live rough-edge acceptance pending",
+  "artifact_sha256": "e8b89433aa633dc16b695bbd22366729883fdf80ce6a2a6dbefc0df7bd6f73a4",
+  "compiled_source_sha256": "b5160ae83fd488a5630707b9aff3efec9ddb564b06eaea67da2ab6be0c27c818",
+  "compiled_source_records": 1240,
+  "compiled_source_hash_algorithm": {
+    "selection": "Every SOURCE-PROVENANCE.json files entry whose relative POSIX path ends .rs or has basename Cargo.toml or Cargo.lock",
+    "records": "Objects containing only path and lowercase sha256, sorted lexicographically by path",
+    "encoding": "UTF-8 of Python json.dumps(records, sort_keys=True, separators=(',', ':'), ensure_ascii=True)",
+    "digest": "SHA256"
+  },
+  "verification": "BUILDING-GRIND-VERIFICATION.json",
+  "verification_sha256": "74e0261f6cf6e718658ec45b591e85950fd218e6de7863cf06c8edd636406afc",
+  "previous_verification": "SCENE-CACHE-VERIFICATION-19.json",
+  "previous_verification_sha256": "cdfee5a8f3750a6b7a141e847608b22f06da778629d8731ee34a52254ab0e026",
+  "assets_included": false,
+  "published": false
+}

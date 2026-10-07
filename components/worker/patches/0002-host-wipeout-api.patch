@@ -1,0 +1,11 @@
+--- a/skate3-mashup/skate/crates/skate-host/src/physics/wipeout_states/update.rs
++++ b/skate3-mashup/skate/crates/skate-host/src/physics/wipeout_states/update.rs
+@@ -140,7 +140,7 @@
+             &mut skater.skeleton,
+             com,
+             &effective,
+-            state.predicted_position,
++            p,
+             &runtime.profiles[state.profile],
+             &skater.animated_skeleton.roots.animation_to_world,
+             &skater.animated_skeleton.record.pose,

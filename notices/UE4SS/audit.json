@@ -1,0 +1,61 @@
+{
+  "schema": "UE4SS_RELEASE_LICENSE_AUDIT_1",
+  "audited_utc": "2026-10-04T09:22:40.434665+00:00",
+  "source_commit": "e3ba1016562d6c0868c410d0a71e88bfcdbf691b",
+  "decision": "Do not bundle UE4SS.dll or dwmapi.dll in current draft; exact-hash manual official-loader prerequisite. UEHelpers.lua may be supplied with the UE4SS MIT notice.",
+  "redistribution_closure": false,
+  "artifacts": [
+    {
+      "file": "dwmapi.dll",
+      "sha256": "cf440b9eb8643bb7c434acfda696aee57fd981d185dca5e57fb8dbb18f8fc1cd",
+      "bytes": 279552,
+      "manual_prerequisite": true
+    },
+    {
+      "file": "ue4ss/UE4SS.dll",
+      "sha256": "680a026890abb4d0df2211251f8defc1681a584275f1521dcc0fe30af480006f",
+      "bytes": 20605440,
+      "manual_prerequisite": true
+    },
+    {
+      "file": "ue4ss/Mods/shared/UEHelpers/UEHelpers.lua",
+      "sha256": "7476f02eef0c87bfeab169f2ffe2e704363faeaae4bf9f1bda574b1e34f4a0e9",
+      "bytes": 10237,
+      "manual_prerequisite": false
+    }
+  ],
+  "official_zip_sha256": "af8ea9d8975e8eff7967423f43b8b50875e66a29a0f434cffce6e0867ea17252",
+  "official_zip_notices": [
+    "ue4ss/LICENSE"
+  ],
+  "obtainable_notice_manifest": "notice-manifest.json",
+  "blocking_permission_gap": {
+    "component": "UEPseudo",
+    "commit": "38e7171e9e8c4a871ff84765848f0290ca34a44e",
+    "reason": "Exact pinned official docs say UEPseudo code is subject to Epic Games licensing terms. The private submodule license and applicable compiled redistribution grant were not accessible/established. Main MIT is not a substitute.",
+    "source": "https://github.com/UE4SS-RE/RE-UE4SS/blob/e3ba1016562d6c0868c410d0a71e88bfcdbf691b/docs/contributing.md#uepseudo-code-licensing",
+    "private_api_status": 404
+  },
+  "inventory_limits": [
+    "IconFontCppHeaders is fetched from moving main in exact upstream CMake; supplied current license is not an attested build-time revision.",
+    "Pinned Cargo.lock packages are a conservative 73-package inventory, not exact Windows linked SBOM; upstream CMake does not visibly request --locked.",
+    "Rust compiler commit 48a229ceaefd4985c50990b14116b6d856af0985 appears in loader binary. Rust base notices collected; full release COPYRIGHT-library.html and standard-library third-party closure not independently established.",
+    "Tracy notices retained as optional; official build defaults RC_PROFILER_FLAVOR=None. Corrosion/build tools are not runtime payload.",
+    "Fonts have been identified from embedded SFNT metadata. Roboto Regular 2.137 says Apache-2.0 whereas adjacent upstream LICENSE_Roboto says OFL; preserve both original notice and embedded attribution. Roboto Mono3.001 and Font Awesome5.15.4 are OFL."
+  ],
+  "helper_audit": {
+    "skate-ipc": "No Cargo dependencies; Rust std and kernel32 only. Uses runtime Lua call addresses guarded by exact loader signature. No UE4SS/UEPseudo static library/header/source import found.",
+    "skate-render": "glam0.32.1 plus Rust std. No UE4SS/UEPseudo static library/header/source import found.",
+    "remaining": "Both helper manifests lack explicit license field. Apply package source license; include glam and toolchain runtime notices. This audit does not establish source provenance beyond inspected workspace code.",
+    "glam_crate_sha256": "f70749695b063ecbf6b62949ccccde2e733ec3ecbbd71d467dca4e5c6c97cca0"
+  },
+  "verification": {
+    "notice_count": 177,
+    "notice_bytes": 844632,
+    "cargo_archives": 73,
+    "cargo_checksum_failures": 0,
+    "notice_sha256_readback": "all pass",
+    "installed_files_changed": false,
+    "game_inputs": false
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "schema": 2,
+  "status": "Latest verified candidate18; previous immutable candidate17 evidence retained",
+  "artifact_sha256": "a0b294e197b4df324589de7ee0507d9126dfdddcc737a82eb7478f7354806265",
+  "compiled_source_sha256": "8a65838b2e0256f76a73479e03c0e701ab89e4f7293ae507496428358db4eaf8",
+  "compiled_source_records": 1235,
+  "compiled_source_hash_algorithm": {
+    "selection": "Every SOURCE-PROVENANCE.json files entry whose relative POSIX path ends .rs or has basename Cargo.toml or Cargo.lock",
+    "records": "Objects containing only path and lowercase sha256, sorted lexicographically by path",
+    "encoding": "UTF-8 of Python json.dumps(records, sort_keys=True, separators=(',', ':'), ensure_ascii=True)",
+    "digest": "SHA256"
+  },
+  "verification": "ACCEPTED-SCENE-CHECKPOINT-VERIFICATION.json",
+  "verification_sha256": "278fb7eec2591298814bc10ada5e1d3b2d57d37676bd166e0030b8cb650fbaab",
+  "previous_verification": "SCENE-CACHE-VERIFICATION-17.json",
+  "previous_verification_sha256": "1a56094ab111770d0bce931e032f8e44b252cd970870ef1c69cfc84ccacfc340",
+  "assets_included": false,
+  "published": false
+}
